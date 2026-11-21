@@ -23,11 +23,11 @@ body{margin:0;background:var(--bg);background-image:repeating-linear-gradient(60
 .jp{font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif}
 header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:50}
 main{width:100%;max-width:100%;margin:0;padding:24px 120px 56px}
-main:has(.practice){height:calc(100dvh - 75px);min-height:calc(100dvh - 75px);max-height:calc(100dvh - 75px);display:flex;flex-direction:column;overflow:hidden;padding-top:12px;padding-bottom:16px}
-@media (max-width: 1280px){main{padding:20px 64px 48px};main:has(.practice){padding-top:12px;padding-bottom:16px}}
-@media (max-width: 768px){main{padding:16px 20px 40px};main:has(.practice){padding-top:8px;padding-bottom:12px}}
+main:has(.practice){height:calc(100dvh - 75px);min-height:calc(100dvh - 75px);max-height:calc(100dvh - 75px);display:flex;flex-direction:column;overflow:hidden;padding-top:24px;padding-bottom:20px}
+@media (max-width: 1280px){main{padding:20px 64px 48px};main:has(.practice){padding-top:20px;padding-bottom:18px}}
+@media (max-width: 768px){main{padding:16px 20px 40px};main:has(.practice){padding-top:16px;padding-bottom:14px}}
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:20px;padding-top:16px;padding-bottom:20px;margin-bottom:40px}
-main:has(.practice) .top{margin-bottom:8px;padding-top:0;padding-bottom:6px;flex-shrink:0}
+main:has(.practice) .top{margin-bottom:6px;padding-top:0;padding-bottom:4px;flex-shrink:0}
 h1{margin:0 4px 0 0;font-size:26px;font-weight:700}
 h1 span{color:var(--muted);font-weight:400;margin-left:10px;font-size:22px}
 .seg{display:inline-flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:4px}
@@ -59,13 +59,13 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .cta .btn.alt, .practice .btn.alt, .sum .btn.alt{background:var(--pill);color:var(--ink)}
 .dim{color:var(--muted);font-size:13px}
 .practice{display:flex;flex-direction:column;flex:1;min-height:0;justify-content:space-between;padding:0}
-.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0;text-align:center}
-.big{font:300 clamp(150px,22vh,250px)/1.05 "Noto Sans JP",sans-serif}
-.big.comp{font-size:clamp(130px,20vh,220px)}
-.big.word{font-size:clamp(80px,12vh,140px);font-weight:500}
-.ans{font-size:28px;font-weight:600;color:var(--accent);min-height:32px}
-.note{color:var(--muted);font-size:14px;min-height:16px}
-.foot{display:flex;align-items:center;gap:18px;border-top:1px solid var(--line);padding-top:12px;flex-shrink:0;width:100%}
+.stage{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0;text-align:center}
+.big{font:300 clamp(130px,18vh,210px)/1.0 "Noto Sans JP",sans-serif}
+.big.comp{font-size:clamp(110px,16vh,180px)}
+.big.word{font-size:clamp(74px,11vh,125px);font-weight:500}
+.ans{font-size:26px;font-weight:600;color:var(--accent);min-height:28px}
+.note{color:var(--muted);font-size:13px;min-height:16px}
+.foot{display:flex;align-items:center;gap:18px;border-top:1px solid var(--line);padding-top:10px;flex-shrink:0;width:100%}
 .stats{display:flex;border:1px solid var(--line);border-radius:999px;background:var(--pill);box-shadow:0 2px 6px rgba(0,0,0,.08)}
 .stats div{padding:8px 30px;min-width:105px;text-align:center;border-left:1px solid var(--line)}
 .stats div:first-child{border:0}
