@@ -5,6 +5,10 @@ import { useAuth } from './store/useAuth'
 import { HashRouter, NavLink, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Practice from './pages/Practice'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminOverview from './pages/admin/Overview'
+import AdminUsers from './pages/admin/Users'
+import AdminUserDetail from './pages/admin/UserDetail'
 import { InstallPrompt } from './components/InstallPrompt'
 
 export default function App() {
@@ -18,7 +22,7 @@ export default function App() {
     t.current = window.setTimeout(() => setShow(false), 2400)
   }
   const cls = ({ isActive }: { isActive: boolean }) => (isActive ? 'on' : '')
-  const { user, loading, init, signIn, signOut, deleteAccount } = useAuth()
+  const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
   const onLogin = () => {
@@ -38,6 +42,11 @@ export default function App() {
             <NavLink to="/" end className={cls}>Home</NavLink>
             <NavLink to="/practice/hiragana" className={cls}>Flashcard Hiragana</NavLink>
             <NavLink to="/practice/katakana" className={cls}>Flashcard Katakana</NavLink>
+            {role === 'admin' && (
+              <NavLink to="/admin" className={cls} style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                Admin
+              </NavLink>
+            )}
           </nav>
           {user ? (
             <span className="login" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -57,6 +66,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home onHint={toast} />} />
           <Route path="/practice/:script" element={<Practice />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="users/:id" element={<AdminUserDetail />} />
+          </Route>
           <Route path="*" element={<Home onHint={toast} />} />
         </Routes>
       </main>

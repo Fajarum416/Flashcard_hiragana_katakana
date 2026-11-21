@@ -2,8 +2,12 @@ import { create } from 'zustand'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 
+export type Role = 'user' | 'admin'
+
 interface AuthState {
   user: User | null
+  /** null selama belum login atau role masih dimuat. Hanya untuk tampilan, hak akses ditegakkan RLS. */
+  role: Role | null
   loading: boolean
   /** Mulai mendengarkan sesi. Mengembalikan fungsi untuk berhenti. */
   init: () => () => void
@@ -14,6 +18,7 @@ interface AuthState {
 
 export const useAuth = create<AuthState>((set) => ({
   user: null,
+  role: null,
   loading: supabase !== null,
   init: () => {
     if (!supabase) {
@@ -21,9 +26,22 @@ export const useAuth = create<AuthState>((set) => ({
       return () => {}
     }
     const client = supabase
-    client.auth.getSession().then(({ data }) => set({ user: data.session?.user ?? null, loading: false }))
+    const loadRole = (uid: string | undefined) => {
+      if (!uid) return set({ role: null })
+      void client
+        .from('profiles')
+        .select('role')
+        .eq('id', uid)
+        .maybeSingle()
+        .then(({ data }) => set({ role: data?.role === 'admin' ? 'admin' : 'user' }))
+    }
+    client.auth.getSession().then(({ data }) => {
+      set({ user: data.session?.user ?? null, loading: false })
+      loadRole(data.session?.user.id)
+    })
     const { data } = client.auth.onAuthStateChange((event, session) => {
       set({ user: session?.user ?? null, loading: false })
+      loadRole(session?.user.id)
       if (event === 'SIGNED_IN' && session) {
         // tidak menunggu; kegagalan di sini tidak boleh mengganggu login
         void client.from('profiles').update({ last_login_at: new Date().toISOString() }).eq('id', session.user.id)
