@@ -4,7 +4,6 @@ import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
 import { COMP_WORDS, WORDS } from '../data/words'
 import { buildDeck, compositeWordOk, selectedChars, wordOk, type Mode } from '../lib/deck'
 import { isDue } from '../lib/srs'
-import { playKana } from '../lib/audio'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
@@ -101,14 +100,8 @@ export default function Home({ script, mode, onHint }: Props) {
               <div
                 key={w[0]}
                 className={`w ${active ? '' : 'off'}`}
-                style={{ cursor: 'pointer' }}
-                title="Klik untuk mendengarkan pelafalan"
-                onClick={() => playKana(w[0])}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <b>{w[0]}</b>
-                  <span style={{ fontSize: 16 }}>🔊</span>
-                </div>
+                <b>{w[0]}</b>
                 <span>
                   {w[1]} · {w[2]}
                 </span>

@@ -5,7 +5,6 @@ import { buildDeck, shuffle, type Card } from '../lib/deck'
 import { accuracy, norm } from '../lib/romaji'
 import { queueSession, recordAnswer } from '../lib/sync'
 import { getBox } from '../lib/srs'
-import { playKana } from '../lib/audio'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
@@ -188,26 +187,7 @@ function Session({ script }: { script: Script }) {
             Kotak Hafalan: Box {getBox(useSelection.getState().stats[card.id])} / 5
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-          <div className={`big jp ${card.kind === 'single' ? '' : card.kind}`}>{card.front}</div>
-          <button
-            type="button"
-            className="link"
-            style={{
-              fontSize: 22,
-              padding: '8px 12px',
-              cursor: 'pointer',
-              background: 'var(--pill)',
-              borderRadius: 999,
-              textDecoration: 'none',
-              border: '1px solid var(--line)',
-            }}
-            title="Dengarkan pelafalan audio bahasa Jepang"
-            onClick={() => playKana(card.front)}
-          >
-            🔊
-          </button>
-        </div>
+        <div className={`big jp ${card.kind === 'single' ? '' : card.kind}`}>{card.front}</div>
         <div className="ans">{s.rev ? card.ans : ''}</div>
         <div className="note">{s.rev ? card.note : ''}</div>
       </div>
