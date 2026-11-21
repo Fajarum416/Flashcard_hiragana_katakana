@@ -41,7 +41,7 @@ export default function Home({ script, mode, onHint }: Props) {
                   type="checkbox"
                   checked={on}
                   onChange={() => st.toggleYoon(sc, id)}
-                  className="toggle toggle-success mb-5 cursor-pointer"
+                  className="toggle toggle-lg mb-5 cursor-pointer"
                   aria-label={`Select column ${id}`}
                 />
                 {YOON_TABLE[sc][id].map((c) => (
@@ -68,7 +68,7 @@ export default function Home({ script, mode, onHint }: Props) {
                   type="checkbox"
                   checked={on}
                   onChange={() => st.toggleCol(sc, id)}
-                  className="toggle toggle-success mb-5 cursor-pointer"
+                  className="toggle toggle-lg mb-5 cursor-pointer"
                   aria-label={`Select column ${id}`}
                 />
                 {TABLE[sc][id].map((c, i) => (
