@@ -76,8 +76,8 @@ function AppContent() {
             </NavLink>
           </div>
 
-          {/* Navbar End: daisyUI Megamenu Dropdown System (matching user snippet) */}
-          <div className="navbar-end w-auto">
+          {/* Navbar End: daisyUI Megamenu + Dedicated Profile Component */}
+          <div className="navbar-end w-auto gap-3">
             <div
               className="megamenu megamenu-lg max-sm:megamenu-vertical p-1.5 border border-base-300 rounded-box text-base font-medium"
               id="my-megamenu-5"
@@ -138,36 +138,65 @@ function AppContent() {
                   Admin
                 </NavLink>
               )}
-
-              {user ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => void signOut()}
-                    className="text-base font-medium"
-                  >
-                    Logout ({user.user_metadata?.full_name ?? user.email?.split('@')[0]})
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void onDelete()}
-                    className="text-sm text-error/80 hover:text-error"
-                    title="Hapus Akun"
-                  >
-                    Hapus Akun
-                  </button>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onLogin}
-                  disabled={loading}
-                  className="text-base font-semibold text-primary"
-                >
-                  Login
-                </button>
-              )}
             </div>
+
+            {/* Profile / Sign In Component */}
+            {user ? (
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0} role="button" className="btn btn-ghost rounded-full gap-2.5 border border-base-300 normal-case px-3.5 h-11 min-h-11">
+                  <div className="w-7 h-7 rounded-full overflow-hidden ring-1 ring-base-300">
+                    <img
+                      alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
+                      src={
+                        user.user_metadata?.avatar_url ||
+                        user.user_metadata?.picture ||
+                        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
+                      }
+                    />
+                  </div>
+                  <span className="text-sm font-semibold truncate max-w-[140px] hidden md:inline">
+                    {user.user_metadata?.full_name ?? user.email}
+                  </span>
+                </div>
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-60 p-2.5 shadow-xl border border-base-200">
+                  <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-sm truncate block">
+                      {user.user_metadata?.full_name || 'Learner'}
+                    </span>
+                    <span className="text-xs text-base-content/60 truncate font-normal block">
+                      {user.email}
+                    </span>
+                  </li>
+                  <li>
+                    <a className="justify-between py-2 text-sm font-medium" onClick={closeDropdowns}>
+                      Profile
+                      <span className="badge badge-sm badge-primary">Active</span>
+                    </a>
+                  </li>
+                  {role === 'admin' && (
+                    <li>
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2 text-sm">
+                        Admin Dashboard
+                        <span className="badge badge-accent badge-xs">Admin</span>
+                      </NavLink>
+                    </li>
+                  )}
+                  <li><button onClick={() => void signOut()} className="py-2 text-sm font-medium">Logout</button></li>
+                  <li><button onClick={() => void onDelete()} className="text-error py-2 text-sm font-medium">Hapus Akun</button></li>
+                </ul>
+              </div>
+            ) : (
+              <button
+                className="btn btn-ghost rounded-full normal-case gap-2.5 px-5 text-sm font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-11 min-h-11"
+                disabled={loading}
+                onClick={onLogin}
+              >
+                <svg className="w-4 h-4 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Sign in
+              </button>
+            )}
           </div>
         </div>
       </header>
