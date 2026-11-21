@@ -3,6 +3,7 @@ import { HashRouter, Navigate, NavLink, Route, Routes, useLocation } from 'react
 import { supabaseEnabled } from './lib/supabase'
 import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
+import { useSelection } from './store/useSelection'
 import Home from './pages/Home'
 import Practice from './pages/Practice'
 import AdminLayout from './pages/admin/AdminLayout'
@@ -25,6 +26,7 @@ function AppContent() {
   }
 
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
+  const { srsMode, setSrsMode } = useSelection()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
 
@@ -158,7 +160,7 @@ function AppContent() {
                     {user.user_metadata?.full_name ?? user.email}
                   </span>
                 </div>
-                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-60 p-2.5 shadow-xl border border-base-200">
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-64 p-2.5 shadow-xl border border-base-200">
                   <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content text-sm truncate block">
                       {user.user_metadata?.full_name || 'Learner'}
@@ -173,6 +175,23 @@ function AppContent() {
                       <span className="badge badge-sm badge-primary">Active</span>
                     </a>
                   </li>
+                  <li>
+                    <div
+                      onClick={() => setSrsMode(!srsMode)}
+                      className="flex items-center justify-between py-2 text-sm font-medium cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-base">🧠</span>
+                        <span>SRS Mode</span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={srsMode}
+                        onChange={() => setSrsMode(!srsMode)}
+                        className="toggle toggle-success toggle-sm pointer-events-none"
+                      />
+                    </div>
+                  </li>
                   {role === 'admin' && (
                     <li>
                       <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2 text-sm">
@@ -186,16 +205,58 @@ function AppContent() {
                 </ul>
               </div>
             ) : (
-              <button
-                className="btn btn-ghost rounded-full normal-case gap-2.5 px-5 text-sm font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-11 min-h-11"
-                disabled={loading}
-                onClick={onLogin}
-              >
-                <svg className="w-4 h-4 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Sign in
-              </button>
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost rounded-full normal-case gap-2.5 px-4 text-sm font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-11 min-h-11"
+                >
+                  <svg className="w-4 h-4 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>Sign in</span>
+                </div>
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-64 p-2.5 shadow-xl border border-base-200">
+                  <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-sm block">
+                      Tamu (Guest)
+                    </span>
+                    <span className="text-xs text-base-content/60 font-normal block">
+                      Masuk untuk sinkronisasi cloud
+                    </span>
+                  </li>
+                  <li>
+                    <div
+                      onClick={() => setSrsMode(!srsMode)}
+                      className="flex items-center justify-between py-2 text-sm font-medium cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-base">🧠</span>
+                        <span>SRS Mode</span>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={srsMode}
+                        onChange={() => setSrsMode(!srsMode)}
+                        className="toggle toggle-success toggle-sm pointer-events-none"
+                      />
+                    </div>
+                  </li>
+                  <li className="pt-2 mt-1 border-t border-base-200">
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => {
+                        closeDropdowns()
+                        onLogin()
+                      }}
+                      className="btn btn-primary btn-sm w-full text-sm font-semibold normal-case"
+                    >
+                      Masuk dengan Google
+                    </button>
+                  </li>
+                </ul>
+              </div>
             )}
           </div>
         </div>

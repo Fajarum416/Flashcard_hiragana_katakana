@@ -129,29 +129,11 @@ export default function Home({ script, mode, onHint }: Props) {
           onModeChange={(m) => navigate(`/${script}/${m === 'char' ? 'flashcard' : 'word'}`)}
         />
         <span className="sp" />
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <button
-            className="link"
-            style={{
-              textDecoration: 'none',
-              padding: '8px 18px',
-              borderRadius: 999,
-              background: st.srsMode ? 'var(--pill-on)' : 'var(--pill)',
-              color: st.srsMode ? 'var(--ink)' : 'var(--muted)',
-              fontSize: 15,
-              fontWeight: 500,
-            }}
-            title="Sistem Pengulangan Berjarak: Memprioritaskan huruf yang lemah atau jatuh tempo peninjauan"
-            onClick={() => st.setSrsMode(!st.srsMode)}
-          >
-            🧠 SRS: {st.srsMode ? 'Aktif' : 'Nonaktif'}
-          </button>
-          {mode === 'char' && dueCount > 0 && (
-            <span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600 }}>
-              {dueCount} due
-            </span>
-          )}
-        </div>
+        {mode === 'char' && st.srsMode && dueCount > 0 && (
+          <span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600 }}>
+            {dueCount} due
+          </span>
+        )}
       </div>
       {body}
       <div className="cta">
