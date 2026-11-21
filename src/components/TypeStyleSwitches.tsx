@@ -30,13 +30,41 @@ export function TypeStyleSwitches() {
   )
 }
 
-export const scriptTitle = (sc: 'hiragana' | 'katakana') =>
-  sc === 'hiragana' ? (
+export function StyleSwitch() {
+  const comp = useSelection((s) => s.comp)
+  const setComp = useSelection((s) => s.setComp)
+  return (
+    <Segmented
+      label="Style"
+      value={comp ? 'comp' : 'single'}
+      onChange={(v) => setComp(v === 'comp')}
+      options={[
+        { value: 'single', text: 'Single' },
+        { value: 'comp', text: 'Composite' },
+      ]}
+    />
+  )
+}
+
+export const pageTitle = (sc: 'hiragana' | 'katakana', mode: 'char' | 'word') => {
+  if (sc === 'hiragana') {
+    return mode === 'char' ? (
+      <>
+        Hiragana Flashcard <span className="jp">ひらがな</span>
+      </>
+    ) : (
+      <>
+        Hiragana Words <span className="jp">ひらがな 単語</span>
+      </>
+    )
+  }
+  return mode === 'char' ? (
     <>
-      Hiragana Practice <span className="jp">ひらがな</span>
+      Katakana Flashcard <span className="jp">カタカナ</span>
     </>
   ) : (
     <>
-      Katakana Practice <span className="jp">カタカナ</span>
+      Katakana Words <span className="jp">カタカナ 単語</span>
     </>
   )
+}

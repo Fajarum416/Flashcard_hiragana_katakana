@@ -6,7 +6,7 @@ import { accuracy, norm } from '../lib/romaji'
 import { queueSession, recordAnswer } from '../lib/sync'
 import { getBox } from '../lib/srs'
 import { playKana } from '../lib/audio'
-import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
+import { StyleSwitch, pageTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
 interface PState {
@@ -135,6 +135,8 @@ function Session({ script }: { script: Script }) {
     return () => document.removeEventListener('keydown', onKey)
   })
 
+  const backUrl = `/${script}/${useSelection.getState().mode === 'char' ? 'flashcard' : 'word'}`
+
   if (!s.q.length) {
     const word = useSelection.getState().mode === 'word'
     return (
@@ -144,11 +146,11 @@ function Session({ script }: { script: Script }) {
           <br />
           Pick columns on Home, or start with the a-column.
         </p>
-        <Link className="btn" to="/" onClick={() => useSelection.getState().useDefault(script)}>
+        <Link className="btn" to={backUrl} onClick={() => useSelection.getState().useDefault(script)}>
           Use the a-column
         </Link>{' '}
-        <Link className="btn alt" to="/">
-          Go to Home
+        <Link className="btn alt" to={backUrl}>
+          Kembali ke Daftar
         </Link>
       </div>
     )
@@ -170,8 +172,8 @@ function Session({ script }: { script: Script }) {
               Retry mistakes ({s.mist.length})
             </button>
           )}
-          <Link className="btn alt" to="/">
-            Change selection
+          <Link className="btn alt" to={backUrl}>
+            Kembali ke Daftar
           </Link>
         </div>
       </div>
@@ -261,8 +263,8 @@ export default function Practice() {
   return (
     <>
       <div className="top">
-        <h1>{scriptTitle(script)}</h1>
-        <TypeStyleSwitches />
+        <h1>{pageTitle(script, mode)}</h1>
+        <StyleSwitch />
       </div>
       <Session key={`${script}-${mode}-${comp}`} script={script} />
     </>

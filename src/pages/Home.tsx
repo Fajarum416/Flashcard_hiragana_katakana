@@ -1,11 +1,11 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE } from '../data/kana'
+import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
 import { COMP_WORDS, WORDS } from '../data/words'
-import { buildDeck, compositeWordOk, selectedChars, wordOk } from '../lib/deck'
+import { buildDeck, compositeWordOk, selectedChars, wordOk, type Mode } from '../lib/deck'
 import { isDue } from '../lib/srs'
 import { playKana } from '../lib/audio'
-import { Segmented } from '../components/Segmented'
-import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
+import { StyleSwitch, pageTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
 const LOCK = (
@@ -14,14 +14,25 @@ const LOCK = (
   </svg>
 )
 
-export default function Home({ onHint }: { onHint: (msg: string) => void }) {
+interface Props {
+  script: Script
+  mode: Mode
+  onHint: (msg: string) => void
+}
+
+export default function Home({ script, mode, onHint }: Props) {
   const st = useSelection()
-  const sc = st.script
-  const yoon = st.mode === 'char' && st.comp
-  const chars = selectedChars(st)
+  const sc = script
+  useEffect(() => {
+    st.setScript(script)
+    st.setMode(mode)
+  }, [script, mode])
+
+  const yoon = mode === 'char' && st.comp
+  const chars = selectedChars(st, script)
   const count = chars.length
   const dueCount = chars.filter((c) => isDue(st.stats[`${sc}:${c.k}`])).length
-  const deck = buildDeck(st, { stats: st.stats, srsMode: st.srsMode })
+  const deck = buildDeck({ ...st, script, mode }, { stats: st.stats, srsMode: st.srsMode })
 
   let body
   if (yoon) {
@@ -119,18 +130,9 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
   return (
     <>
       <div className="top">
-        <h1>{scriptTitle(sc)}</h1>
-        <TypeStyleSwitches />
+        <h1>{pageTitle(sc, mode)}</h1>
+        <StyleSwitch />
         <span className="sp" />
-        <Segmented
-          label="Script"
-          value={sc}
-          onChange={st.setScript}
-          options={[
-            { value: 'hiragana', text: 'Hiragana' },
-            { value: 'katakana', text: 'Katakana' },
-          ]}
-        />
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <button
             className="link"
@@ -148,7 +150,7 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
           >
             🧠 SRS: {st.srsMode ? 'Aktif' : 'Nonaktif'}
           </button>
-          {st.mode === 'char' && dueCount > 0 && (
+          {mode === 'char' && dueCount > 0 && (
             <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 500 }}>
               {dueCount} due
             </span>
@@ -159,7 +161,7 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
       <div className="cta">
         {deck.length ? (
           <Link className="btn" to={`/practice/${sc}`}>
-            Start practice ({st.mode === 'char' ? `${count} characters` : `${deck.length} words`})
+            Start practice ({mode === 'char' ? `${count} characters` : `${deck.length} words`})
           </Link>
         ) : (
           <button className="btn alt" onClick={() => onHint('Switch on at least one column first')}>

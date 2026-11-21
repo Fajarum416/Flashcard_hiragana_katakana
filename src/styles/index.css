@@ -10,6 +10,10 @@ header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);bor
 nav{display:flex;gap:4px}
 nav a{padding:7px 12px;border-radius:999px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
 nav a.on{background:var(--pill);color:var(--ink)}
+.sub-bar{border-top:1px solid var(--line);background:var(--bg)}
+.sub-nav{max-width:1240px;margin:auto;display:flex;gap:6px;padding:6px 16px;flex-wrap:wrap}
+.sub-nav a{padding:5px 14px;border-radius:999px;color:var(--muted);text-decoration:none;font-weight:500;font-size:13px;white-space:nowrap}
+.sub-nav a.on{background:var(--pill);color:var(--accent);font-weight:600}
 .login{margin-left:auto;border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
 main{max-width:1240px;margin:auto;padding:18px 16px 28px}
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:22px}

@@ -22,7 +22,7 @@ Aplikasi web flashcard modern untuk belajar dan melatih aksara Jepang (**Hiragan
   - Kartu lemah atau jatuh tempo diprioritaskan muncul lebih awal.
 - **Offline-First PWA**:
   - Service worker precaching untuk seluruh aset dan font.
-  - Petunjuk instalasi untuk iOS Safari (*Add to Home Screen*) dan Android/Chrome.
+  - Petunjuk instalasi untuk iOS Safari (_Add to Home Screen_) dan Android/Chrome.
 - **Cloud Sync & Auth (Supabase)**:
   - Login dengan akun Google.
   - Sinkronisasi progres lokal (IndexedDB Dexie) ke cloud Postgres secara aman (RLS).
@@ -39,19 +39,24 @@ Aplikasi web flashcard modern untuk belajar dan melatih aksara Jepang (**Hiragan
 ## Menjalankan Proyek
 
 ### 1. Instalasi Dependensi & Pengembangan Lokal
+
 ```bash
 npm install
 npm run dev
 ```
+
 Buka `http://localhost:5173` di browser.
 
 ### 2. Menjalankan Unit Tests
+
 ```bash
 npm test
 ```
+
 Menjalankan 42 unit test otomatis (Vitest) untuk memastikan kebenaran logika romaji, srs, deck, pengaturan, dan kalkulasi hafalan.
 
 ### 3. Build Produksi (PWA)
+
 ```bash
 npm run build
 npm run preview
