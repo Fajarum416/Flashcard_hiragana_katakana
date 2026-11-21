@@ -40,7 +40,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .col .toggle{margin-bottom:38px}
 .toggle:checked,.toggle[aria-checked="true"]{background-color:#5eb839!important;border-color:#5eb839!important;color:#ffffff!important}
 .cell{width:100%;max-width:80px;text-align:center;margin-bottom:46px}
-.cell b{display:block;font:300 42px/1.2 "Noto Sans JP",sans-serif;font-weight:300;color:#f0f3f8}
+.cell b{display:block;font:300 42px/1.2 "Noto Sans JP",sans-serif;font-weight:300;color:#f0f3f8;border-bottom:1px solid var(--line);padding-bottom:8px}
 .cell i{display:block;font-style:normal;color:#78859e;font-size:15px;padding-top:8px}
 .col.on .cell b{color:var(--accent)}
 .cols.y{grid-template-columns:repeat(11,minmax(96px,1fr));width:100%;gap:0 14px;min-width:1100px}
