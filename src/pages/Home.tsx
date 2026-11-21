@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE } from '../data/kana'
 import { WORDS } from '../data/words'
 import { buildDeck, selectedChars, wordOk } from '../lib/deck'
+import { isDue } from '../lib/srs'
 import { Segmented } from '../components/Segmented'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
@@ -16,8 +17,10 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
   const st = useSelection()
   const sc = st.script
   const yoon = st.mode === 'char' && st.comp
-  const deck = buildDeck(st)
-  const count = selectedChars(st).length
+  const chars = selectedChars(st)
+  const count = chars.length
+  const dueCount = chars.filter((c) => isDue(st.stats[`${sc}:${c.k}`])).length
+  const deck = buildDeck(st, { stats: st.stats, srsMode: st.srsMode })
 
   let body
   if (yoon) {
@@ -111,6 +114,29 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
             { value: 'katakana', text: 'Katakana' },
           ]}
         />
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <button
+            className="link"
+            style={{
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: 999,
+              background: st.srsMode ? 'var(--pill-on)' : 'var(--pill)',
+              color: st.srsMode ? 'var(--ink)' : 'var(--muted)',
+              fontSize: 12,
+              fontWeight: 500,
+            }}
+            title="Sistem Pengulangan Berjarak: Memprioritaskan huruf yang lemah atau jatuh tempo peninjauan"
+            onClick={() => st.setSrsMode(!st.srsMode)}
+          >
+            🧠 SRS: {st.srsMode ? 'Aktif' : 'Nonaktif'}
+          </button>
+          {st.mode === 'char' && dueCount > 0 && (
+            <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 500 }}>
+              {dueCount} due
+            </span>
+          )}
+        </div>
       </div>
       {body}
       <div className="cta">

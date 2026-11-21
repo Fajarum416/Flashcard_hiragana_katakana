@@ -4,6 +4,7 @@ import type { Script } from '../data/kana'
 import { buildDeck, shuffle, type Card } from '../lib/deck'
 import { accuracy, norm } from '../lib/romaji'
 import { queueSession, recordAnswer } from '../lib/sync'
+import { getBox } from '../lib/srs'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
@@ -52,8 +53,13 @@ function reducer(s: PState, a: Act): PState {
   }
 }
 
+function makeDeck(script: Script) {
+  const st = useSelection.getState()
+  return buildDeck({ ...st, script }, { stats: st.stats, srsMode: st.srsMode })
+}
+
 function Session({ script }: { script: Script }) {
-  const [s, dispatch] = useReducer(reducer, undefined, () => init(buildDeck({ ...useSelection.getState(), script })))
+  const [s, dispatch] = useReducer(reducer, undefined, () => init(makeDeck(script)))
   const inputRef = useRef<HTMLInputElement>(null)
   const timer = useRef<number | undefined>(undefined)
   const startedAt = useRef(Date.now())
@@ -153,7 +159,7 @@ function Session({ script }: { script: Script }) {
           {s.ok} correct on first try, {s.bad} incorrect, {s.q.length} cards
         </p>
         <div className="row">
-          <button className="btn" onClick={() => dispatch({ t: 'reset', q: shuffle(buildDeck({ ...useSelection.getState(), script })) })}>
+          <button className="btn" onClick={() => dispatch({ t: 'reset', q: makeDeck(script) })}>
             Restart
           </button>
           {s.mist.length > 0 && (
@@ -172,6 +178,11 @@ function Session({ script }: { script: Script }) {
   return (
     <div className="practice">
       <div className="stage">
+        {card.id && (
+          <div style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--pill)', padding: '2px 10px', borderRadius: 999 }}>
+            Kotak Hafalan: Box {getBox(useSelection.getState().stats[card.id])} / 5
+          </div>
+        )}
         <div className={`big jp ${card.kind === 'single' ? '' : card.kind}`}>{card.front}</div>
         <div className="ans">{s.rev ? card.ans : ''}</div>
         <div className="note">{s.rev ? card.note : ''}</div>

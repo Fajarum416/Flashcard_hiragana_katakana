@@ -57,4 +57,12 @@ describe('buildDeck', () => {
     const d = buildDeck({ ...base, mode: 'word' }, seq)
     expect(d.map((c) => c.front)).toEqual(['いえ'])
   })
+  it('SRS mode mengurutkan deck berdasarkan statistik kartu', () => {
+    const stats = {
+      'hiragana:あ': { ok: 10, no: 0, box: 5, lastReviewedAt: Date.now() },
+      'hiragana:い': { ok: 0, no: 2, box: 1, lastReviewedAt: Date.now() - 3600 * 1000 },
+    }
+    const d = buildDeck(base, { stats, srsMode: true, rng: () => 0 })
+    expect(d[0].id).toBe('hiragana:い')
+  })
 })

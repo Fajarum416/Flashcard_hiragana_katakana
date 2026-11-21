@@ -121,14 +121,21 @@ async function pushSettings(): Promise<void> {
 async function pull(userId: string): Promise<void> {
   if (!supabase) return
   const [prog, set] = await Promise.all([
-    supabase.from('card_progress').select('kana_id, ok, no'),
+    supabase.from('card_progress').select('kana_id, ok, no, box, last_reviewed_at'),
     supabase.from('user_settings').select('selection').eq('user_id', userId).maybeSingle(),
   ])
 
   if (prog.error) console.warn('[sync] ambil card_progress gagal:', prog.error.message)
   else {
-    const stats: Record<string, { ok: number; no: number }> = {}
-    for (const r of prog.data) stats[r.kana_id] = { ok: r.ok, no: r.no }
+    const stats: Record<string, { ok: number; no: number; box?: number; lastReviewedAt?: number }> = {}
+    for (const r of prog.data) {
+      stats[r.kana_id] = {
+        ok: r.ok,
+        no: r.no,
+        box: r.box,
+        lastReviewedAt: r.last_reviewed_at ? new Date(r.last_reviewed_at).getTime() : undefined,
+      }
+    }
     useSelection.getState().setStats(stats)
   }
 
