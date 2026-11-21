@@ -20,12 +20,13 @@ export const useAuth = create<AuthState>((set) => ({
       set({ loading: false })
       return () => {}
     }
-    supabase.auth.getSession().then(({ data }) => set({ user: data.session?.user ?? null, loading: false }))
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    const client = supabase
+    client.auth.getSession().then(({ data }) => set({ user: data.session?.user ?? null, loading: false }))
+    const { data } = client.auth.onAuthStateChange((event, session) => {
       set({ user: session?.user ?? null, loading: false })
       if (event === 'SIGNED_IN' && session) {
         // tidak menunggu; kegagalan di sini tidak boleh mengganggu login
-        void supabase.from('profiles').update({ last_login_at: new Date().toISOString() }).eq('id', session.user.id)
+        void client.from('profiles').update({ last_login_at: new Date().toISOString() }).eq('id', session.user.id)
       }
     })
     return () => data.subscription.unsubscribe()
