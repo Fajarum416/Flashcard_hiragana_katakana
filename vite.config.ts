@@ -71,5 +71,18 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@supabase')) return 'supabase'
+            if (id.includes('dexie')) return 'dexie'
+            if (id.includes('react') || id.includes('zustand')) return 'vendor'
+          }
+        },
+      },
+    },
+  },
   test: { environment: 'node', include: ['src/**/*.test.ts'] },
 })
