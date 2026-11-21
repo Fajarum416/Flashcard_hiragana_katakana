@@ -134,24 +134,78 @@ function AppContent() {
             </ul>
           </div>
 
-          {/* Navbar End */}
+          {/* Navbar End: Profile / Auth */}
           <div className="navbar-end gap-2">
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs opacity-80 hidden md:inline truncate max-w-[160px]" title={user.email}>
-                  {user.user_metadata?.full_name ?? user.email}
-                </span>
-                <button className="btn btn-outline btn-sm rounded-full text-xs" onClick={() => void signOut()}>
-                  Sign out
-                </button>
-                <button className="btn btn-ghost btn-xs text-error" title="Hapus akun" onClick={() => void onDelete()}>
-                  ✕
-                </button>
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                  <div className="w-10 rounded-full">
+                    <img
+                      alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
+                      src={
+                        user.user_metadata?.avatar_url ||
+                        user.user_metadata?.picture ||
+                        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
+                      }
+                    />
+                  </div>
+                </div>
+                <ul
+                  tabIndex={-1}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow"
+                >
+                  <li className="menu-title px-4 py-2 border-b border-base-200">
+                    <span className="font-semibold text-base-content truncate block">
+                      {user.user_metadata?.full_name || 'Learner'}
+                    </span>
+                    <span className="text-xs text-base-content/60 truncate font-normal block">
+                      {user.email}
+                    </span>
+                  </li>
+                  <li>
+                    <a className="justify-between" onClick={closeDropdowns}>
+                      Profile
+                      <span className="badge badge-sm badge-primary">Active</span>
+                    </a>
+                  </li>
+                  {role === 'admin' && (
+                    <li>
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold">
+                        Admin Dashboard
+                        <span className="badge badge-sm badge-accent">Admin</span>
+                      </NavLink>
+                    </li>
+                  )}
+                  <li>
+                    <button onClick={() => void signOut()}>Logout</button>
+                  </li>
+                  <li>
+                    <button onClick={() => void onDelete()} className="text-error">
+                      Hapus Akun
+                    </button>
+                  </li>
+                </ul>
               </div>
             ) : (
-              <button className="btn btn-primary btn-sm rounded-full text-xs font-semibold" disabled={loading} onClick={onLogin}>
-                Sign In
-              </button>
+              <div className="dropdown dropdown-end">
+                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                  <div className="w-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/70">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                </div>
+                <ul
+                  tabIndex={-1}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
+                >
+                  <li>
+                    <button onClick={onLogin} disabled={loading} className="text-primary font-semibold">
+                      Sign In with Google
+                    </button>
+                  </li>
+                </ul>
+              </div>
             )}
           </div>
         </div>
