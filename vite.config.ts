@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Kana Practice',
-        short_name: 'Kana',
+        name: 'Enna Card | Flashcard',
+        short_name: 'Enna Card',
         description: 'Flashcard Hiragana dan Katakana offline (PWA)',
         theme_color: '#1d212b',
         background_color: '#1d212b',
