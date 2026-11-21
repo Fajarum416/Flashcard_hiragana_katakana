@@ -67,7 +67,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .note{color:var(--muted);font-size:13px;min-height:16px}
 .foot{display:flex;align-items:center;gap:18px;border-top:1px solid var(--line);padding-top:14px;flex-shrink:0;width:100%}
 .stats{display:flex;border:1px solid var(--line);border-radius:999px;background:var(--pill);box-shadow:0 2px 6px rgba(0,0,0,.08)}
-.stats div{padding:8px 30px;min-width:105px;text-align:center;border-left:1px solid var(--line)}
+.stats div{padding:5px 30px;min-width:105px;text-align:center;border-left:1px solid var(--line)}
 .stats div:first-child{border:0}
 .stats small{display:block;color:var(--muted);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
 .stats span{font-size:22px;font-weight:600}
@@ -86,19 +86,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 }
 @media (max-width: 768px){
   main:has(.practice){height:auto;min-height:calc(100dvh - 65px);max-height:none;overflow-y:auto;padding:16px 16px 24px}
-  .foot{display:grid;grid-template-columns:1fr auto;grid-template-areas:"stats stats" "input reveal";gap:10px;padding-top:12px}
-  .stats{grid-area:stats;width:100%;justify-content:space-between}
+  .foot{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding-top:12px}
+  .stats{width:100%;justify-content:space-between}
   .stats div{flex:1;min-width:0;padding:6px 8px}
   .stats small{font-size:10px}
   .stats span{font-size:18px}
-  .inp{grid-area:input;width:100%;min-width:0;height:46px;font-size:17px;padding:0 14px}
-  .rev{grid-area:reveal;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .rev .btn{height:46px;padding:0 18px;font-size:14px;white-space:nowrap}
+  .inp{width:100%;min-width:0;height:48px;font-size:18px;padding:0 16px}
+  .rev{width:100%;display:flex;flex-direction:column;align-items:center}
+  .rev .btn{width:100%;height:48px;padding:0 20px;font-size:15px}
   .rev small{display:none}
-}
-@media (max-width: 480px){
-  .foot{grid-template-columns:1fr;grid-template-areas:"stats" "input" "reveal";gap:8px}
-  .rev .btn{width:100%}
 }
 .sum{text-align:center;padding:40px 0}
 .sum h2{font-size:56px;margin:0;font-weight:500}
