@@ -6,7 +6,7 @@ import { accuracy, norm } from '../lib/romaji'
 import { queueSession, recordAnswer } from '../lib/sync'
 import { getBox } from '../lib/srs'
 import { playKana } from '../lib/audio'
-import { StyleSwitch, pageTitle } from '../components/TypeStyleSwitches'
+import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
 interface PState {
@@ -263,8 +263,8 @@ export default function Practice() {
   return (
     <>
       <div className="top">
-        <h1>{pageTitle(script, mode)}</h1>
-        <StyleSwitch />
+        <h1>{scriptTitle(script)}</h1>
+        <TypeStyleSwitches mode={mode} />
       </div>
       <Session key={`${script}-${mode}-${comp}`} script={script} />
     </>

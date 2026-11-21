@@ -5,15 +5,20 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);background-image:repeating-linear-gradient(60deg,transparent 0 38px,rgba(128,140,170,.05) 38px 39px);color:var(--ink);font:400 15px/1.5 Inter,system-ui,sans-serif;padding-bottom:env(safe-area-inset-bottom,0px)}
 .jp{font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic",sans-serif}
-header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
-.bar{max-width:1240px;margin:auto;display:flex;align-items:center;gap:12px;padding:8px 16px;flex-wrap:wrap}
-nav{display:flex;gap:4px}
-nav a{padding:7px 12px;border-radius:999px;color:var(--muted);text-decoration:none;font-weight:500;font-size:14px;white-space:nowrap}
-nav a.on{background:var(--pill);color:var(--ink)}
-.sub-bar{border-top:1px solid var(--line);background:var(--bg)}
-.sub-nav{max-width:1240px;margin:auto;display:flex;gap:6px;padding:6px 16px;flex-wrap:wrap}
-.sub-nav a{padding:5px 14px;border-radius:999px;color:var(--muted);text-decoration:none;font-weight:500;font-size:13px;white-space:nowrap}
-.sub-nav a.on{background:var(--pill);color:var(--accent);font-weight:600}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid var(--line);z-index:50}
+.bar{max-width:1240px;margin:auto;display:flex;align-items:center;gap:16px;padding:10px 16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px}
+.brand-badge{background:var(--pill);border:1px solid var(--line);border-radius:8px;padding:2px 8px;font-family:"Noto Sans JP",sans-serif;font-size:13px;color:var(--accent)}
+nav{display:flex;gap:8px;align-items:center}
+.nav-item{position:relative}
+.nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;color:var(--muted);background:none;border:0;font:inherit;font-weight:500;font-size:14px;cursor:pointer;text-decoration:none;transition:all .15s}
+.nav-btn:hover,.nav-btn.on{background:var(--pill);color:var(--ink)}
+.nav-btn .caret{font-size:10px;transition:transform .2s;opacity:.7}
+.nav-item:hover .nav-btn .caret,.nav-btn.open .caret{transform:rotate(180deg)}
+.dropdown{position:absolute;top:calc(100% + 6px);left:0;min-width:180px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px rgba(0,0,0,.35);padding:6px;z-index:100;display:none;flex-direction:column;gap:2px}
+.dropdown.show,.nav-item:hover .dropdown{display:flex}
+.dropdown a{display:block;padding:8px 14px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:13px;font-weight:500;transition:background .15s}
+.dropdown a:hover,.dropdown a.on{background:var(--pill-on);color:#fff}
 .login{margin-left:auto;border:1px solid var(--line);background:none;color:var(--ink);border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;cursor:pointer}
 main{max-width:1240px;margin:auto;padding:18px 16px 28px}
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:22px}
@@ -30,7 +35,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .col{display:flex;flex-direction:column;align-items:flex-start}
 .sw{width:52px;height:24px;border-radius:12px;border:0;background:var(--pill);position:relative;cursor:pointer;margin-bottom:12px;padding:0}
 .sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--ink);transition:transform .15s}
-.sw[aria-checked="true"]{background:var(--accent)}
+.sw[aria-checked="true"]{background:var(--ok)}
 .sw[aria-checked="true"]::after{transform:translateX(28px);background:#fff}
 .cell{width:52px;text-align:center;margin-bottom:14px}
 .cell b{display:block;font:300 26px/1.3 "Noto Sans JP",sans-serif;border-bottom:1px solid var(--line)}
@@ -39,14 +44,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .cols.y{grid-template-columns:repeat(11,minmax(86px,1fr));min-width:960px}
 .y .cell{width:76px}
 .lk{width:52px;height:26px;border-radius:13px;border:0;background:var(--pill);color:var(--muted);margin-bottom:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-.lk[aria-pressed="true"]{background:var(--accent);color:#fff}
+.lk[aria-pressed="true"]{background:var(--ok);color:#fff}
 .words{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .w{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
 .w.off{opacity:.4}
 .w b{display:block;font:500 24px "Noto Sans JP",sans-serif}
 .w span{color:var(--muted);font-size:13px}
 .cta{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
-.btn{border:0;border-radius:999px;background:var(--accent);color:#fff;font:600 14px Inter,sans-serif;padding:11px 22px;text-decoration:none;cursor:pointer;display:inline-block}
+.btn{border:0;border-radius:999px;background:var(--ok);color:#fff;font:600 14px Inter,sans-serif;padding:11px 22px;text-decoration:none;cursor:pointer;display:inline-block}
 .btn.alt{background:var(--pill);color:var(--ink)}
 .dim{color:var(--muted);font-size:13px}
 .practice{display:flex;flex-direction:column;min-height:calc(100dvh - 150px)}
@@ -73,6 +78,6 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .sum h2{font-size:56px;margin:0;font-weight:500}
 .sum .row{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
 .empty{text-align:center;padding:60px 0;color:var(--muted)}
-#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center;max-width:90%}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;text-align:center;max-width:90%;z-index:999}
 #toast.show{opacity:1}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

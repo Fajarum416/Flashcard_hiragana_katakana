@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
 import { COMP_WORDS, WORDS } from '../data/words'
 import { buildDeck, compositeWordOk, selectedChars, wordOk, type Mode } from '../lib/deck'
 import { isDue } from '../lib/srs'
 import { playKana } from '../lib/audio'
-import { StyleSwitch, pageTitle } from '../components/TypeStyleSwitches'
+import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
 const LOCK = (
@@ -21,6 +21,7 @@ interface Props {
 }
 
 export default function Home({ script, mode, onHint }: Props) {
+  const navigate = useNavigate()
   const st = useSelection()
   const sc = script
   useEffect(() => {
@@ -130,8 +131,11 @@ export default function Home({ script, mode, onHint }: Props) {
   return (
     <>
       <div className="top">
-        <h1>{pageTitle(sc, mode)}</h1>
-        <StyleSwitch />
+        <h1>{scriptTitle(sc)}</h1>
+        <TypeStyleSwitches
+          mode={mode}
+          onModeChange={(m) => navigate(`/${script}/${m === 'char' ? 'flashcard' : 'word'}`)}
+        />
         <span className="sp" />
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <button
@@ -161,7 +165,7 @@ export default function Home({ script, mode, onHint }: Props) {
       <div className="cta">
         {deck.length ? (
           <Link className="btn" to={`/practice/${sc}`}>
-            Start practice ({mode === 'char' ? `${count} characters` : `${deck.length} words`})
+            Begin Test ({mode === 'char' ? `${count} characters` : `${deck.length} words`})
           </Link>
         ) : (
           <button className="btn alt" onClick={() => onHint('Switch on at least one column first')}>

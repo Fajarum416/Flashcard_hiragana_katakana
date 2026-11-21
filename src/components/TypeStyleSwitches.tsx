@@ -1,17 +1,25 @@
 import { useSelection } from '../store/useSelection'
 import { Segmented } from './Segmented'
 
-export function TypeStyleSwitches() {
-  const mode = useSelection((s) => s.mode)
+export function TypeStyleSwitches({
+  mode,
+  onModeChange,
+}: {
+  mode: 'char' | 'word'
+  onModeChange?: (m: 'char' | 'word') => void
+}) {
   const comp = useSelection((s) => s.comp)
-  const setMode = useSelection((s) => s.setMode)
   const setComp = useSelection((s) => s.setComp)
+  const setMode = useSelection((s) => s.setMode)
   return (
     <>
       <Segmented
         label="Type"
         value={mode}
-        onChange={setMode}
+        onChange={(m) => {
+          setMode(m)
+          onModeChange?.(m)
+        }}
         options={[
           { value: 'char', text: 'Characters' },
           { value: 'word', text: 'Words' },
@@ -30,41 +38,13 @@ export function TypeStyleSwitches() {
   )
 }
 
-export function StyleSwitch() {
-  const comp = useSelection((s) => s.comp)
-  const setComp = useSelection((s) => s.setComp)
-  return (
-    <Segmented
-      label="Style"
-      value={comp ? 'comp' : 'single'}
-      onChange={(v) => setComp(v === 'comp')}
-      options={[
-        { value: 'single', text: 'Single' },
-        { value: 'comp', text: 'Composite' },
-      ]}
-    />
-  )
-}
-
-export const pageTitle = (sc: 'hiragana' | 'katakana', mode: 'char' | 'word') => {
-  if (sc === 'hiragana') {
-    return mode === 'char' ? (
-      <>
-        Hiragana Flashcard <span className="jp">ひらがな</span>
-      </>
-    ) : (
-      <>
-        Hiragana Words <span className="jp">ひらがな 単語</span>
-      </>
-    )
-  }
-  return mode === 'char' ? (
+export const scriptTitle = (sc: 'hiragana' | 'katakana') =>
+  sc === 'hiragana' ? (
     <>
-      Katakana Flashcard <span className="jp">カタカナ</span>
+      Hiragana Practice <span className="jp">ひらがな</span>
     </>
   ) : (
     <>
-      Katakana Words <span className="jp">カタカナ 単語</span>
+      Katakana Practice <span className="jp">カタカナ</span>
     </>
   )
-}

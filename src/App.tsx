@@ -14,6 +14,7 @@ import { InstallPrompt } from './components/InstallPrompt'
 function AppContent() {
   const [msg, setMsg] = useState('')
   const [show, setShow] = useState(false)
+  const [openMenu, setOpenMenu] = useState<'hira' | 'kata' | null>(null)
   const t = useRef<number | undefined>(undefined)
   const location = useLocation()
 
@@ -28,6 +29,17 @@ function AppContent() {
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
+
+  useEffect(() => {
+    const closeDropdown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('.nav-item')) {
+        setOpenMenu(null)
+      }
+    }
+    document.addEventListener('click', closeDropdown)
+    return () => document.removeEventListener('click', closeDropdown)
+  }, [])
 
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
@@ -47,25 +59,73 @@ function AppContent() {
     <>
       <header>
         <div className="bar">
+          <NavLink to="/hiragana/flashcard" className="brand">
+            <span className="brand-badge">A あ</span>
+            <span>JLPT Cards</span>
+          </NavLink>
+
           <nav>
-            <NavLink
-              to="/hiragana/flashcard"
-              className={isHiragana ? 'on' : ''}
-            >
-              Hiragana
-            </NavLink>
-            <NavLink
-              to="/katakana/flashcard"
-              className={isKatakana ? 'on' : ''}
-            >
-              Katakana
-            </NavLink>
+            {/* Hiragana dropdown */}
+            <div className="nav-item">
+              <button
+                type="button"
+                className={`nav-btn ${isHiragana ? 'on' : ''} ${openMenu === 'hira' ? 'open' : ''}`}
+                onClick={() => setOpenMenu(openMenu === 'hira' ? null : 'hira')}
+              >
+                Hiragana <span className="caret">▾</span>
+              </button>
+              <div className={`dropdown ${openMenu === 'hira' ? 'show' : ''}`}>
+                <NavLink
+                  to="/hiragana/flashcard"
+                  onClick={() => setOpenMenu(null)}
+                  className={location.pathname === '/hiragana/flashcard' ? 'on' : ''}
+                >
+                  Hiragana Flashcards
+                </NavLink>
+                <NavLink
+                  to="/hiragana/word"
+                  onClick={() => setOpenMenu(null)}
+                  className={location.pathname === '/hiragana/word' ? 'on' : ''}
+                >
+                  Hiragana Words
+                </NavLink>
+              </div>
+            </div>
+
+            {/* Katakana dropdown */}
+            <div className="nav-item">
+              <button
+                type="button"
+                className={`nav-btn ${isKatakana ? 'on' : ''} ${openMenu === 'kata' ? 'open' : ''}`}
+                onClick={() => setOpenMenu(openMenu === 'kata' ? null : 'kata')}
+              >
+                Katakana <span className="caret">▾</span>
+              </button>
+              <div className={`dropdown ${openMenu === 'kata' ? 'show' : ''}`}>
+                <NavLink
+                  to="/katakana/flashcard"
+                  onClick={() => setOpenMenu(null)}
+                  className={location.pathname === '/katakana/flashcard' ? 'on' : ''}
+                >
+                  Katakana Flashcards
+                </NavLink>
+                <NavLink
+                  to="/katakana/word"
+                  onClick={() => setOpenMenu(null)}
+                  className={location.pathname === '/katakana/word' ? 'on' : ''}
+                >
+                  Katakana Words
+                </NavLink>
+              </div>
+            </div>
+
             {role === 'admin' && (
               <NavLink to="/admin" className={cls} style={{ color: 'var(--accent)', fontWeight: 600 }}>
                 Admin
               </NavLink>
             )}
           </nav>
+
           {user ? (
             <span className="login" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <span title={user.email}>{user.user_metadata?.full_name ?? user.email}</span>
@@ -78,24 +138,6 @@ function AppContent() {
             </button>
           )}
         </div>
-
-        {/* Sub-navbar */}
-        {isHiragana && (
-          <div className="sub-bar">
-            <div className="sub-nav">
-              <NavLink to="/hiragana/flashcard" className={cls}>Hiragana Flashcard</NavLink>
-              <NavLink to="/hiragana/word" className={cls}>Hiragana Word</NavLink>
-            </div>
-          </div>
-        )}
-        {isKatakana && (
-          <div className="sub-bar">
-            <div className="sub-nav">
-              <NavLink to="/katakana/flashcard" className={cls}>Katakana Flashcard</NavLink>
-              <NavLink to="/katakana/word" className={cls}>Katakana Word</NavLink>
-            </div>
-          </div>
-        )}
       </header>
 
       <main>
