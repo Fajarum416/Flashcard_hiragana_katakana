@@ -8,12 +8,6 @@ import { playKana } from '../lib/audio'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
-const LOCK = (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M17 9V7a5 5 0 0 0-10 0v2H5v12h14V9h-2zM9 7a3 3 0 0 1 6 0v2H9V7z" />
-  </svg>
-)
-
 interface Props {
   script: Script
   mode: Mode
@@ -44,14 +38,13 @@ export default function Home({ script, mode, onHint }: Props) {
             const on = st.selY[sc].includes(id)
             return (
               <div key={id} className={`col ${on ? 'on' : ''}`}>
-                <button
-                  className="lk"
-                  aria-pressed={on}
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() => st.toggleYoon(sc, id)}
+                  className="toggle toggle-success mb-4 cursor-pointer"
                   aria-label={`Select column ${id}`}
-                  onClick={() => st.toggleYoon(sc, id)}
-                >
-                  {LOCK}
-                </button>
+                />
                 {YOON_TABLE[sc][id].map((c) => (
                   <div key={c.k} className="cell">
                     <b>{c.k}</b>
@@ -72,12 +65,12 @@ export default function Home({ script, mode, onHint }: Props) {
             const on = st.sel[sc].includes(id)
             return (
               <div key={id} className={`col ${on ? 'on' : ''}`}>
-                <button
-                  className="sw"
-                  role="switch"
-                  aria-checked={on}
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() => st.toggleCol(sc, id)}
+                  className="toggle toggle-success mb-4 cursor-pointer"
                   aria-label={`Select column ${id}`}
-                  onClick={() => st.toggleCol(sc, id)}
                 />
                 {TABLE[sc][id].map((c, i) => (
                   <div key={i} className="cell">
