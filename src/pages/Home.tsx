@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE } from '../data/kana'
-import { WORDS } from '../data/words'
-import { buildDeck, selectedChars, wordOk } from '../lib/deck'
+import { COMP_WORDS, WORDS } from '../data/words'
+import { buildDeck, compositeWordOk, selectedChars, wordOk } from '../lib/deck'
 import { isDue } from '../lib/srs'
+import { playKana } from '../lib/audio'
 import { Segmented } from '../components/Segmented'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
@@ -79,21 +80,37 @@ export default function Home({ onHint }: { onHint: (msg: string) => void }) {
       </div>
     )
   } else {
+    const list = st.comp ? COMP_WORDS[sc] : WORDS[sc]
     body = (
       <>
         <p className="dim">
-          A word is active when all of its characters are in the selected columns. Switch to Characters to select
-          columns.
+          {st.comp
+            ? 'Kosakata gabungan (memuat Yōon & Sokuon). Aktif jika kolom karakter dan yōon terpilih.'
+            : 'Kata aktif jika seluruh hurufnya ada di kolom yang dipilih. Beralih ke Characters untuk memilih kolom.'}
         </p>
         <div className="words">
-          {WORDS[sc].map((w) => (
-            <div key={w[0]} className={`w ${wordOk(w[0], sc, st.sel[sc]) ? '' : 'off'}`}>
-              <b>{w[0]}</b>
-              <span>
-                {w[1]} · {w[2]}
-              </span>
-            </div>
-          ))}
+          {list.map((w) => {
+            const active = st.comp
+              ? compositeWordOk(w[0], sc, st.sel[sc], st.selY[sc])
+              : wordOk(w[0], sc, st.sel[sc])
+            return (
+              <div
+                key={w[0]}
+                className={`w ${active ? '' : 'off'}`}
+                style={{ cursor: 'pointer' }}
+                title="Klik untuk mendengarkan pelafalan"
+                onClick={() => playKana(w[0])}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <b>{w[0]}</b>
+                  <span style={{ fontSize: 16 }}>🔊</span>
+                </div>
+                <span>
+                  {w[1]} · {w[2]}
+                </span>
+              </div>
+            )
+          })}
         </div>
       </>
     )

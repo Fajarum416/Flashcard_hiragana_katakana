@@ -15,10 +15,13 @@ export function norm(input: string): string {
     .replace(/di/g, 'ji')
     .replace(/du/g, 'zu')
     .replace(/nn/g, 'n')
+    .replace(/cch/g, 'tch')
     .replace(/(sh|ch)y/g, '$1')
     .replace(/sy/g, 'sh')
     .replace(/ty|cy/g, 'ch')
     .replace(/zy|jy/g, 'j')
+    .replace(/ou/g, 'o')
+    .replace(/^wo$/g, 'o')
   return s.replace(/(a)\1+|(i)\2+|(u)\3+|(e)\4+|(o)\5+/g, (m) => m[0])
 }
 

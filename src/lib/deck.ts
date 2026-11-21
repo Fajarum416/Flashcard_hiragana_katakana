@@ -1,6 +1,38 @@
 import { CHAR_TO_COL, TABLE, YOON_TABLE, type Kana, type Script } from '../data/kana'
-import { WORDS } from '../data/words'
+import { COMP_WORDS, WORDS } from '../data/words'
 import { sortDeckBySRS, type CardStat } from './srs'
+
+const SMALL_KANA = 'ゃゅょャュョ'
+
+const BASE_TO_YOON_COL: Record<string, string> = {
+  き: 'ki', し: 'shi', ち: 'chi', に: 'ni', ひ: 'hi', み: 'mi', り: 'ri', ぎ: 'gi', じ: 'ji', び: 'bi', ぴ: 'pi',
+  キ: 'ki', シ: 'shi', チ: 'chi', ニ: 'ni', ヒ: 'hi', ミ: 'mi', リ: 'ri', ギ: 'gi', ジ: 'ji', ビ: 'bi', ピ: 'pi',
+}
+
+/** Kata composite aktif jika huruf gojuon ada di sel dan yoon ada di selY. Sokuon (っ/ッ) otomatis valid. */
+export function compositeWordOk(
+  word: string,
+  script: Script,
+  sel: string[],
+  selY: string[]
+): boolean {
+  const chars = [...word]
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i]
+    if (c === 'っ' || c === 'ッ' || c === 'ー' || c === ' ') continue
+
+    if (i + 1 < chars.length && SMALL_KANA.includes(chars[i + 1])) {
+      const yoonCol = BASE_TO_YOON_COL[c]
+      if (!yoonCol || !selY.includes(yoonCol)) return false
+      i++ // Lewati huruf kecil
+      continue
+    }
+
+    const col = CHAR_TO_COL[script][c]
+    if (!col || !sel.includes(col)) return false
+  }
+  return true
+}
 
 export type Mode = 'char' | 'word'
 export type CardKind = 'single' | 'comp' | 'word'
@@ -70,18 +102,12 @@ export function buildDeck(s: Selection, opts?: DeckOptions | Rng): Card[] {
     }
     return shuffle(items, rng)
   }
-  const words = WORDS[script].filter((w) => wordOk(w[0], script, s.sel[script]))
-  if (!words.length) return []
-  if (!s.comp) {
-    items = words.map((w) => ({ front: w[0], ans: w[1], note: w[2], kind: 'word' }))
-    return shuffle(items, rng)
-  }
-  // Words + Composite (sementara): gabungan dua kata
-  const n = Math.min(8, Math.max(3, words.length))
-  const pick = () => words[Math.floor(rng() * words.length)]
-  return Array.from({ length: n }, () => {
-    const a = pick()
-    const b = pick()
-    return { front: `${a[0]} ${b[0]}`, ans: a[1] + b[1], note: `${a[2]} + ${b[2]}`, kind: 'word' as const }
-  })
+  const wordList = s.comp ? COMP_WORDS[script] : WORDS[script]
+  const validWords = s.comp
+    ? wordList.filter((w) => compositeWordOk(w[0], script, s.sel[script], s.selY[script]))
+    : wordList.filter((w) => wordOk(w[0], script, s.sel[script]))
+
+  if (!validWords.length) return []
+  items = validWords.map((w) => ({ front: w[0], ans: w[1], note: w[2], kind: 'word' }))
+  return shuffle(items, rng)
 }

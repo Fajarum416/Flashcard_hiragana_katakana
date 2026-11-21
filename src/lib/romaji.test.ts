@@ -28,6 +28,17 @@ describe('norm', () => {
   it('nn menjadi n', () => {
     expect(norm('nn')).toBe('n')
   })
+  it('sokuon konsonan ganda dipertahankan', () => {
+    expect(norm('kitte')).toBe('kitte')
+    expect(norm('gakkou')).toBe('gakko')
+    expect(norm('gakkō')).toBe('gakko')
+    expect(norm('kicchin')).toBe('kitchin')
+    expect(norm('kitchin')).toBe('kitchin')
+  })
+  it('wo dan o dianggap sama', () => {
+    expect(norm('wo')).toBe('o')
+    expect(norm('o')).toBe('o')
+  })
 })
 
 describe('accuracy', () => {

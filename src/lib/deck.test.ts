@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, toKatakana } from '../data/kana'
-import { buildDeck, wordOk, type Selection } from './deck'
+import { buildDeck, compositeWordOk, wordOk, type Selection } from './deck'
 
 const base: Selection = {
   script: 'hiragana',
@@ -37,6 +37,19 @@ describe('wordOk', () => {
   })
   it('tanda panjang selalu valid', () => {
     expect(wordOk('コーヒー', 'katakana', ['ka', 'ha', 'a'])).toBe(true)
+  })
+})
+
+describe('compositeWordOk', () => {
+  it('valid jika huruf gojuon dan yoon aktif', () => {
+    // おちゃ: 'お' (a-col), 'ちゃ' (chi yoon-col)
+    expect(compositeWordOk('おちゃ', 'hiragana', ['a'], ['chi'])).toBe(true)
+    expect(compositeWordOk('おちゃ', 'hiragana', ['a'], ['ki'])).toBe(false)
+  })
+  it('sokuon (っ) otomatis valid jika konsonan diapit aktif', () => {
+    // きって: 'き' (ka-col), 'っ' (sokuon), 'て' (ta-col)
+    expect(compositeWordOk('きって', 'hiragana', ['ka', 'ta'], [])).toBe(true)
+    expect(compositeWordOk('きって', 'hiragana', ['ka'], [])).toBe(false)
   })
 })
 
