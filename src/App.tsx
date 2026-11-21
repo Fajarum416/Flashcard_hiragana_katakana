@@ -12,9 +12,11 @@ import AdminOverview from './pages/admin/Overview'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
 import { InstallPrompt } from './components/InstallPrompt'
+import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
 
 function AppContent() {
   const [msg, setMsg] = useState('')
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(true)
   const [openKata, setOpenKata] = useState(true)
@@ -41,7 +43,11 @@ function AppContent() {
 
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
-    void signIn()
+    if (googleClientId) {
+      setLoginModalOpen(true)
+    } else {
+      void signIn()
+    }
   }
 
   const onLogout = async () => {
@@ -592,6 +598,12 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/hiragana/flashcard" replace />} />
         </Routes>
       </main>
+
+      <GoogleSignInModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onFallbackOAuth={() => void signIn()}
+      />
 
       <dialog id="my_modal_1" className="modal">
         <div className="modal-box">

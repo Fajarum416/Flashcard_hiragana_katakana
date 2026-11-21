@@ -12,6 +12,7 @@ interface AuthState {
   /** Mulai mendengarkan sesi. Mengembalikan fungsi untuk berhenti. */
   init: () => () => void
   signIn: () => Promise<void>
+  signInWithGoogleIdToken: (token: string, nonce?: string) => Promise<string | null>
   signOut: () => Promise<void>
   deleteAccount: () => Promise<string | null>
 }
@@ -52,6 +53,15 @@ export const useAuth = create<AuthState>((set) => ({
   signIn: async () => {
     if (!supabase) return
     await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })
+  },
+  signInWithGoogleIdToken: async (token, nonce) => {
+    if (!supabase) return 'Supabase belum dikonfigurasi'
+    const { error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token,
+      nonce,
+    })
+    return error ? error.message : null
   },
   signOut: async () => {
     if (!supabase) return
