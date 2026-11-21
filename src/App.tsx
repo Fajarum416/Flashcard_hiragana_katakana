@@ -18,8 +18,16 @@ function AppContent() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(true)
   const [openKata, setOpenKata] = useState(true)
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const toast = (m: string) => {
     setMsg(m)
@@ -77,7 +85,11 @@ function AppContent() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-transparent border-b border-white/10 w-full">
+      <header
+        className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${
+          scrolled ? 'bg-black/65 backdrop-blur-md border-white/15 shadow-md' : 'bg-transparent border-white/10'
+        }`}
+      >
         <div className="navbar bg-transparent w-full px-4 sm:px-6 md:px-12 lg:px-20 xl:px-[120px] py-3 sm:py-3.5 md:py-4 justify-between">
           {/* Navbar Start: Brand Logo */}
           <div className="navbar-start w-auto">
