@@ -56,7 +56,7 @@ function AppContent() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-base-100/95 backdrop-blur border-b border-base-300 w-full">
-        <div className="navbar w-full px-6 md:px-12 lg:px-20 py-3.5 md:py-4 justify-between">
+        <div className="navbar w-full px-6 md:px-12 lg:px-20 xl:px-[120px] py-3.5 md:py-4 justify-between">
           {/* Navbar Start: Brand & Mobile Menu Button */}
           <div className="navbar-start w-auto gap-2">
             <div className="dropdown lg:hidden">
