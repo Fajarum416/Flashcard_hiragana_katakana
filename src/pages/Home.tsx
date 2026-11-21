@@ -25,7 +25,6 @@ export default function Home({ script, mode, onHint }: Props) {
 
   const yoon = mode === 'char' && st.comp
   const chars = selectedChars(st, script)
-  const count = chars.length
   const dueCount = chars.filter((c) => isDue(st.stats[`${sc}:${c.k}`])).length
   const deck = buildDeck({ ...st, script, mode }, { stats: st.stats, srsMode: st.srsMode })
 
@@ -156,15 +155,6 @@ export default function Home({ script, mode, onHint }: Props) {
       </div>
       {body}
       <div className="cta">
-        {deck.length ? (
-          <Link className="btn" to={`/practice/${sc}`}>
-            Begin Test ({mode === 'char' ? `${count} characters` : `${deck.length} words`})
-          </Link>
-        ) : (
-          <button className="btn alt" onClick={() => onHint('Switch on at least one column first')}>
-            Start practice
-          </button>
-        )}
         <span>
           <button className="link" onClick={() => st.selectAll(sc)}>
             Select all
@@ -173,6 +163,15 @@ export default function Home({ script, mode, onHint }: Props) {
             Clear
           </button>
         </span>
+        {deck.length ? (
+          <Link className="btn font-bold shadow-md" to={`/practice/${sc}`}>
+            Begin Test - {mode === 'char' ? `${st.comp ? st.selY[sc].length : st.sel[sc].length} Groups` : `${deck.length} Words`}
+          </Link>
+        ) : (
+          <button className="btn alt" onClick={() => onHint('Switch on at least one column first')}>
+            Begin Test - 0 Groups
+          </button>
+        )}
       </div>
     </>
   )
