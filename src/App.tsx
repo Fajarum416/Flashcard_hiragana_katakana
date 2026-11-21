@@ -145,8 +145,8 @@ function AppContent() {
             {/* Profile / Sign In Component */}
             {user ? (
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-ghost rounded-full gap-2.5 border border-base-300 normal-case px-3.5 h-11 min-h-11">
-                  <div className="w-7 h-7 rounded-full overflow-hidden ring-1 ring-base-300">
+                <div tabIndex={0} role="button" className="btn btn-ghost rounded-full gap-3 border border-base-300 normal-case px-4 h-12 min-h-12 text-base">
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-base-300">
                     <img
                       alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
                       src={
@@ -156,13 +156,13 @@ function AppContent() {
                       }
                     />
                   </div>
-                  <span className="text-sm font-semibold truncate max-w-[140px] hidden md:inline">
+                  <span className="text-base font-semibold truncate max-w-[160px] hidden md:inline">
                     {user.user_metadata?.full_name ?? user.email}
                   </span>
                 </div>
-                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-64 p-2.5 shadow-xl border border-base-200">
-                  <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
-                    <span className="font-semibold text-base-content text-sm truncate block">
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
+                  <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-base truncate block">
                       {user.user_metadata?.full_name || 'Learner'}
                     </span>
                     <span className="text-xs text-base-content/60 truncate font-normal block">
@@ -170,18 +170,18 @@ function AppContent() {
                     </span>
                   </li>
                   <li>
-                    <a className="justify-between py-2 text-sm font-medium" onClick={closeDropdowns}>
+                    <a className="justify-between py-2.5 text-base font-medium" onClick={closeDropdowns}>
                       Profile
-                      <span className="badge badge-sm badge-primary">Active</span>
+                      <span className="badge badge-md badge-primary">Active</span>
                     </a>
                   </li>
                   <li>
                     <div
                       onClick={() => setSrsMode(!srsMode)}
-                      className="flex items-center justify-between py-2 text-sm font-medium cursor-pointer"
+                      className="flex items-center justify-between py-2.5 text-base font-medium cursor-pointer hover:bg-base-200/60 rounded-lg"
                     >
                       <span className="flex items-center gap-2">
-                        <span className="text-base">🧠</span>
+                        <span className="text-lg">🧠</span>
                         <span>SRS Mode</span>
                       </span>
                       <input
@@ -194,14 +194,14 @@ function AppContent() {
                   </li>
                   {role === 'admin' && (
                     <li>
-                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2 text-sm">
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2.5 text-base">
                         Admin Dashboard
                         <span className="badge badge-accent badge-xs">Admin</span>
                       </NavLink>
                     </li>
                   )}
-                  <li><button onClick={() => void signOut()} className="py-2 text-sm font-medium">Logout</button></li>
-                  <li><button onClick={() => void onDelete()} className="text-error py-2 text-sm font-medium">Hapus Akun</button></li>
+                  <li><button onClick={() => void signOut()} className="py-2.5 text-base font-medium">Logout</button></li>
+                  <li><button onClick={() => void onDelete()} className="text-error py-2.5 text-base font-medium">Hapus Akun</button></li>
                 </ul>
               </div>
             ) : (
@@ -209,16 +209,16 @@ function AppContent() {
                 <div
                   tabIndex={0}
                   role="button"
-                  className="btn btn-ghost rounded-full normal-case gap-2.5 px-4 text-sm font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-11 min-h-11"
+                  className="btn btn-ghost rounded-full normal-case gap-3 px-5 text-base font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-12 min-h-12"
                 >
-                  <svg className="w-4 h-4 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   <span>Sign in</span>
                 </div>
-                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-64 p-2.5 shadow-xl border border-base-200">
-                  <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
-                    <span className="font-semibold text-base-content text-sm block">
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
+                  <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-base block">
                       Tamu (Guest)
                     </span>
                     <span className="text-xs text-base-content/60 font-normal block">
@@ -228,10 +228,10 @@ function AppContent() {
                   <li>
                     <div
                       onClick={() => setSrsMode(!srsMode)}
-                      className="flex items-center justify-between py-2 text-sm font-medium cursor-pointer"
+                      className="flex items-center justify-between py-2.5 text-base font-medium cursor-pointer hover:bg-base-200/60 rounded-lg"
                     >
                       <span className="flex items-center gap-2">
-                        <span className="text-base">🧠</span>
+                        <span className="text-lg">🧠</span>
                         <span>SRS Mode</span>
                       </span>
                       <input
@@ -250,7 +250,7 @@ function AppContent() {
                         closeDropdowns()
                         onLogin()
                       }}
-                      className="btn btn-primary btn-sm w-full text-sm font-semibold normal-case"
+                      className="btn btn-primary btn-md w-full text-base font-semibold normal-case mt-1"
                     >
                       Masuk dengan Google
                     </button>
