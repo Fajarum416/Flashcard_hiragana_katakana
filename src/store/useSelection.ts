@@ -22,6 +22,8 @@ interface Actions {
   setStats: (stats: Record<string, Stat>) => void
   /** Menerapkan pilihan dari server. */
   applySelection: (s: SelectionState) => void
+  /** Mereset seluruh toggle ke kondisi nonaktif saat pengguna logout. */
+  resetOnLogout: () => void
 }
 
 export type AppState = Selection & { srsMode: boolean; stats: Record<string, Stat> } & Actions
@@ -57,6 +59,16 @@ export const useSelection = create<AppState>()(
         useDefault: (script) => patch(script, ['ki'], ['a']),
         setStats: (stats) => set({ stats }),
         applySelection: (s) => set({ ...s }),
+        resetOnLogout: () =>
+          set({
+            script: 'hiragana',
+            mode: 'char',
+            comp: false,
+            srsMode: false,
+            sel: { hiragana: [], katakana: [] },
+            selY: { hiragana: [], katakana: [] },
+            stats: {},
+          }),
         record: (id, correct) =>
           set((s) => {
             const cur = s.stats[id] ?? { ok: 0, no: 0, box: 1 }

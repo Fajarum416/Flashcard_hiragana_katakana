@@ -7,9 +7,16 @@ interface Props<T extends string> {
 
 export function Segmented<T extends string>({ label, value, options, onChange }: Props<T>) {
   return (
-    <div className="seg" role="group" aria-label={label}>
+    <div className="inline-flex shrink-0 bg-pill border border-line rounded-full p-0.5 sm:p-1" role="group" aria-label={label}>
       {options.map((o) => (
-        <button key={o.value} className={o.value === value ? 'on' : ''} onClick={() => onChange(o.value)}>
+        <button
+          key={o.value}
+          type="button"
+          className={`border-0 rounded-full cursor-pointer text-[13px] sm:text-[15px] font-medium px-3 py-1.5 sm:px-[22px] sm:py-2 whitespace-nowrap transition-colors ${
+            o.value === value ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+          }`}
+          onClick={() => onChange(o.value)}
+        >
           {o.text}
         </button>
       ))}

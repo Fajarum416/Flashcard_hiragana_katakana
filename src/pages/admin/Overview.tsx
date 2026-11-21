@@ -19,48 +19,51 @@ export default function AdminOverview() {
       })
   }, [])
 
-  if (loading) return <p className="dim" style={{ textAlign: 'center', padding: '40px 0' }}>Memuat ringkasan admin...</p>
-  if (error) return <p className="bad" style={{ color: 'var(--bad)', textAlign: 'center', padding: '40px 0' }}>Error: {error}</p>
+  if (loading) return <p className="text-muted text-[13px] text-center py-10">Memuat ringkasan admin...</p>
+  if (error) return <p className="text-bad text-center py-10">Error: {error}</p>
   if (!data) return null
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2>Dashboard Admin</h2>
-        <Link to="/admin/users" className="btn alt" style={{ fontSize: 13, padding: '8px 16px' }}>
+      <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
+        <h2 className="text-xl font-bold m-0">Dashboard Admin</h2>
+        <Link
+          to="/admin/users"
+          className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-[13px] px-4 py-2 no-underline cursor-pointer inline-block transition-all"
+        >
           Lihat Daftar Pengguna →
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 30 }}>
-        <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-          <small style={{ color: 'var(--muted)', display: 'block' }}>Total Pengguna</small>
-          <span style={{ fontSize: 32, fontWeight: 600 }}>{data.total_users}</span>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4 mb-[30px]">
+        <div className="bg-panel border border-line rounded-xl p-4">
+          <small className="text-muted block text-xs mb-1">Total Pengguna</small>
+          <span className="text-[32px] font-semibold">{data.total_users}</span>
         </div>
-        <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-          <small style={{ color: 'var(--muted)', display: 'block' }}>Pengguna Aktif Harian (DAU 24j)</small>
-          <span style={{ fontSize: 32, fontWeight: 600, color: 'var(--accent)' }}>{data.dau}</span>
+        <div className="bg-panel border border-line rounded-xl p-4">
+          <small className="text-muted block text-xs mb-1">Pengguna Aktif Harian (DAU 24j)</small>
+          <span className="text-[32px] font-semibold text-accent">{data.dau}</span>
         </div>
-        <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 16 }}>
-          <small style={{ color: 'var(--muted)', display: 'block' }}>Pengguna Aktif Mingguan (WAU 7h)</small>
-          <span style={{ fontSize: 32, fontWeight: 600, color: 'var(--ok)' }}>{data.wau}</span>
+        <div className="bg-panel border border-line rounded-xl p-4">
+          <small className="text-muted block text-xs mb-1">Pengguna Aktif Mingguan (WAU 7h)</small>
+          <span className="text-[32px] font-semibold text-ok">{data.wau}</span>
         </div>
       </div>
 
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 20 }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: 16 }}>Huruf Paling Sering Salah (Top 10 Kesalahan Global)</h3>
+      <div className="bg-panel border border-line rounded-xl p-5">
+        <h3 className="m-0 mb-4 text-base font-semibold">Huruf Paling Sering Salah (Top 10 Kesalahan Global)</h3>
         {data.top_mistakes.length === 0 ? (
-          <p className="dim">Belum ada data kesalahan yang tercatat.</p>
+          <p className="text-muted text-[13px]">Belum ada data kesalahan yang tercatat.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--line)', color: 'var(--muted)' }}>
-                  <th style={{ padding: '8px 12px' }}>Aksara / Huruf</th>
-                  <th style={{ padding: '8px 12px' }}>ID Kartu</th>
-                  <th style={{ padding: '8px 12px' }}>Jumlah Salah</th>
-                  <th style={{ padding: '8px 12px' }}>Jumlah Benar</th>
-                  <th style={{ padding: '8px 12px' }}>Rasio Salah</th>
+                <tr className="border-b border-line text-muted">
+                  <th className="py-2 px-3">Aksara / Huruf</th>
+                  <th className="py-2 px-3">ID Kartu</th>
+                  <th className="py-2 px-3">Jumlah Salah</th>
+                  <th className="py-2 px-3">Jumlah Benar</th>
+                  <th className="py-2 px-3">Rasio Salah</th>
                 </tr>
               </thead>
               <tbody>
@@ -69,15 +72,15 @@ export default function AdminOverview() {
                   const total = m.wrong + m.correct
                   const pct = total > 0 ? Math.round((m.wrong / total) * 100) : 0
                   return (
-                    <tr key={m.kana_id} style={{ borderBottom: '1px solid var(--line)' }}>
-                      <td style={{ padding: '10px 12px' }}>
-                        <strong className="jp" style={{ fontSize: 20, marginRight: 8 }}>{char}</strong>
-                        <span style={{ color: 'var(--muted)', fontSize: 12 }}>({sc})</span>
+                    <tr key={m.kana_id} className="border-b border-line">
+                      <td className="py-2.5 px-3">
+                        <strong className="jp text-xl mr-2">{char}</strong>
+                        <span className="text-muted text-xs">({sc})</span>
                       </td>
-                      <td style={{ padding: '10px 12px', color: 'var(--muted)' }}>{m.kana_id}</td>
-                      <td style={{ padding: '10px 12px', color: 'var(--bad)', fontWeight: 600 }}>{m.wrong}</td>
-                      <td style={{ padding: '10px 12px', color: 'var(--ok)' }}>{m.correct}</td>
-                      <td style={{ padding: '10px 12px' }}>{pct}%</td>
+                      <td className="py-2.5 px-3 text-muted">{m.kana_id}</td>
+                      <td className="py-2.5 px-3 text-bad font-semibold">{m.wrong}</td>
+                      <td className="py-2.5 px-3 text-ok">{m.correct}</td>
+                      <td className="py-2.5 px-3">{pct}%</td>
                     </tr>
                   )
                 })}

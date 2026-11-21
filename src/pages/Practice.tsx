@@ -45,7 +45,7 @@ function reducer(s: PState, a: Act): PState {
     case 'good':
       return { ...s, lock: true, cls: 'ok', ok: s.wrong ? s.ok : s.ok + 1 }
     case 'reveal':
-      return { ...markBad(s), rev: true }
+      return { ...markBad(s), rev: !s.rev }
     case 'next':
       return { ...s, i: s.i + 1, wrong: false, rev: false, lock: false, cls: '', value: '' }
     case 'reset':
@@ -90,21 +90,20 @@ function Session({ script }: { script: Script }) {
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
   useEffect(() => {
-    if (!s.rev) inputRef.current?.focus()
+    inputRef.current?.focus()
   }, [s.i, s.rev])
 
   const stat = (correct: boolean) => {
     if (!s.wrong && card?.id) void recordAnswer(card.id, correct)
   }
   const check = (value: string, enter: boolean) => {
-    if (done || s.rev || s.lock) return
+    if (done || s.lock) return
     const v = norm(value)
     const a = norm(card.ans)
     if (!v) return
     if (v === a) {
       stat(true)
       dispatch({ t: 'good' })
-      playKana(card.front)
       timer.current = window.setTimeout(() => dispatch({ t: 'next' }), 320)
     } else if (enter || (card.kind === 'single' && v.length >= a.length)) {
       stat(false)
@@ -113,10 +112,8 @@ function Session({ script }: { script: Script }) {
   }
   const reveal = () => {
     if (done || s.lock) return
-    if (s.rev) return dispatch({ t: 'next' })
     stat(false)
     dispatch({ t: 'reveal' })
-    playKana(card.front)
   }
 
   useEffect(() => {
@@ -126,8 +123,7 @@ function Session({ script }: { script: Script }) {
         reveal()
       } else if (e.key === 'Enter') {
         e.preventDefault()
-        if (s.rev) dispatch({ t: 'next' })
-        else check(s.value, true)
+        check(s.value, true)
       }
     }
     document.addEventListener('keydown', onKey)
@@ -139,39 +135,24 @@ function Session({ script }: { script: Script }) {
   if (!s.q.length) {
     const word = useSelection.getState().mode === 'word'
     return (
-      <div className="empty">
-        <p>
+      <div className="flex flex-col items-center justify-center py-28 md:py-48 lg:py-64 text-center text-muted">
+        <p className="mb-5 text-base">
           {word ? 'No words match the selected columns.' : 'No columns selected.'}
           <br />
           Pick columns on Home, or start with the a-column.
         </p>
-        <Link className="btn" to={backUrl} onClick={() => useSelection.getState().useDefault(script)}>
-          Use the a-column
-        </Link>{' '}
-        <Link className="btn alt" to={backUrl}>
-          Kembali ke Daftar
-        </Link>
-      </div>
-    )
-  }
-
-  if (done) {
-    return (
-      <div className="sum">
-        <h2>{accuracy(s.ok, s.q.length)}%</h2>
-        <p className="dim">
-          {s.ok} correct on first try, {s.bad} incorrect, {s.q.length} cards
-        </p>
-        <div className="row">
-          <button className="btn" onClick={() => dispatch({ t: 'reset', q: makeDeck(script) })}>
-            Restart
-          </button>
-          {s.mist.length > 0 && (
-            <button className="btn alt" onClick={() => dispatch({ t: 'reset', q: shuffle(s.mist) })}>
-              Retry mistakes ({s.mist.length})
-            </button>
-          )}
-          <Link className="btn alt" to={backUrl}>
+        <div className="flex justify-center gap-3 flex-wrap">
+          <Link
+            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all"
+            to={backUrl}
+            onClick={() => useSelection.getState().useDefault(script)}
+          >
+            Use the a-column
+          </Link>
+          <Link
+            className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all"
+            to={backUrl}
+          >
             Kembali ke Daftar
           </Link>
         </div>
@@ -179,56 +160,138 @@ function Session({ script }: { script: Script }) {
     )
   }
 
+  if (done) {
+    return (
+      <div className="flex flex-col items-center justify-center py-28 md:py-48 lg:py-64 text-center">
+        <h2 className="text-[64px] md:text-[80px] leading-none m-0 font-light">{accuracy(s.ok, s.q.length)}%</h2>
+        <p className="text-muted text-sm md:text-base mt-3 mb-6">
+          {s.ok} correct on first try, {s.bad} incorrect, {s.q.length} cards
+        </p>
+        <div className="flex gap-3 justify-center flex-wrap">
+          <button
+            type="button"
+            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-sm md:text-[15px] px-7 py-3 cursor-pointer inline-block transition-all"
+            onClick={() => dispatch({ t: 'reset', q: makeDeck(script) })}
+          >
+            Restart
+          </button>
+          {s.mist.length > 0 && (
+            <button
+              type="button"
+              className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-sm md:text-[15px] px-7 py-3 cursor-pointer inline-block transition-all"
+              onClick={() => dispatch({ t: 'reset', q: shuffle(s.mist) })}
+            >
+              Retry mistakes ({s.mist.length})
+            </button>
+          )}
+          <Link
+            className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-sm md:text-[15px] px-7 py-3 no-underline cursor-pointer inline-block transition-all"
+            to={backUrl}
+          >
+            Kembali ke Daftar
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const kanaSizeClass =
+    card.kind === 'comp'
+      ? 'font-light text-[clamp(110px,16vh,180px)] leading-none'
+      : card.kind === 'word'
+        ? 'font-medium text-[clamp(74px,11vh,125px)] leading-none'
+        : 'font-light text-[clamp(130px,18vh,210px)] leading-none'
+
+  const inpBorderClass =
+    s.cls === 'ok'
+      ? 'border-ok shadow-[0_0_0_2px_var(--ok)]'
+      : s.cls === 'bad'
+        ? 'border-bad shadow-[0_0_0_2px_var(--bad)] animate-[sh_0.3s]'
+        : 'border-line'
+
   return (
-    <div className="practice">
-      <div className="stage">
+    <div className="flex flex-col justify-between p-0 w-full">
+      <div className="flex flex-col items-center justify-center gap-3 py-24 md:py-40 lg:py-52 text-center">
         {card.id && (
-          <div style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--pill)', padding: '2px 10px', borderRadius: 999 }}>
+          <div className="text-xs text-muted bg-pill px-2.5 py-0.5 rounded-full">
             Kotak Hafalan: Box {getBox(useSelection.getState().stats[card.id])} / 5
           </div>
         )}
-        <div className={`big jp ${card.kind === 'single' ? '' : card.kind}`}>{card.front}</div>
-        <div className="ans">{s.rev ? card.ans : ''}</div>
-        <div className="note">{s.rev ? card.note : ''}</div>
+        <div className="[perspective:1000px] w-full flex justify-center">
+          <div
+            key={s.i}
+            className={`grid [grid-template-areas:'stack'] place-items-center transition-transform duration-500 [transform-style:preserve-3d] ${
+              s.rev ? '[transform:rotateY(180deg)]' : ''
+            }`}
+          >
+            <div className="[grid-area:stack] [backface-visibility:hidden] flex flex-col items-center justify-center">
+              <div className={`jp ${kanaSizeClass}`}>{card.front}</div>
+            </div>
+            <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center">
+              <div
+                className={
+                  card.kind === 'word'
+                    ? 'font-medium text-[clamp(56px,9vh,105px)] text-accent leading-tight'
+                    : 'font-light text-[clamp(110px,16vh,190px)] text-accent leading-none'
+                }
+              >
+                {card.ans}
+              </div>
+              {card.note && <div className="text-muted text-base md:text-lg mt-2">{card.note}</div>}
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="foot">
-        <div className="stats">
-          <div>
-            <small>Accuracy</small>
-            <span>{accuracy(s.ok, s.i)}%</span>
+      <div className="grid grid-cols-1 min-[481px]:grid-cols-[1fr_auto] gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 border-t border-line pt-5 md:pt-6 shrink-0 w-full">
+        <div className="flex items-center border border-line rounded-full bg-pill/40 py-2 px-1 w-full justify-between min-[481px]:col-span-2 md:col-span-1 md:w-auto md:justify-self-start">
+          <div className="flex-1 min-w-0 px-3 py-0.5 text-center md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+            <small className="block text-muted text-[11px] font-normal mb-0.5">
+              Accuracy
+            </small>
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">{accuracy(s.ok, s.i)}%</span>
           </div>
-          <div>
-            <small>Remaining</small>
-            <span>{s.q.length - s.i}</span>
+          <div className="flex-1 min-w-0 px-3 py-0.5 text-center border-l border-line md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+            <small className="block text-muted text-[11px] font-normal mb-0.5">
+              Remaining
+            </small>
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">{s.q.length - s.i}</span>
           </div>
-          <div>
-            <small>Incorrect</small>
-            <span>
+          <div className="flex-1 min-w-0 px-3 py-0.5 text-center border-l border-line md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+            <small className="block text-muted text-[11px] font-normal mb-0.5">
+              Incorrect
+            </small>
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">
               {s.bad} / {s.q.length}
             </span>
           </div>
         </div>
         <input
           ref={inputRef}
-          className={`inp ${s.cls}`}
+          className={`w-full min-w-0 h-[50px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[56px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted ${inpBorderClass}`}
           value={s.value}
           placeholder="type romaji"
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
-          disabled={s.rev}
+          disabled={s.lock}
           aria-label="Type romaji"
           onChange={(e) => {
             dispatch({ t: 'type', v: e.target.value })
             check(e.target.value, false)
           }}
         />
-        <div className="rev">
-          <button className="btn alt" onClick={reveal}>
-            {s.rev ? 'Next' : 'Reveal Answer'}
+        <div className="flex flex-col items-center justify-center text-center md:justify-self-end">
+          <button
+            type="button"
+            className="w-full min-[481px]:w-auto h-[46px] px-7 md:px-8 text-[15px] whitespace-nowrap border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-medium cursor-pointer inline-flex items-center justify-center transition-all"
+            onClick={reveal}
+          >
+            Reveal Answer
           </button>
-          <small>“Space Bar” for {s.rev ? 'next' : 'answer'}</small>
+          <small className="hidden md:block text-muted text-[11px] mt-1.5">
+            “Space Bar” for answer
+          </small>
         </div>
       </div>
     </div>
@@ -242,8 +305,8 @@ export default function Practice() {
   if (script !== 'hiragana' && script !== 'katakana') return <Navigate to="/" replace />
   return (
     <>
-      <div className="top">
-        <h1>{scriptTitle(script)}</h1>
+      <div className="flex flex-wrap items-center gap-5 pt-4 pb-5 mb-2 shrink-0">
+        <h1 className="m-0 mr-1 text-[26px] font-bold">{scriptTitle(script)}</h1>
         <TypeStyleSwitches mode={mode} />
       </div>
       <Session key={`${script}-${mode}-${comp}`} script={script} />

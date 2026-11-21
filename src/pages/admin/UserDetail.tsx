@@ -5,12 +5,32 @@ import { fetchUserDetail, resetProgress, setDisabled, type UserDetail } from '..
 import { masteryLevel, streak, type Level } from '../../lib/mastery'
 import { useAuth } from '../../store/useAuth'
 
-const LEVEL_COLORS: Record<Level, { bg: string; text: string; label: string }> = {
-  none: { bg: 'var(--pill)', text: 'var(--muted)', label: 'Belum dipelajari' },
-  weak: { bg: 'rgba(240, 131, 111, 0.25)', text: 'var(--bad)', label: 'Lemah (<60%)' },
-  learning: { bg: 'rgba(235, 185, 80, 0.25)', text: '#e6a23c', label: 'Belajar (Box 1-2)' },
-  almost: { bg: 'rgba(138, 167, 255, 0.25)', text: 'var(--accent)', label: 'Hampir (Box 3)' },
-  mastered: { bg: 'rgba(94, 196, 154, 0.25)', text: 'var(--ok)', label: 'Hafal (Box 4-5, ≥80%)' },
+const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: string }> = {
+  none: {
+    boxClass: 'bg-pill border-muted',
+    textClass: 'text-muted',
+    label: 'Belum dipelajari',
+  },
+  weak: {
+    boxClass: 'bg-[rgba(240,131,111,0.25)] border-bad',
+    textClass: 'text-bad',
+    label: 'Lemah (<60%)',
+  },
+  learning: {
+    boxClass: 'bg-[rgba(235,185,80,0.25)] border-[#e6a23c]',
+    textClass: 'text-[#e6a23c]',
+    label: 'Belajar (Box 1-2)',
+  },
+  almost: {
+    boxClass: 'bg-[rgba(138,167,255,0.25)] border-accent',
+    textClass: 'text-accent',
+    label: 'Hampir (Box 3)',
+  },
+  mastered: {
+    boxClass: 'bg-[rgba(94,196,154,0.25)] border-ok',
+    textClass: 'text-ok',
+    label: 'Hafal (Box 4-5, ≥80%)',
+  },
 }
 
 export default function AdminUserDetail() {
@@ -20,6 +40,12 @@ export default function AdminUserDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Script>('hiragana')
+  const [modalMsg, setModalMsg] = useState('')
+
+  const showNotice = (m: string) => {
+    setModalMsg(m)
+    ;(document.getElementById('admin_notice_modal') as HTMLDialogElement | null)?.showModal()
+  }
 
   const load = () => {
     if (!id) return
@@ -39,69 +65,89 @@ export default function AdminUserDetail() {
     load()
   }, [id])
 
-  if (loading) return <p className="dim" style={{ textAlign: 'center', padding: '40px 0' }}>Memuat data pengguna...</p>
-  if (error || !data) return <p className="bad" style={{ color: 'var(--bad)', textAlign: 'center', padding: '40px 0' }}>Error: {error || 'Pengguna tidak ditemukan'}</p>
+  if (loading) return <p className="text-muted text-[13px] text-center py-10">Memuat data pengguna...</p>
+  if (error || !data) {
+    return <p className="text-bad text-center py-10">Error: {error || 'Pengguna tidak ditemukan'}</p>
+  }
 
   const { profile, progress, sessions } = data
   const userStreak = streak(sessions.map((s) => s.started_at))
   const isSelf = currentUser?.id === profile.id
 
   const handleReset = async () => {
-    if (!window.confirm(`Yakin ingin mereset seluruh progres hafalan untuk ${profile.display_name || profile.email}?`)) return
+    ;(document.getElementById('reset_confirm_modal') as HTMLDialogElement | null)?.close()
     try {
       await resetProgress(profile.id)
-      alert('Progres berhasil direset.')
+      showNotice('Progres berhasil direset.')
       load()
     } catch (err: any) {
-      alert(`Gagal mereset: ${err.message}`)
+      showNotice(`Gagal mereset: ${err.message}`)
     }
   }
 
   const handleToggleDisabled = async () => {
+    ;(document.getElementById('status_confirm_modal') as HTMLDialogElement | null)?.close()
     const action = profile.disabled ? 'mengaktifkan' : 'menonaktifkan'
-    if (!window.confirm(`Yakin ingin ${action} akun ${profile.display_name || profile.email}?`)) return
     try {
       await setDisabled(profile.id, !profile.disabled)
-      alert(`Akun berhasil di-${action}.`)
+      showNotice(`Akun berhasil di-${action}.`)
       load()
     } catch (err: any) {
-      alert(`Gagal: ${err.message}`)
+      showNotice(`Gagal: ${err.message}`)
     }
   }
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
-        <Link to="/admin/users" className="link">← Kembali ke Daftar Pengguna</Link>
+      <div className="mb-4">
+        <Link to="/admin/users" className="text-muted text-[13px] underline hover:text-ink">
+          ← Kembali ke Daftar Pengguna
+        </Link>
       </div>
 
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+      <div className="bg-panel border border-line rounded-xl p-5 mb-6">
+        <div className="flex justify-between items-start flex-wrap gap-4">
           <div>
-            <h2 style={{ margin: '0 0 6px 0' }}>{profile.display_name || 'Tanpa Nama'}</h2>
-            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 8 }}>{profile.email} • ID: {profile.id}</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, background: profile.role === 'admin' ? 'var(--accent)' : 'var(--pill)', color: profile.role === 'admin' ? '#fff' : 'var(--muted)' }}>
+            <h2 className="m-0 mb-1.5 text-xl font-bold">{profile.display_name || 'Tanpa Nama'}</h2>
+            <div className="text-muted text-[13px] mb-2">
+              {profile.email} • ID: {profile.id}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full ${
+                  profile.role === 'admin' ? 'bg-accent text-white' : 'bg-pill text-muted'
+                }`}
+              >
                 Role: {profile.role}
               </span>
-              <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, background: profile.disabled ? 'var(--bad)' : 'var(--ok)', color: '#fff' }}>
+              <span
+                className={`text-xs px-2 py-0.5 rounded-full text-white ${
+                  profile.disabled ? 'bg-bad' : 'bg-ok'
+                }`}
+              >
                 Status: {profile.disabled ? 'Nonaktif' : 'Aktif'}
               </span>
-              <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 999, background: 'var(--pill)', color: 'var(--ink)' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-pill text-ink">
                 🔥 Streak: {userStreak} hari
               </span>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn alt" style={{ fontSize: 12, padding: '8px 14px' }} onClick={handleReset}>
+          <div className="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-xs px-3.5 py-2 cursor-pointer transition-all"
+              onClick={() => (document.getElementById('reset_confirm_modal') as HTMLDialogElement | null)?.showModal()}
+            >
               🔄 Reset Progres
             </button>
             {!isSelf && (
               <button
-                className="btn alt"
-                style={{ fontSize: 12, padding: '8px 14px', color: profile.disabled ? 'var(--ok)' : 'var(--bad)' }}
-                onClick={handleToggleDisabled}
+                type="button"
+                className={`border-0 rounded-full bg-pill hover:bg-pill-on font-semibold text-xs px-3.5 py-2 cursor-pointer transition-all ${
+                  profile.disabled ? 'text-ok' : 'text-bad'
+                }`}
+                onClick={() => (document.getElementById('status_confirm_modal') as HTMLDialogElement | null)?.showModal()}
               >
                 {profile.disabled ? 'Aktifkan Akun' : 'Nonaktifkan Akun'}
               </button>
@@ -111,60 +157,70 @@ export default function AdminUserDetail() {
       </div>
 
       {/* Heatmap Section */}
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+      <div className="bg-panel border border-line rounded-xl p-5 mb-6">
+        <div className="flex justify-between items-center flex-wrap gap-3 mb-4">
           <div>
-            <h3 style={{ margin: 0, fontSize: 16 }}>Heatmap Hafalan Karakter</h3>
-            <p className="dim" style={{ margin: '4px 0 0 0', fontSize: 12 }}>Status hafalan tiap huruf berdasarkan tingkat akurasi & Leitner Box.</p>
+            <h3 className="m-0 text-base font-semibold">Heatmap Hafalan Karakter</h3>
+            <p className="text-muted text-xs mt-1 mb-0">
+              Status hafalan tiap huruf berdasarkan tingkat akurasi & Leitner Box.
+            </p>
           </div>
-          <div className="seg" role="group">
-            <button className={activeTab === 'hiragana' ? 'on' : ''} onClick={() => setActiveTab('hiragana')}>Hiragana</button>
-            <button className={activeTab === 'katakana' ? 'on' : ''} onClick={() => setActiveTab('katakana')}>Katakana</button>
+          <div className="inline-flex bg-pill border border-line rounded-full p-1" role="group">
+            <button
+              type="button"
+              className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
+                activeTab === 'hiragana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+              }`}
+              onClick={() => setActiveTab('hiragana')}
+            >
+              Hiragana
+            </button>
+            <button
+              type="button"
+              className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
+                activeTab === 'katakana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+              }`}
+              onClick={() => setActiveTab('katakana')}
+            >
+              Katakana
+            </button>
           </div>
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20, fontSize: 12 }}>
-          {Object.entries(LEVEL_COLORS).map(([key, val]) => (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 14, height: 14, borderRadius: 3, background: val.bg, border: `1px solid ${val.text}` }} />
-              <span style={{ color: 'var(--muted)' }}>{val.label}</span>
+        <div className="flex gap-3 flex-wrap mb-5 text-xs">
+          {Object.entries(LEVEL_STYLES).map(([key, val]) => (
+            <div key={key} className="flex items-center gap-1.5">
+              <div className={`w-3.5 h-3.5 rounded-[3px] border ${val.boxClass}`} />
+              <span className="text-muted">{val.label}</span>
             </div>
           ))}
         </div>
 
         {/* Gojuon Heatmap */}
-        <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: 'var(--muted)' }}>Single (Gojūon & Dakuten - 71 Huruf)</h4>
-        <div style={{ overflowX: 'auto', paddingBottom: 12, marginBottom: 20 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(16, minmax(48px, 1fr))', gap: 6, minWidth: 800 }}>
+        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Single (Gojūon & Dakuten - 71 Huruf)</h4>
+        <div className="overflow-x-auto pb-3 mb-5">
+          <div className="grid grid-cols-[repeat(16,minmax(48px,1fr))] gap-1.5 min-w-[800px]">
             {COL_IDS.map((id) => (
-              <div key={id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--muted)' }}>{id}</div>
+              <div key={id} className="flex flex-col gap-1.5">
+                <div className="text-center text-[11px] text-muted">{id}</div>
                 {TABLE[activeTab][id].map((cell, idx) => {
-                  if (!cell) return <div key={idx} style={{ height: 48, background: 'transparent' }} />
+                  if (!cell) return <div key={idx} className="h-12 bg-transparent" />
                   const key = `${activeTab}:${cell.k}`
                   const stat = progress.get(key)
                   const level = masteryLevel(stat)
-                  const style = LEVEL_COLORS[level]
-                  const title = stat ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}` : `${cell.k} (${cell.r}) - Belum dicoba`
+                  const st = LEVEL_STYLES[level]
+                  const title = stat
+                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                    : `${cell.k} (${cell.r}) - Belum dicoba`
                   return (
                     <div
                       key={cell.k}
                       title={title}
-                      style={{
-                        height: 48,
-                        borderRadius: 6,
-                        background: style.bg,
-                        border: `1px solid ${style.text}`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'default',
-                      }}
+                      className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                     >
-                      <span className="jp" style={{ fontSize: 18, fontWeight: 500, color: style.text }}>{cell.k}</span>
-                      <small style={{ fontSize: 9, color: 'var(--muted)' }}>{cell.r}</small>
+                      <span className={`jp text-lg font-medium ${st.textClass}`}>{cell.k}</span>
+                      <small className="text-[9px] text-muted">{cell.r}</small>
                     </div>
                   )
                 })}
@@ -174,36 +230,28 @@ export default function AdminUserDetail() {
         </div>
 
         {/* Yoon Heatmap */}
-        <h4 style={{ margin: '0 0 10px 0', fontSize: 14, color: 'var(--muted)' }}>Composite (Yōon - 33 Huruf)</h4>
-        <div style={{ overflowX: 'auto', paddingBottom: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(11, minmax(64px, 1fr))', gap: 6, minWidth: 700 }}>
+        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Composite (Yōon - 33 Huruf)</h4>
+        <div className="overflow-x-auto pb-3">
+          <div className="grid grid-cols-[repeat(11,minmax(64px,1fr))] gap-1.5 min-w-[700px]">
             {YOON_IDS.map((id) => (
-              <div key={id} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--muted)' }}>{id}</div>
+              <div key={id} className="flex flex-col gap-1.5">
+                <div className="text-center text-[11px] text-muted">{id}</div>
                 {YOON_TABLE[activeTab][id].map((cell) => {
                   const key = `${activeTab}:${cell.k}`
                   const stat = progress.get(key)
                   const level = masteryLevel(stat)
-                  const style = LEVEL_COLORS[level]
-                  const title = stat ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}` : `${cell.k} (${cell.r}) - Belum dicoba`
+                  const st = LEVEL_STYLES[level]
+                  const title = stat
+                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                    : `${cell.k} (${cell.r}) - Belum dicoba`
                   return (
                     <div
                       key={cell.k}
                       title={title}
-                      style={{
-                        height: 48,
-                        borderRadius: 6,
-                        background: style.bg,
-                        border: `1px solid ${style.text}`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'default',
-                      }}
+                      className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                     >
-                      <span className="jp" style={{ fontSize: 16, fontWeight: 500, color: style.text }}>{cell.k}</span>
-                      <small style={{ fontSize: 9, color: 'var(--muted)' }}>{cell.r}</small>
+                      <span className={`jp text-base font-medium ${st.textClass}`}>{cell.k}</span>
+                      <small className="text-[9px] text-muted">{cell.r}</small>
                     </div>
                   )
                 })}
@@ -214,36 +262,40 @@ export default function AdminUserDetail() {
       </div>
 
       {/* Session History */}
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, padding: 20 }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: 16 }}>Riwayat Sesi Latihan ({sessions.length})</h3>
+      <div className="bg-panel border border-line rounded-xl p-5">
+        <h3 className="m-0 mb-4 text-base font-semibold">Riwayat Sesi Latihan ({sessions.length})</h3>
         {sessions.length === 0 ? (
-          <p className="dim">Belum ada riwayat sesi latihan.</p>
+          <p className="text-muted text-[13px]">Belum ada riwayat sesi latihan.</p>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+          <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+            <table className="table">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--line)', color: 'var(--muted)' }}>
-                  <th style={{ padding: '8px 12px' }}>Waktu Sesi</th>
-                  <th style={{ padding: '8px 12px' }}>Aksara</th>
-                  <th style={{ padding: '8px 12px' }}>Mode</th>
-                  <th style={{ padding: '8px 12px' }}>Total Kartu</th>
-                  <th style={{ padding: '8px 12px' }}>Benar</th>
-                  <th style={{ padding: '8px 12px' }}>Akurasi</th>
-                  <th style={{ padding: '8px 12px' }}>Durasi</th>
+                <tr>
+                  <th></th>
+                  <th>Waktu Sesi</th>
+                  <th>Aksara</th>
+                  <th>Mode</th>
+                  <th>Total Kartu</th>
+                  <th>Benar</th>
+                  <th>Akurasi</th>
+                  <th>Durasi</th>
                 </tr>
               </thead>
               <tbody>
-                {sessions.map((s) => {
+                {sessions.map((s, idx) => {
                   const acc = s.total_cards > 0 ? Math.round((s.correct_cards / s.total_cards) * 100) : 0
                   return (
-                    <tr key={s.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                      <td style={{ padding: '10px 12px' }}>{new Date(s.started_at).toLocaleString()}</td>
-                      <td style={{ padding: '10px 12px', textTransform: 'capitalize' }}>{s.script}</td>
-                      <td style={{ padding: '10px 12px' }}>{s.mode === 'char' ? 'Characters' : 'Words'} {s.composite ? '(Comp)' : '(Single)'}</td>
-                      <td style={{ padding: '10px 12px' }}>{s.total_cards}</td>
-                      <td style={{ padding: '10px 12px', color: 'var(--ok)' }}>{s.correct_cards}</td>
-                      <td style={{ padding: '10px 12px', fontWeight: 600 }}>{acc}%</td>
-                      <td style={{ padding: '10px 12px', color: 'var(--muted)' }}>{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
+                    <tr key={s.id}>
+                      <th>{idx + 1}</th>
+                      <td>{new Date(s.started_at).toLocaleString()}</td>
+                      <td className="capitalize">{s.script}</td>
+                      <td>
+                        {s.mode === 'char' ? 'Characters' : 'Words'} {s.composite ? '(Comp)' : '(Single)'}
+                      </td>
+                      <td>{s.total_cards}</td>
+                      <td className="text-ok">{s.correct_cards}</td>
+                      <td className="font-semibold">{acc}%</td>
+                      <td className="text-muted">{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
                     </tr>
                   )
                 })}
@@ -252,6 +304,56 @@ export default function AdminUserDetail() {
           </div>
         )}
       </div>
+
+      <dialog id="reset_confirm_modal" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Reset Progres Hafalan?</h3>
+          <p className="py-4">
+            Yakin ingin mereset seluruh progres hafalan untuk {profile.display_name || profile.email}?
+          </p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2">
+              <button className="btn">Close</button>
+              <button type="button" className="btn btn-error text-white" onClick={() => void handleReset()}>
+                Reset Progres
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog id="status_confirm_modal" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">{profile.disabled ? 'Aktifkan Akun?' : 'Nonaktifkan Akun?'}</h3>
+          <p className="py-4">
+            Yakin ingin {profile.disabled ? 'mengaktifkan' : 'menonaktifkan'} akun {profile.display_name || profile.email}?
+          </p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-2">
+              <button className="btn">Close</button>
+              <button
+                type="button"
+                className={`btn text-white ${profile.disabled ? 'btn-success' : 'btn-error'}`}
+                onClick={() => void handleToggleDisabled()}
+              >
+                {profile.disabled ? 'Aktifkan' : 'Nonaktifkan'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog id="admin_notice_modal" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Informasi</h3>
+          <p className="py-4">{modalMsg}</p>
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn">Close</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   )
 }

@@ -12,7 +12,7 @@ export function TypeStyleSwitches({
   const setComp = useSelection((s) => s.setComp)
   const setMode = useSelection((s) => s.setMode)
   return (
-    <>
+    <div className="flex flex-nowrap items-center gap-2 sm:gap-4 max-w-full">
       <Segmented
         label="Type"
         value={mode}
@@ -34,17 +34,17 @@ export function TypeStyleSwitches({
           { value: 'comp', text: 'Composite' },
         ]}
       />
-    </>
+    </div>
   )
 }
 
 export const scriptTitle = (sc: 'hiragana' | 'katakana') =>
   sc === 'hiragana' ? (
     <>
-      Hiragana Practice <span className="jp">ひらがな</span>
+      Hiragana Practice <span className="jp text-muted font-normal ml-2.5 text-[22px]">ひらがな</span>
     </>
   ) : (
     <>
-      Katakana Practice <span className="jp">カタカナ</span>
+      Katakana Practice <span className="jp text-muted font-normal ml-2.5 text-[22px]">カタカナ</span>
     </>
   )

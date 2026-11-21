@@ -47,99 +47,100 @@ export default function AdminUsers() {
     downloadCsv(`kana_users_${new Date().toISOString().slice(0, 10)}.csv`, csv)
   }
 
-  if (loading) return <p className="dim" style={{ textAlign: 'center', padding: '40px 0' }}>Memuat daftar pengguna...</p>
-  if (error) return <p className="bad" style={{ color: 'var(--bad)', textAlign: 'center', padding: '40px 0' }}>Error: {error}</p>
+  if (loading) return <p className="text-muted text-[13px] text-center py-10">Memuat daftar pengguna...</p>
+  if (error) return <p className="text-bad text-center py-10">Error: {error}</p>
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+      <div className="flex justify-between items-center flex-wrap gap-3 mb-5">
         <div>
-          <h2 style={{ margin: 0 }}>Daftar Pengguna ({users.length})</h2>
-          <p className="dim" style={{ margin: '4px 0 0 0' }}>Pantau progres belajar dan hafalan pengguna per aksara.</p>
+          <h2 className="m-0 text-xl font-bold">Daftar Pengguna ({users.length})</h2>
+          <p className="text-muted text-[13px] mt-1 mb-0">Pantau progres belajar dan hafalan pengguna per aksara.</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <button className="btn alt" style={{ fontSize: 13, padding: '8px 16px' }} onClick={handleExport}>
+        <div className="flex gap-2.5">
+          <button
+            type="button"
+            className="border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-[13px] px-4 py-2 cursor-pointer inline-block transition-all"
+            onClick={handleExport}
+          >
             📥 Ekspor CSV
           </button>
         </div>
       </div>
 
-      <div style={{ marginBottom: 16 }}>
+      <div className="mb-4">
         <input
-          className="inp"
-          style={{ height: 40, fontSize: 14, textAlign: 'left', maxWidth: 360, width: '100%' }}
+          className="w-full max-w-[360px] h-10 rounded-full border border-line bg-pill text-ink text-sm text-left px-5 placeholder:text-muted"
           placeholder="Cari nama, email, atau ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      <div style={{ background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: 12, overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 14 }}>
+      <div className="bg-panel border border-line rounded-xl overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--line)', color: 'var(--muted)' }}>
-              <th style={{ padding: '10px 14px' }}>Pengguna</th>
-              <th style={{ padding: '10px 14px' }}>Role</th>
-              <th style={{ padding: '10px 14px' }}>Hiragana (104)</th>
-              <th style={{ padding: '10px 14px' }}>Katakana (104)</th>
-              <th style={{ padding: '10px 14px' }}>Login Terakhir</th>
-              <th style={{ padding: '10px 14px' }}>Aksi</th>
+            <tr className="border-b border-line text-muted">
+              <th className="py-2.5 px-3.5">Pengguna</th>
+              <th className="py-2.5 px-3.5">Role</th>
+              <th className="py-2.5 px-3.5">Hiragana (104)</th>
+              <th className="py-2.5 px-3.5">Katakana (104)</th>
+              <th className="py-2.5 px-3.5">Login Terakhir</th>
+              <th className="py-2.5 px-3.5">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} style={{ padding: 24, textAlign: 'center', color: 'var(--muted)' }}>
+                <td colSpan={6} className="p-6 text-center text-muted">
                   Tidak ada pengguna yang cocok.
                 </td>
               </tr>
             ) : (
               filtered.map((u) => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--line)', opacity: u.disabled ? 0.6 : 1 }}>
-                  <td style={{ padding: '12px 14px' }}>
-                    <div style={{ fontWeight: 500 }}>{u.display_name || 'Tanpa Nama'}</div>
-                    <div style={{ color: 'var(--muted)', fontSize: 12 }}>{u.email || u.id}</div>
+                <tr key={u.id} className={`border-b border-line ${u.disabled ? 'opacity-60' : ''}`}>
+                  <td className="py-3 px-3.5">
+                    <div className="font-medium">{u.display_name || 'Tanpa Nama'}</div>
+                    <div className="text-muted text-xs">{u.email || u.id}</div>
                     {u.disabled && (
-                      <span style={{ fontSize: 11, background: 'var(--bad)', color: '#fff', padding: '1px 6px', borderRadius: 4 }}>
+                      <span className="text-[11px] bg-bad text-white px-1.5 py-0.5 rounded">
                         Nonaktif
                       </span>
                     )}
                   </td>
-                  <td style={{ padding: '12px 14px' }}>
+                  <td className="py-3 px-3.5">
                     <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: 999,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        background: u.role === 'admin' ? 'var(--accent)' : 'var(--pill)',
-                        color: u.role === 'admin' ? '#fff' : 'var(--muted)',
-                      }}
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                        u.role === 'admin' ? 'bg-accent text-white' : 'bg-pill text-muted'
+                      }`}
                     >
                       {u.role}
                     </span>
                   </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 80, height: 8, background: 'var(--pill)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${u.hiraganaPct}%`, height: '100%', background: 'var(--ok)' }} />
+                  <td className="py-3 px-3.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-pill rounded overflow-hidden">
+                        <div className="h-full bg-ok" style={{ width: `${u.hiraganaPct}%` }} />
                       </div>
-                      <span style={{ fontWeight: 500 }}>{u.hiraganaPct}%</span>
+                      <span className="font-medium">{u.hiraganaPct}%</span>
                     </div>
                   </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 80, height: 8, background: 'var(--pill)', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: `${u.katakanaPct}%`, height: '100%', background: 'var(--accent)' }} />
+                  <td className="py-3 px-3.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-pill rounded overflow-hidden">
+                        <div className="h-full bg-accent" style={{ width: `${u.katakanaPct}%` }} />
                       </div>
-                      <span style={{ fontWeight: 500 }}>{u.katakanaPct}%</span>
+                      <span className="font-medium">{u.katakanaPct}%</span>
                     </div>
                   </td>
-                  <td style={{ padding: '12px 14px', color: 'var(--muted)', fontSize: 13 }}>
+                  <td className="py-3 px-3.5 text-muted text-[13px]">
                     {u.last_login_at ? new Date(u.last_login_at).toLocaleDateString() : '-'}
                   </td>
-                  <td style={{ padding: '12px 14px' }}>
-                    <Link to={`/admin/users/${u.id}`} className="link" style={{ fontWeight: 500, color: 'var(--accent)' }}>
+                  <td className="py-3 px-3.5">
+                    <Link
+                      to={`/admin/users/${u.id}`}
+                      className="text-accent font-medium text-[13px] underline hover:opacity-80"
+                    >
                       Detail & Heatmap →
                     </Link>
                   </td>

@@ -6,14 +6,12 @@ export function InstallPrompt() {
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    // Check if already in standalone mode
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true
 
     if (isStandalone) return
 
-    // iOS detection
     const userAgent = window.navigator.userAgent.toLowerCase()
     const isIOS = /iphone|ipad|ipod/.test(userAgent)
 
@@ -24,7 +22,6 @@ export function InstallPrompt() {
       }
     }
 
-    // Android/Desktop Chrome install prompt
     const handler = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e)
@@ -53,29 +50,15 @@ export function InstallPrompt() {
 
   if (showIOS) {
     return (
-      <div
-        style={{
-          background: 'var(--panel)',
-          border: '1px solid var(--accent)',
-          borderRadius: 12,
-          padding: '12px 16px',
-          margin: '12px auto',
-          maxWidth: 1240,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          fontSize: 13,
-        }}
-      >
+      <div className="bg-panel border border-accent rounded-xl px-4 py-3 my-3 mx-auto max-w-[1240px] flex items-center justify-between gap-3 text-[13px]">
         <div>
           <strong>Install Kana Practice di iPhone/iPad:</strong> Ketuk tombol <strong>Share</strong>{' '}
-          <span style={{ fontSize: 16 }}>⎋</span> di Safari, lalu pilih <strong>Add to Home Screen</strong> [+] untuk
+          <span className="text-base">⎋</span> di Safari, lalu pilih <strong>Add to Home Screen</strong> [+] untuk
           akses offline cepat.
         </div>
         <button
-          className="link"
-          style={{ whiteSpace: 'nowrap', textDecoration: 'none', color: 'var(--accent)', fontWeight: 600 }}
+          type="button"
+          className="bg-transparent border-0 text-accent font-semibold text-[13px] cursor-pointer px-1.5 py-1 whitespace-nowrap hover:underline"
           onClick={dismissIOS}
         >
           Tutup ✕
@@ -86,27 +69,21 @@ export function InstallPrompt() {
 
   if (deferredPrompt) {
     return (
-      <div
-        style={{
-          background: 'var(--panel)',
-          border: '1px solid var(--line)',
-          borderRadius: 12,
-          padding: '10px 16px',
-          margin: '12px auto',
-          maxWidth: 1240,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          fontSize: 13,
-        }}
-      >
+      <div className="bg-panel border border-line rounded-xl px-4 py-2.5 my-3 mx-auto max-w-[1240px] flex items-center justify-between gap-3 text-[13px]">
         <div>Pasang Kana Practice sebagai aplikasi untuk latihan offline yang lancar.</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn" style={{ padding: '6px 14px', fontSize: 12 }} onClick={handleInstallClick}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-xs px-3.5 py-1.5 cursor-pointer transition-all"
+            onClick={handleInstallClick}
+          >
             Install App
           </button>
-          <button className="link" onClick={() => setDeferredPrompt(null)}>
+          <button
+            type="button"
+            className="bg-transparent border-0 text-muted text-[13px] cursor-pointer px-1.5 py-1 underline hover:text-ink"
+            onClick={() => setDeferredPrompt(null)}
+          >
             Nanti
           </button>
         </div>
