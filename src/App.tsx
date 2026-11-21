@@ -55,8 +55,8 @@ function AppContent() {
 
   return (
     <>
-      <header className="sticky top-0 z-50">
-        <div className="navbar bg-base-100 shadow-sm px-4 justify-between">
+      <header className="sticky top-0 z-50 bg-base-100 shadow-sm border-b border-base-200">
+        <div className="navbar max-w-[1240px] mx-auto px-6 justify-between">
           {/* Navbar Start: Brand & Mobile Menu Button */}
           <div className="navbar-start gap-2">
             <button
