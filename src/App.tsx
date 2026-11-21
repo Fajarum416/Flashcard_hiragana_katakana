@@ -56,7 +56,7 @@ function AppContent() {
   return (
     <>
       <header className="sticky top-0 z-50 bg-base-100/95 backdrop-blur border-b border-base-300">
-        <div className="navbar max-w-[1440px] mx-auto px-4 md:px-8 justify-between">
+        <div className="navbar max-w-[1520px] mx-auto px-6 md:px-12 lg:px-16 justify-between">
           {/* Navbar Start: Brand & Mobile Menu Button */}
           <div className="navbar-start w-auto gap-2">
             <div className="dropdown lg:hidden">
