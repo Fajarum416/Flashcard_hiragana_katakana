@@ -134,79 +134,60 @@ function AppContent() {
             </ul>
           </div>
 
-          {/* Navbar End: Profile / Auth */}
-          <div className="navbar-end gap-2">
-            {user ? (
-              <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                  <div className="w-10 rounded-full">
-                    <img
-                      alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
-                      src={
-                        user.user_metadata?.avatar_url ||
-                        user.user_metadata?.picture ||
-                        `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
-                      }
-                    />
-                  </div>
+          {/* Navbar End: Profile */}
+          <div className="navbar-end">
+            <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                <div className="w-10 rounded-full">
+                  <img
+                    alt="Tailwind CSS Navbar component"
+                    src={
+                      user?.user_metadata?.avatar_url ||
+                      user?.user_metadata?.picture ||
+                      "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                    }
+                  />
                 </div>
-                <ul
-                  tabIndex={-1}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-56 p-2 shadow"
-                >
-                  <li className="menu-title px-4 py-2 border-b border-base-200">
+              </div>
+              <ul
+                tabIndex={-1}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
+              >
+                {user && (
+                  <li className="menu-title px-4 py-1 text-xs border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content truncate block">
                       {user.user_metadata?.full_name || 'Learner'}
                     </span>
-                    <span className="text-xs text-base-content/60 truncate font-normal block">
+                    <span className="text-[11px] text-base-content/60 truncate font-normal block">
                       {user.email}
                     </span>
                   </li>
+                )}
+                <li>
+                  <a className="justify-between" onClick={closeDropdowns}>
+                    Profile
+                    <span className="badge">{user ? 'Active' : 'New'}</span>
+                  </a>
+                </li>
+                {role === 'admin' && (
                   <li>
-                    <a className="justify-between" onClick={closeDropdowns}>
-                      Profile
-                      <span className="badge badge-sm badge-primary">Active</span>
-                    </a>
+                    <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold">
+                      Admin
+                      <span className="badge badge-accent badge-xs">Admin</span>
+                    </NavLink>
                   </li>
-                  {role === 'admin' && (
-                    <li>
-                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold">
-                        Admin Dashboard
-                        <span className="badge badge-sm badge-accent">Admin</span>
-                      </NavLink>
-                    </li>
-                  )}
-                  <li>
-                    <button onClick={() => void signOut()}>Logout</button>
-                  </li>
-                  <li>
-                    <button onClick={() => void onDelete()} className="text-error">
-                      Hapus Akun
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            ) : (
-              <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                  <div className="w-10 rounded-full bg-base-200 flex items-center justify-center text-base-content/70">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
-                <ul
-                  tabIndex={-1}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
-                >
-                  <li>
-                    <button onClick={onLogin} disabled={loading} className="text-primary font-semibold">
-                      Sign In with Google
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            )}
+                )}
+                <li><a onClick={closeDropdowns}>Settings</a></li>
+                {user ? (
+                  <>
+                    <li><button onClick={() => void signOut()}>Logout</button></li>
+                    <li><button onClick={() => void onDelete()} className="text-error">Hapus Akun</button></li>
+                  </>
+                ) : (
+                  <li><button onClick={onLogin} disabled={loading} className="text-primary font-semibold">Sign In</button></li>
+                )}
+              </ul>
+            </div>
           </div>
         </div>
       </header>
