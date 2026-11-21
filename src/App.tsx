@@ -43,8 +43,10 @@ function AppContent() {
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
     }
-    document.querySelectorAll('details[open]').forEach((el) => {
-      el.removeAttribute('open')
+    document.querySelectorAll('[popover]').forEach((el) => {
+      try {
+        (el as HTMLElement & { hidePopover?: () => void }).hidePopover?.()
+      } catch {}
     })
   }
 
@@ -54,84 +56,89 @@ function AppContent() {
   return (
     <>
       <header className="sticky top-0 z-50">
-        <div className="navbar bg-base-100 shadow-sm px-4">
-          {/* Navbar Start */}
-          <div className="navbar-start">
-            <div className="dropdown">
-              <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-                <svg
-                  aria-label="Menu"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
-                </svg>
-              </div>
-              <ul
-                tabIndex={-1}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow"
+        <div className="navbar bg-base-100 shadow-sm px-4 justify-between">
+          {/* Navbar Start: Brand & Mobile Menu Button */}
+          <div className="navbar-start gap-2">
+            <button
+              className="btn btn-ghost sm:hidden p-2"
+              popoverTarget="my-megamenu-5"
+              aria-label="Toggle Menu"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                <li>
-                  <a className={isHiragana ? 'font-bold text-primary' : ''}>Hiragana</a>
-                  <ul className="p-2">
-                    <li><NavLink to="/hiragana/flashcard" onClick={closeDropdowns}>Hiragana Flashcards</NavLink></li>
-                    <li><NavLink to="/hiragana/word" onClick={closeDropdowns}>Hiragana Words</NavLink></li>
-                  </ul>
-                </li>
-                <li>
-                  <a className={isKatakana ? 'font-bold text-primary' : ''}>Katakana</a>
-                  <ul className="p-2">
-                    <li><NavLink to="/katakana/flashcard" onClick={closeDropdowns}>Katakana Flashcards</NavLink></li>
-                    <li><NavLink to="/katakana/word" onClick={closeDropdowns}>Katakana Words</NavLink></li>
-                  </ul>
-                </li>
-                {role === 'admin' && (
-                  <li>
-                    <NavLink to="/admin" onClick={closeDropdowns} className="text-accent font-semibold">
-                      Admin Dashboard
-                    </NavLink>
-                  </li>
-                )}
-              </ul>
-            </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+              </svg>
+            </button>
             <NavLink to="/hiragana/flashcard" className="btn btn-ghost text-xl font-bold gap-2 normal-case">
               <span className="badge badge-primary font-mono text-xs px-2 py-3 font-bold">A あ</span>
               <span>JLPT Cards</span>
             </NavLink>
           </div>
 
-          {/* Navbar Center */}
-          <div className="navbar-center hidden lg:flex">
-            <ul className="menu menu-horizontal px-1">
-              <li>
-                <details>
-                  <summary className={isHiragana ? 'text-primary font-bold' : ''}>Hiragana</summary>
-                  <ul className="p-2 bg-base-100 w-48 z-50 shadow rounded-box">
-                    <li><NavLink to="/hiragana/flashcard" onClick={closeDropdowns}>Hiragana Flashcards</NavLink></li>
-                    <li><NavLink to="/hiragana/word" onClick={closeDropdowns}>Hiragana Words</NavLink></li>
-                  </ul>
-                </details>
-              </li>
-              <li>
-                <details>
-                  <summary className={isKatakana ? 'text-primary font-bold' : ''}>Katakana</summary>
-                  <ul className="p-2 bg-base-100 w-48 z-50 shadow rounded-box">
-                    <li><NavLink to="/katakana/flashcard" onClick={closeDropdowns}>Katakana Flashcards</NavLink></li>
-                    <li><NavLink to="/katakana/word" onClick={closeDropdowns}>Katakana Words</NavLink></li>
-                  </ul>
-                </details>
-              </li>
+          {/* Navbar Center: daisyUI Megamenu with Popover Dropdowns */}
+          <div className="navbar-center">
+            <div
+              className="megamenu max-sm:megamenu-vertical p-1 border border-base-300 rounded-box"
+              id="my-megamenu-5"
+              popover="auto"
+            >
+              <span className="megamenu-active"></span>
+
+              <button
+                type="button"
+                popoverTarget="k1"
+                className={isHiragana ? 'text-primary font-bold' : ''}
+              >
+                Hiragana
+              </button>
+              <div id="k1" popover="auto">
+                <ul className="menu bg-base-100 rounded-box shadow-lg p-2 border border-base-200 min-w-48 z-50">
+                  <li>
+                    <NavLink to="/hiragana/flashcard" onClick={closeDropdowns}>
+                      Hiragana Flashcards
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/hiragana/word" onClick={closeDropdowns}>
+                      Hiragana Words
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                popoverTarget="k2"
+                className={isKatakana ? 'text-primary font-bold' : ''}
+              >
+                Katakana
+              </button>
+              <div id="k2" popover="auto">
+                <ul className="menu bg-base-100 rounded-box shadow-lg p-2 border border-base-200 min-w-48 z-50">
+                  <li>
+                    <NavLink to="/katakana/flashcard" onClick={closeDropdowns}>
+                      Katakana Flashcards
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/katakana/word" onClick={closeDropdowns}>
+                      Katakana Words
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+
               {role === 'admin' && (
-                <li>
-                  <NavLink to="/admin" className="font-semibold text-accent">
-                    Admin
-                  </NavLink>
-                </li>
+                <NavLink to="/admin" onClick={closeDropdowns} className="font-semibold text-accent">
+                  Admin
+                </NavLink>
               )}
-            </ul>
+            </div>
           </div>
 
           {/* Navbar End: Profile */}
