@@ -103,46 +103,46 @@ function AppContent() {
               </ul>
             </div>
 
-            <NavLink to="/hiragana/flashcard" className="flex items-center gap-2.5 font-bold text-lg text-base-content hover:opacity-90 normal-case px-1">
-              <span className="bg-base-200 text-base-content border border-base-300 rounded-lg px-2 py-0.5 font-mono text-xs font-bold shadow-xs">
+            <NavLink to="/hiragana/flashcard" className="flex items-center gap-3 font-bold text-xl text-base-content hover:opacity-90 normal-case px-1">
+              <span className="bg-base-200 text-base-content border border-base-300 rounded-lg px-2.5 py-1 font-mono text-sm font-bold shadow-xs">
                 A あ
               </span>
-              <span className="tracking-tight text-base font-bold">JLPT Cards</span>
+              <span className="tracking-tight text-lg font-bold">JLPT Cards</span>
             </NavLink>
           </div>
 
           {/* Navbar End: Nav Links & Profile (Right-aligned matching JLPT Cards) */}
           <div className="navbar-end w-auto gap-3">
             {/* Desktop Nav Items */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-2">
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className={`btn btn-ghost btn-sm normal-case text-sm font-medium gap-1.5 ${isHiragana ? 'text-primary font-bold' : 'text-base-content/80'}`}>
+                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-base font-medium gap-2 px-3.5 h-10 min-h-10 ${isHiragana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
                   Hiragana
-                  <svg className="h-3.5 w-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-2 w-48 p-2 shadow-lg border border-base-200">
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-52 p-2 shadow-lg border border-base-200 text-sm">
                   <li><NavLink to="/hiragana/flashcard" onClick={closeDropdowns}>Hiragana Flashcards</NavLink></li>
                   <li><NavLink to="/hiragana/word" onClick={closeDropdowns}>Hiragana Words</NavLink></li>
                 </ul>
               </div>
 
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className={`btn btn-ghost btn-sm normal-case text-sm font-medium gap-1.5 ${isKatakana ? 'text-primary font-bold' : 'text-base-content/80'}`}>
+                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-base font-medium gap-2 px-3.5 h-10 min-h-10 ${isKatakana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
                   Katakana
-                  <svg className="h-3.5 w-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-2 w-48 p-2 shadow-lg border border-base-200">
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-52 p-2 shadow-lg border border-base-200 text-sm">
                   <li><NavLink to="/katakana/flashcard" onClick={closeDropdowns}>Katakana Flashcards</NavLink></li>
                   <li><NavLink to="/katakana/word" onClick={closeDropdowns}>Katakana Words</NavLink></li>
                 </ul>
               </div>
 
               {role === 'admin' && (
-                <NavLink to="/admin" onClick={closeDropdowns} className="btn btn-ghost btn-sm normal-case text-sm font-semibold text-accent">
+                <NavLink to="/admin" onClick={closeDropdowns} className="btn btn-ghost normal-case text-base font-semibold text-accent px-3.5 h-10 min-h-10">
                   Admin
                 </NavLink>
               )}
@@ -151,8 +151,8 @@ function AppContent() {
             {/* Profile / Sign In */}
             {user ? (
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-ghost btn-sm rounded-full gap-2 border border-base-300 normal-case px-2.5">
-                  <div className="w-5 h-5 rounded-full overflow-hidden">
+                <div tabIndex={0} role="button" className="btn btn-ghost rounded-full gap-2.5 border border-base-300 normal-case px-3.5 h-10 min-h-10">
+                  <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-base-300">
                     <img
                       alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
                       src={
@@ -162,38 +162,38 @@ function AppContent() {
                       }
                     />
                   </div>
-                  <span className="text-xs truncate max-w-[120px] hidden md:inline">
+                  <span className="text-sm font-medium truncate max-w-[140px] hidden md:inline">
                     {user.user_metadata?.full_name ?? user.email}
                   </span>
                 </div>
-                <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-2 w-52 p-2 shadow-lg border border-base-200">
-                  <li className="menu-title px-4 py-1.5 text-xs border-b border-base-200 mb-1">
-                    <span className="font-semibold text-base-content truncate block">
+                <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-2 w-56 p-2 shadow-lg border border-base-200">
+                  <li className="menu-title px-4 py-2 text-xs border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-sm truncate block">
                       {user.user_metadata?.full_name || 'Learner'}
                     </span>
-                    <span className="text-[11px] text-base-content/60 truncate font-normal block">
+                    <span className="text-xs text-base-content/60 truncate font-normal block">
                       {user.email}
                     </span>
                   </li>
                   {role === 'admin' && (
                     <li>
-                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold">
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2">
                         Admin Dashboard
                         <span className="badge badge-accent badge-xs">Admin</span>
                       </NavLink>
                     </li>
                   )}
-                  <li><button onClick={() => void signOut()}>Logout</button></li>
-                  <li><button onClick={() => void onDelete()} className="text-error">Hapus Akun</button></li>
+                  <li><button onClick={() => void signOut()} className="py-2">Logout</button></li>
+                  <li><button onClick={() => void onDelete()} className="text-error py-2">Hapus Akun</button></li>
                 </ul>
               </div>
             ) : (
               <button
-                className="btn btn-ghost btn-sm rounded-full normal-case gap-2 px-4 text-xs font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50"
+                className="btn btn-ghost rounded-full normal-case gap-2.5 px-5 text-sm font-semibold border border-base-300 hover:border-base-content/60 bg-base-200/50 h-10 min-h-10"
                 disabled={loading}
                 onClick={onLogin}
               >
-                <svg className="w-3.5 h-3.5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 Sign in
