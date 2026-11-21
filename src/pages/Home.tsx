@@ -134,11 +134,11 @@ export default function Home({ script, mode, onHint }: Props) {
             className="link"
             style={{
               textDecoration: 'none',
-              padding: '6px 12px',
+              padding: '8px 18px',
               borderRadius: 999,
               background: st.srsMode ? 'var(--pill-on)' : 'var(--pill)',
               color: st.srsMode ? 'var(--ink)' : 'var(--muted)',
-              fontSize: 12,
+              fontSize: 15,
               fontWeight: 500,
             }}
             title="Sistem Pengulangan Berjarak: Memprioritaskan huruf yang lemah atau jatuh tempo peninjauan"
@@ -147,7 +147,7 @@ export default function Home({ script, mode, onHint }: Props) {
             🧠 SRS: {st.srsMode ? 'Aktif' : 'Nonaktif'}
           </button>
           {mode === 'char' && dueCount > 0 && (
-            <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 500 }}>
+            <span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 600 }}>
               {dueCount} due
             </span>
           )}

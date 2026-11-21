@@ -116,33 +116,33 @@ function AppContent() {
             {/* Desktop Nav Items */}
             <div className="hidden lg:flex items-center gap-2">
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-base font-medium gap-2 px-3.5 h-10 min-h-10 ${isHiragana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
+                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-lg font-medium gap-2 px-4 h-11 min-h-11 ${isHiragana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
                   Hiragana
                   <svg className="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-52 p-2 shadow-lg border border-base-200 text-sm">
-                  <li><NavLink to="/hiragana/flashcard" onClick={closeDropdowns}>Hiragana Flashcards</NavLink></li>
-                  <li><NavLink to="/hiragana/word" onClick={closeDropdowns}>Hiragana Words</NavLink></li>
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-60 p-2.5 shadow-xl border border-base-200 text-base">
+                  <li><NavLink to="/hiragana/flashcard" onClick={closeDropdowns} className="py-2.5">Hiragana Flashcards</NavLink></li>
+                  <li><NavLink to="/hiragana/word" onClick={closeDropdowns} className="py-2.5">Hiragana Words</NavLink></li>
                 </ul>
               </div>
 
               <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-base font-medium gap-2 px-3.5 h-10 min-h-10 ${isKatakana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
+                <div tabIndex={0} role="button" className={`btn btn-ghost normal-case text-lg font-medium gap-2 px-4 h-11 min-h-11 ${isKatakana ? 'text-primary font-bold' : 'text-base-content/85'}`}>
                   Katakana
                   <svg className="h-4 w-4 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-52 p-2 shadow-lg border border-base-200 text-sm">
-                  <li><NavLink to="/katakana/flashcard" onClick={closeDropdowns}>Katakana Flashcards</NavLink></li>
-                  <li><NavLink to="/katakana/word" onClick={closeDropdowns}>Katakana Words</NavLink></li>
+                <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-60 p-2.5 shadow-xl border border-base-200 text-base">
+                  <li><NavLink to="/katakana/flashcard" onClick={closeDropdowns} className="py-2.5">Katakana Flashcards</NavLink></li>
+                  <li><NavLink to="/katakana/word" onClick={closeDropdowns} className="py-2.5">Katakana Words</NavLink></li>
                 </ul>
               </div>
 
               {role === 'admin' && (
-                <NavLink to="/admin" onClick={closeDropdowns} className="btn btn-ghost normal-case text-base font-semibold text-accent px-3.5 h-10 min-h-10">
+                <NavLink to="/admin" onClick={closeDropdowns} className="btn btn-ghost normal-case text-lg font-semibold text-accent px-4 h-11 min-h-11">
                   Admin
                 </NavLink>
               )}

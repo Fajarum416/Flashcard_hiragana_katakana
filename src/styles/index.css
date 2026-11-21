@@ -25,11 +25,11 @@ header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-i
 main{width:100%;max-width:100%;margin:0;padding:24px 120px 56px}
 @media (max-width: 1280px){main{padding:20px 64px 48px}}
 @media (max-width: 768px){main{padding:16px 20px 40px}}
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-bottom:28px}
-h1{margin:0 4px 0 0;font-size:20px;font-weight:600}
-h1 span{color:var(--muted);font-weight:400;margin-left:8px}
-.seg{display:inline-flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:3px}
-.seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:6px 18px;border-radius:999px;cursor:pointer}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:20px;margin-bottom:32px}
+h1{margin:0 4px 0 0;font-size:26px;font-weight:700}
+h1 span{color:var(--muted);font-weight:400;margin-left:10px;font-size:22px}
+.seg{display:inline-flex;background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:4px}
+.seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:15px;font-weight:500;padding:8px 22px;border-radius:999px;cursor:pointer}
 .seg button.on{background:var(--pill-on);color:var(--ink)}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sp{flex:1}
