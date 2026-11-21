@@ -12,11 +12,10 @@ import AdminOverview from './pages/admin/Overview'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
 import { InstallPrompt } from './components/InstallPrompt'
-import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
+import { GoogleSignInButton } from './components/GoogleSignInButton'
 
 function AppContent() {
   const [msg, setMsg] = useState('')
-  const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(true)
   const [openKata, setOpenKata] = useState(true)
@@ -43,11 +42,7 @@ function AppContent() {
 
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
-    if (googleClientId) {
-      setLoginModalOpen(true)
-    } else {
-      void signIn()
-    }
+    void signIn()
   }
 
   const onLogout = async () => {
@@ -317,19 +312,18 @@ function AppContent() {
                       />
                     </div>
                   </li>
-                  <li className="pt-2 mt-1 border-t border-base-200">
-                    <button
-                      type="button"
+                  <div className="pt-2.5 mt-1 border-t border-base-200 px-1 flex justify-center">
+                    <GoogleSignInButton
+                      width={248}
                       disabled={loading}
-                      onClick={() => {
+                      onSuccess={closeDropdowns}
+                      onError={toast}
+                      onFallbackClick={() => {
                         closeDropdowns()
                         onLogin()
                       }}
-                      className="btn btn-primary btn-md w-full text-base font-semibold normal-case mt-1"
-                    >
-                      Masuk dengan Google
-                    </button>
-                  </li>
+                    />
+                  </div>
                 </ul>
               </div>
             )}
@@ -548,24 +542,19 @@ function AppContent() {
                   </div>
                 </div>
               ) : (
-                <button
-                  type="button"
+                <GoogleSignInButton
+                  width={260}
                   disabled={loading}
-                  onClick={() => {
+                  onSuccess={() => setMobileOpen(false)}
+                  onError={(m) => {
+                    setMobileOpen(false)
+                    toast(m)
+                  }}
+                  onFallbackClick={() => {
                     setMobileOpen(false)
                     onLogin()
                   }}
-                  className="w-full h-12 rounded-full bg-pill hover:bg-pill-on border border-line text-ink font-semibold text-[15px] flex items-center justify-center gap-2.5 cursor-pointer transition-colors"
-                >
-                  <svg className="w-5 h-5 text-ink" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a3 3 0 110 6 3 3 0 010-6zm0 12.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span>Sign in</span>
-                </button>
+                />
               )}
             </div>
           </aside>
@@ -598,12 +587,6 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/hiragana/flashcard" replace />} />
         </Routes>
       </main>
-
-      <GoogleSignInModal
-        open={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
-        onFallbackOAuth={() => void signIn()}
-      />
 
       <dialog id="my_modal_1" className="modal">
         <div className="modal-box">
