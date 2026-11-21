@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { COL_IDS, YOON_IDS, type Script } from '../data/kana'
 import type { Mode, Selection } from '../lib/deck'
+import type { SelectionState } from '../lib/settings'
 
 export interface Stat {
   ok: number
@@ -18,6 +19,10 @@ interface Actions {
   clearAll: (script: Script) => void
   useDefault: (script: Script) => void
   record: (id: string, correct: boolean) => void
+  /** Mengganti seluruh stats dengan data dari server. */
+  setStats: (stats: Record<string, Stat>) => void
+  /** Menerapkan pilihan dari server. */
+  applySelection: (s: SelectionState) => void
 }
 
 export type AppState = Selection & { stats: Record<string, Stat> } & Actions
@@ -49,6 +54,8 @@ export const useSelection = create<AppState>()(
         selectAll: (script) => patch(script, [...YOON_IDS], [...COL_IDS]),
         clearAll: (script) => patch(script, [], []),
         useDefault: (script) => patch(script, ['ki'], ['a']),
+        setStats: (stats) => set({ stats }),
+        applySelection: (s) => set({ ...s }),
         record: (id, correct) =>
           set((s) => {
             const cur = s.stats[id] ?? { ok: 0, no: 0 }

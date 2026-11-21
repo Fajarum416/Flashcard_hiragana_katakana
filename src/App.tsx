@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabaseEnabled } from './lib/supabase'
+import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
 import { HashRouter, NavLink, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
@@ -19,6 +20,7 @@ export default function App() {
   const cls = ({ isActive }: { isActive: boolean }) => (isActive ? 'on' : '')
   const { user, loading, init, signIn, signOut, deleteAccount } = useAuth()
   useEffect(() => init(), [init])
+  useEffect(() => startSync(), [])
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
     void signIn()

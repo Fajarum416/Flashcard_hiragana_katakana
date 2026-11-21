@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import type { Script } from '../data/kana'
 import { buildDeck, shuffle, type Card } from '../lib/deck'
 import { accuracy, norm } from '../lib/romaji'
+import { queueSession, recordAnswer } from '../lib/sync'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
@@ -52,12 +53,34 @@ function reducer(s: PState, a: Act): PState {
 }
 
 function Session({ script }: { script: Script }) {
-  const record = useSelection((s) => s.record)
   const [s, dispatch] = useReducer(reducer, undefined, () => init(buildDeck({ ...useSelection.getState(), script })))
   const inputRef = useRef<HTMLInputElement>(null)
   const timer = useRef<number | undefined>(undefined)
+  const startedAt = useRef(Date.now())
+  const saved = useRef(false)
   const done = s.i >= s.q.length
   const card = s.q[s.i]
+
+  // catat sesi satu kali setiap putaran selesai (termasuk Restart / Retry)
+  useEffect(() => {
+    if (!done) {
+      saved.current = false
+      if (s.i === 0) startedAt.current = Date.now()
+      return
+    }
+    if (saved.current || !s.q.length) return
+    saved.current = true
+    const { mode, comp } = useSelection.getState()
+    void queueSession({
+      script,
+      mode,
+      composite: comp,
+      totalCards: s.q.length,
+      correctCards: s.ok,
+      durationSec: Math.max(1, Math.round((Date.now() - startedAt.current) / 1000)),
+      startedAt: new Date(startedAt.current).toISOString(),
+    })
+  }, [done, s.i, s.q.length, s.ok, script])
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
   useEffect(() => {
@@ -65,7 +88,7 @@ function Session({ script }: { script: Script }) {
   }, [s.i, s.rev])
 
   const stat = (correct: boolean) => {
-    if (!s.wrong && card?.id) record(card.id, correct)
+    if (!s.wrong && card?.id) void recordAnswer(card.id, correct)
   }
   const check = (value: string, enter: boolean) => {
     if (done || s.rev || s.lock) return
