@@ -40,19 +40,19 @@ export default function Home({ script, mode, onHint }: Props) {
                   type="checkbox"
                   checked={on}
                   onChange={() => st.toggleYoon(sc, id)}
-                  className="toggle toggle-xl mb-[38px] cursor-pointer"
-                  aria-label={`Select column ${id}`}
+                  className="toggle toggle-xl mb-5 sm:mb-[38px] cursor-pointer"
+                  aria-label={`Pilih kolom ${id}`}
                 />
                 {YOON_TABLE[sc][id].map((c) => (
-                  <div key={c.k} className="w-full max-w-[104px] text-center mb-[46px]">
+                  <div key={c.k} className="w-full max-w-[104px] text-center mb-5 sm:mb-[46px]">
                     <b
-                      className={`block jp font-light text-[36px]/[1.2] border-b border-line pb-2 ${
+                      className={`block jp font-light text-[36px]/[1.2] border-b border-line pb-1 sm:pb-2 ${
                         on ? 'text-accent' : 'text-[#f0f3f8]'
                       }`}
                     >
                       {c.k}
                     </b>
-                    <i className="block not-italic text-[#78859e] text-[15px] pt-2">{c.r}</i>
+                    <i className="block not-italic text-[#78859e] text-[15px] pt-1 sm:pt-2">{c.r}</i>
                   </div>
                 ))}
               </div>
@@ -73,19 +73,19 @@ export default function Home({ script, mode, onHint }: Props) {
                   type="checkbox"
                   checked={on}
                   onChange={() => st.toggleCol(sc, id)}
-                  className="toggle toggle-xl mb-[38px] cursor-pointer"
-                  aria-label={`Select column ${id}`}
+                  className="toggle toggle-xl mb-5 sm:mb-[38px] cursor-pointer"
+                  aria-label={`Pilih kolom ${id}`}
                 />
                 {TABLE[sc][id].map((c, i) => (
-                  <div key={i} className="w-full max-w-[80px] text-center mb-[46px]">
+                  <div key={i} className="w-full max-w-[80px] text-center mb-5 sm:mb-[46px]">
                     <b
-                      className={`block jp font-light text-[42px]/[1.2] border-b border-line pb-2 ${
+                      className={`block jp font-light text-[42px]/[1.2] border-b border-line pb-1 sm:pb-2 ${
                         on ? 'text-accent' : 'text-[#f0f3f8]'
                       }`}
                     >
                       {c ? c.k : '-'}
                     </b>
-                    <i className="block not-italic text-[#78859e] text-[15px] pt-2">{c ? c.r : '-'}</i>
+                    <i className="block not-italic text-[#78859e] text-[15px] pt-1 sm:pt-2">{c ? c.r : '-'}</i>
                   </div>
                 ))}
               </div>
@@ -100,8 +100,8 @@ export default function Home({ script, mode, onHint }: Props) {
       <>
         <p className="text-muted text-[13px] mb-4">
           {st.comp
-            ? 'Kosakata gabungan (memuat Yōon & Sokuon). Aktif jika kolom karakter dan yōon terpilih.'
-            : 'Kata aktif jika seluruh hurufnya ada di kolom yang dipilih. Beralih ke Characters untuk memilih kolom.'}
+            ? 'Kosakata gabungan (memuat Yōon & Sokuon). Aktif jika kolom huruf dan yōon terpilih.'
+            : 'Kata aktif jika seluruh hurufnya ada di kolom yang dipilih. Beralih ke Huruf untuk memilih kolom.'}
         </p>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 w-full">
           {list.map((w) => {
@@ -129,7 +129,7 @@ export default function Home({ script, mode, onHint }: Props) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-5 pt-4 pb-5 mb-10">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-5 pt-2 pb-3 mb-5 sm:pt-4 sm:pb-5 sm:mb-10">
         <h1 className="m-0 mr-1 text-[26px] font-bold">{scriptTitle(sc)}</h1>
         <TypeStyleSwitches
           mode={mode}
@@ -137,7 +137,7 @@ export default function Home({ script, mode, onHint }: Props) {
         />
         <span className="flex-1" />
         {mode === 'char' && st.srsMode && dueCount > 0 && (
-          <span className="text-sm text-accent font-semibold">{dueCount} due</span>
+          <span className="text-sm text-accent font-semibold">{dueCount} perlu diulang</span>
         )}
       </div>
       {body}
@@ -148,14 +148,14 @@ export default function Home({ script, mode, onHint }: Props) {
             className="bg-transparent border-0 text-muted text-[13px] cursor-pointer px-1.5 py-1 underline hover:text-ink"
             onClick={() => st.selectAll(sc)}
           >
-            Select all
+            Pilih semua
           </button>
           <button
             type="button"
             className="bg-transparent border-0 text-muted text-[13px] cursor-pointer px-1.5 py-1 underline hover:text-ink"
             onClick={() => st.clearAll(sc)}
           >
-            Clear
+            Hapus pilihan
           </button>
         </span>
         {deck.length ? (
@@ -163,16 +163,16 @@ export default function Home({ script, mode, onHint }: Props) {
             className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-bold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all shadow-md"
             to={`/practice/${sc}`}
           >
-            Begin Test -{' '}
-            {mode === 'char' ? `${st.comp ? st.selY[sc].length : st.sel[sc].length} Groups` : `${deck.length} Words`}
+            Mulai Latihan -{' '}
+            {mode === 'char' ? `${st.comp ? st.selY[sc].length : st.sel[sc].length} Kelompok` : `${deck.length} Kata`}
           </Link>
         ) : (
           <button
             type="button"
             className="border-0 rounded-full bg-pill text-ink font-semibold text-sm px-[26px] py-3 cursor-pointer inline-block transition-all"
-            onClick={() => onHint('Switch on at least one column first')}
+            onClick={() => onHint('Aktifkan minimal satu kolom terlebih dahulu')}
           >
-            Begin Test - 0 Groups
+            Mulai Latihan - 0 Kelompok
           </button>
         )}
       </div>

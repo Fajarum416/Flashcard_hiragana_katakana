@@ -111,7 +111,7 @@ function AppContent() {
               type="button"
               className="sm:hidden w-11 h-11 rounded-xl bg-pill hover:bg-pill-on border-0 text-ink flex items-center justify-center cursor-pointer transition-colors"
               onClick={() => setMobileOpen(true)}
-              aria-label="Open Menu"
+              aria-label="Buka Menu"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -139,7 +139,7 @@ function AppContent() {
                       onClick={closeDropdowns}
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
                     >
-                      Hiragana Flashcards
+                      Flashcard Hiragana
                     </NavLink>
                   </li>
                   <li>
@@ -148,7 +148,7 @@ function AppContent() {
                       onClick={closeDropdowns}
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
                     >
-                      Hiragana Words
+                      Kata Hiragana
                     </NavLink>
                   </li>
                 </ul>
@@ -169,7 +169,7 @@ function AppContent() {
                       onClick={closeDropdowns}
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
                     >
-                      Katakana Flashcards
+                      Flashcard Katakana
                     </NavLink>
                   </li>
                   <li>
@@ -178,7 +178,7 @@ function AppContent() {
                       onClick={closeDropdowns}
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
                     >
-                      Katakana Words
+                      Kata Katakana
                     </NavLink>
                   </li>
                 </ul>
@@ -189,10 +189,10 @@ function AppContent() {
                   to="/admin"
                   onClick={closeDropdowns}
                   className={({ isActive }) =>
-                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-accent'}`
+                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-amber-400'}`
                   }
                 >
-                  Dashboard
+                  Dasbor
                 </NavLink>
               )}
 
@@ -201,10 +201,10 @@ function AppContent() {
                   to="/dashboard"
                   onClick={closeDropdowns}
                   className={({ isActive }) =>
-                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-accent'}`
+                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-sky-400'}`
                   }
                 >
-                  Progress
+                  Progres
                 </NavLink>
               )}
             </div>
@@ -231,7 +231,7 @@ function AppContent() {
                 <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
                   <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content text-base truncate block">
-                      {user.user_metadata?.full_name || 'Learner'}
+                      {user.user_metadata?.full_name || 'Pelajar'}
                     </span>
                     <span className="text-xs text-base-content/60 truncate font-normal block">
                       {user.email}
@@ -239,8 +239,8 @@ function AppContent() {
                   </li>
                   <li>
                     <a className="justify-between py-2.5 text-base font-medium" onClick={closeDropdowns}>
-                      Profile
-                      <span className="badge badge-md bg-[#5eb839] border-[#5eb839] text-white font-semibold">Active</span>
+                      Profil
+                      <span className="badge badge-md bg-[#5eb839] border-[#5eb839] text-white font-semibold">Aktif</span>
                     </a>
                   </li>
                   <li>
@@ -250,7 +250,7 @@ function AppContent() {
                     >
                       <span className="flex items-center gap-2">
                         <span className="text-lg">🧠</span>
-                        <span>SRS Mode</span>
+                        <span>Mode SRS</span>
                       </span>
                       <input
                         type="checkbox"
@@ -262,20 +262,20 @@ function AppContent() {
                   </li>
                   {role === 'admin' ? (
                     <li>
-                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2.5 text-base">
-                        Dashboard
-                        <span className="badge badge-accent badge-xs">Admin</span>
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-amber-400 font-semibold py-2.5 text-base">
+                        Dasbor
+                        <span className="badge badge-warning badge-xs">Admin</span>
                       </NavLink>
                     </li>
                   ) : (
                     <li>
-                      <NavLink to="/dashboard" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2.5 text-base">
+                      <NavLink to="/dashboard" onClick={closeDropdowns} className="justify-between text-sky-400 font-semibold py-2.5 text-base">
                         Progres
-                        <span className="badge badge-accent badge-xs">User</span>
+                        <span className="badge badge-info badge-xs">Pengguna</span>
                       </NavLink>
                     </li>
                   )}
-                  <li><button onClick={() => void onLogout()} className="py-2.5 text-base font-medium">Logout</button></li>
+                  <li><button onClick={() => void onLogout()} className="py-2.5 text-base font-medium">Keluar</button></li>
                   <li><button onClick={() => void onDelete()} className="text-error py-2.5 text-base font-medium">Hapus Akun</button></li>
                 </ul>
               </div>
@@ -289,12 +289,12 @@ function AppContent() {
                   <svg className="w-5 h-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span>Sign in</span>
+                  <span>Masuk</span>
                 </div>
                 <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
                   <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content text-base block">
-                      Tamu (Guest)
+                      Tamu
                     </span>
                     <span className="text-xs text-base-content/60 font-normal block">
                       Masuk untuk sinkronisasi cloud
@@ -307,7 +307,7 @@ function AppContent() {
                     >
                       <span className="flex items-center gap-2">
                         <span className="text-lg">🧠</span>
-                        <span>SRS Mode</span>
+                        <span>Mode SRS</span>
                       </span>
                       <input
                         type="checkbox"
@@ -325,9 +325,9 @@ function AppContent() {
                         closeDropdowns()
                         onLogin()
                       }}
-                      className="btn btn-primary btn-md w-full text-base font-semibold normal-case mt-1"
+                      className="btn btn-md w-full rounded-full bg-pill hover:bg-pill-on border border-white/15 hover:border-white/30 text-ink text-base font-semibold normal-case mt-1 shadow-none"
                     >
-                      Masuk dengan Google
+                      Masuk
                     </button>
                   </li>
                 </ul>
@@ -359,7 +359,7 @@ function AppContent() {
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  aria-label="Close Menu"
+                  aria-label="Tutup Menu"
                   className="w-11 h-11 rounded-xl bg-pill hover:bg-pill-on border-0 text-ink flex items-center justify-center cursor-pointer transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -400,7 +400,7 @@ function AppContent() {
                           }`
                         }
                       >
-                        Hiragana Flashcards
+                        Flashcard Hiragana
                       </NavLink>
                       <NavLink
                         to="/hiragana/word"
@@ -411,7 +411,7 @@ function AppContent() {
                           }`
                         }
                       >
-                        Hiragana Words
+                        Kata Hiragana
                       </NavLink>
                     </div>
                   )}
@@ -447,7 +447,7 @@ function AppContent() {
                           }`
                         }
                       >
-                        Katakana Flashcards
+                        Flashcard Katakana
                       </NavLink>
                       <NavLink
                         to="/katakana/word"
@@ -458,7 +458,7 @@ function AppContent() {
                           }`
                         }
                       >
-                        Katakana Words
+                        Kata Katakana
                       </NavLink>
                     </div>
                   )}
@@ -471,7 +471,7 @@ function AppContent() {
                 >
                   <span className="text-[17px] font-semibold text-ink flex items-center gap-2">
                     <span>🧠</span>
-                    <span>SRS Mode</span>
+                    <span>Mode SRS</span>
                   </span>
                   <input
                     type="checkbox"
@@ -487,10 +487,10 @@ function AppContent() {
                       to="/admin"
                       onClick={() => setMobileOpen(false)}
                       className={({ isActive }) =>
-                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-accent'}`
+                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-amber-400'}`
                       }
                     >
-                      Dashboard
+                      Dasbor
                     </NavLink>
                   </div>
                 )}
@@ -501,7 +501,7 @@ function AppContent() {
                       to="/dashboard"
                       onClick={() => setMobileOpen(false)}
                       className={({ isActive }) =>
-                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-accent'}`
+                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-sky-400'}`
                       }
                     >
                       Progres
@@ -536,7 +536,7 @@ function AppContent() {
                       onClick={() => void onLogout()}
                       className="flex-1 h-11 rounded-full bg-pill hover:bg-pill-on border border-line text-ink font-semibold text-sm cursor-pointer transition-colors"
                     >
-                      Logout
+                      Keluar
                     </button>
                     <button
                       type="button"
@@ -564,7 +564,7 @@ function AppContent() {
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span>Sign in</span>
+                  <span>Masuk</span>
                 </button>
               )}
             </div>
@@ -611,7 +611,7 @@ function AppContent() {
           <p className="py-4">{msg}</p>
           <div className="modal-action">
             <form method="dialog">
-              <button className="btn">Close</button>
+              <button className="btn">Tutup</button>
             </form>
           </div>
         </div>
@@ -630,7 +630,7 @@ function AppContent() {
               >
                 Hapus Akun
               </button>
-              <button className="btn w-36 h-11 min-h-11">Close</button>
+              <button className="btn w-36 h-11 min-h-11">Tutup</button>
             </form>
           </div>
         </div>
