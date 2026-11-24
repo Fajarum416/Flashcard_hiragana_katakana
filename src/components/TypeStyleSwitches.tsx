@@ -14,24 +14,24 @@ export function TypeStyleSwitches({
   return (
     <div className="flex flex-nowrap items-center gap-2 sm:gap-4 max-w-full">
       <Segmented
-        label="Type"
+        label="Tipe"
         value={mode}
         onChange={(m) => {
           setMode(m)
           onModeChange?.(m)
         }}
         options={[
-          { value: 'char', text: 'Characters' },
-          { value: 'word', text: 'Words' },
+          { value: 'char', text: 'Huruf' },
+          { value: 'word', text: 'Kata' },
         ]}
       />
       <Segmented
-        label="Style"
+        label="Jenis"
         value={comp ? 'comp' : 'single'}
         onChange={(v) => setComp(v === 'comp')}
         options={[
-          { value: 'single', text: 'Single' },
-          { value: 'comp', text: 'Composite' },
+          { value: 'single', text: 'Tunggal' },
+          { value: 'comp', text: 'Gabungan' },
         ]}
       />
     </div>
@@ -41,10 +41,10 @@ export function TypeStyleSwitches({
 export const scriptTitle = (sc: 'hiragana' | 'katakana') =>
   sc === 'hiragana' ? (
     <>
-      Hiragana Practice <span className="jp text-muted font-normal ml-2.5 text-[22px]">ひらがな</span>
+      Flashcard Hiragana <span className="jp text-muted font-normal ml-2.5 text-[22px]">ひらがな</span>
     </>
   ) : (
     <>
-      Katakana Practice <span className="jp text-muted font-normal ml-2.5 text-[22px]">カタカナ</span>
+      Flashcard Katakana <span className="jp text-muted font-normal ml-2.5 text-[22px]">カタカナ</span>
     </>
   )

@@ -4,18 +4,23 @@ import { supabaseEnabled } from './lib/supabase'
 import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
 import { useSelection } from './store/useSelection'
+import { useTheme } from './store/useTheme'
+import { Logo } from './components/Logo'
+import { BackgroundPattern } from './components/BackgroundPattern'
 import Home from './pages/Home'
 import Practice from './pages/Practice'
+import Profile from './pages/Profile'
 import UserDashboard from './pages/UserDashboard'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminOverview from './pages/admin/Overview'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
 import { InstallPrompt } from './components/InstallPrompt'
-import { GoogleSignInButton } from './components/GoogleSignInButton'
+import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
 
 function AppContent() {
   const [msg, setMsg] = useState('')
+  const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(true)
   const [openKata, setOpenKata] = useState(true)
@@ -37,12 +42,17 @@ function AppContent() {
 
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
   const { srsMode, setSrsMode, resetOnLogout } = useSelection()
+  const { theme, toggleTheme } = useTheme()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
 
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
-    void signIn()
+    if (googleClientId) {
+      setLoginModalOpen(true)
+    } else {
+      void signIn()
+    }
   }
 
   const onLogout = async () => {
@@ -86,35 +96,80 @@ function AppContent() {
 
   return (
     <>
+      <BackgroundPattern />
       <header
-        className={`sticky top-0 z-50 w-full border-b transition-all duration-200 ${
-          scrolled ? 'bg-black/65 backdrop-blur-md border-white/15 shadow-md' : 'bg-transparent border-white/10'
+        className={`sticky top-0 z-50 w-full transition-all duration-200 ${
+          scrolled ? 'bg-panel/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
         }`}
       >
         <div className="navbar bg-transparent w-full px-4 sm:px-6 md:px-12 lg:px-20 xl:px-[120px] py-3 sm:py-3.5 md:py-4 justify-between">
           {/* Navbar Start: Brand Logo */}
           <div className="navbar-start w-auto">
             <NavLink to="/hiragana/flashcard" className="flex items-center hover:opacity-90 px-1 no-underline">
-              <img src="/logo_flashcard.svg" alt="Flashcard Logo" className="h-9 sm:h-11 w-auto block" />
+              <Logo className="h-9 sm:h-11 w-auto block" />
             </NavLink>
           </div>
 
           {/* Navbar End: Desktop Megamenu + Profile (sm:flex) & Mobile Hamburger Button (sm:hidden) */}
           <div className="navbar-end w-auto gap-2 sm:gap-3">
-            {/* Mobile Hamburger Button on Right */}
-            <button
-              type="button"
-              className="sm:hidden w-11 h-11 rounded-xl bg-pill hover:bg-pill-on border-0 text-ink flex items-center justify-center cursor-pointer transition-colors"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open Menu"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            {/* Mobile Theme Toggle Button using swap swap-rotate */}
+            <label className="sm:hidden swap swap-rotate cursor-pointer p-1 text-ink">
+              {/* this hidden checkbox controls the state */}
+              <input
+                type="checkbox"
+                checked={theme === 'dark'}
+                onChange={toggleTheme}
+              />
+
+              {/* sun icon */}
+              <svg
+                className="swap-off h-5 w-5 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
               </svg>
-            </button>
+
+              {/* moon icon */}
+              <svg
+                className="swap-on h-5 w-5 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+              </svg>
+            </label>
+
+            {/* Mobile Hamburger Button on Right using swap swap-rotate */}
+            <label
+              className="sm:hidden btn btn-ghost btn-circle swap swap-rotate border border-line bg-pill hover:bg-pill-on text-ink w-11 h-11 min-h-11 cursor-pointer"
+              aria-label="Toggle Menu"
+            >
+              <input
+                type="checkbox"
+                checked={mobileOpen}
+                onChange={() => setMobileOpen(!mobileOpen)}
+              />
+              {/* hamburger icon */}
+              <svg
+                className="swap-off fill-current w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <path d="M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" />
+              </svg>
+              {/* close icon */}
+              <svg
+                className="swap-on fill-current w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 512 512"
+              >
+                <polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
+              </svg>
+            </label>
 
             <div
-              className="hidden sm:flex megamenu megamenu-lg p-1.5 bg-transparent border border-white/15 rounded-box text-base font-medium"
+              className="hidden sm:flex megamenu megamenu-lg p-1.5 bg-transparent border border-line rounded-box text-base font-medium"
               id="my-megamenu-5"
             >
               <span className="megamenu-active"></span>
@@ -122,7 +177,7 @@ function AppContent() {
               <button
                 type="button"
                 popoverTarget="k1"
-                className={`text-base font-semibold ${isHiragana ? 'text-[#5eb839] font-bold' : ''}`}
+                className={`text-base font-semibold ${isHiragana ? 'text-accent font-bold' : ''}`}
               >
                 Hiragana
               </button>
@@ -132,18 +187,18 @@ function AppContent() {
                     <NavLink
                       to="/hiragana/flashcard"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
                     >
-                      Hiragana Flashcards
+                      Flashcard Hiragana
                     </NavLink>
                   </li>
                   <li>
                     <NavLink
                       to="/hiragana/word"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
                     >
-                      Hiragana Words
+                      Kata Hiragana
                     </NavLink>
                   </li>
                 </ul>
@@ -152,7 +207,7 @@ function AppContent() {
               <button
                 type="button"
                 popoverTarget="k2"
-                className={`text-base font-semibold ${isKatakana ? 'text-[#5eb839] font-bold' : ''}`}
+                className={`text-base font-semibold ${isKatakana ? 'text-accent font-bold' : ''}`}
               >
                 Katakana
               </button>
@@ -162,47 +217,103 @@ function AppContent() {
                     <NavLink
                       to="/katakana/flashcard"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
                     >
-                      Katakana Flashcards
+                      Flashcard Katakana
                     </NavLink>
                   </li>
                   <li>
                     <NavLink
                       to="/katakana/word"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-[#5eb839] font-bold' : ''}`}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
                     >
-                      Katakana Words
+                      Kata Katakana
                     </NavLink>
                   </li>
                 </ul>
               </div>
-
-              {role === 'admin' && (
-                <NavLink
-                  to="/admin"
-                  onClick={closeDropdowns}
-                  className={({ isActive }) =>
-                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-accent'}`
-                  }
-                >
-                  Dashboard
-                </NavLink>
-              )}
-
-              {user && role !== 'admin' && (
-                <NavLink
-                  to="/dashboard"
-                  onClick={closeDropdowns}
-                  className={({ isActive }) =>
-                    `text-base font-semibold ${isActive ? 'text-[#5eb839] font-bold' : 'text-accent'}`
-                  }
-                >
-                  Progress
-                </NavLink>
-              )}
             </div>
+
+            {/* Standalone Admin / Progress Button beside profile */}
+            {role === 'admin' && (
+              <NavLink
+                to="/admin"
+                onClick={closeDropdowns}
+                title="Admin"
+                aria-label="Admin"
+                className={({ isActive }) =>
+                  `hidden sm:inline-flex items-center justify-center p-1.5 transition-colors no-underline cursor-pointer ${
+                    isActive
+                      ? 'text-accent'
+                      : 'text-amber-500 hover:text-amber-600 dark:text-amber-400'
+                  }`
+                }
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </NavLink>
+            )}
+
+            {user && role !== 'admin' && (
+              <NavLink
+                to="/dashboard"
+                onClick={closeDropdowns}
+                title="Progres"
+                aria-label="Progres"
+                className={({ isActive }) =>
+                  `hidden sm:inline-flex items-center justify-center p-1.5 transition-colors no-underline cursor-pointer ${
+                    isActive
+                      ? 'text-accent'
+                      : 'text-ink/80 hover:text-ink'
+                  }`
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="w-6 h-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                  />
+                </svg>
+              </NavLink>
+            )}
+
+            {/* Desktop Theme Toggle using swap swap-rotate */}
+            <label className="hidden sm:inline-grid swap swap-rotate cursor-pointer p-1 text-ink hover:text-accent transition-colors">
+              {/* this hidden checkbox controls the state */}
+              <input
+                type="checkbox"
+                checked={theme === 'dark'}
+                onChange={toggleTheme}
+              />
+
+              {/* sun icon */}
+              <svg
+                className="swap-off h-6 w-6 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+              </svg>
+
+              {/* moon icon */}
+              <svg
+                className="swap-on h-6 w-6 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z" />
+              </svg>
+            </label>
 
             {/* Desktop Profile / Sign In Component */}
             <div className="hidden sm:block">
@@ -226,27 +337,28 @@ function AppContent() {
                 <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
                   <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content text-base truncate block">
-                      {user.user_metadata?.full_name || 'Learner'}
+                      {user.user_metadata?.full_name || 'Pelajar'}
                     </span>
                     <span className="text-xs text-base-content/60 truncate font-normal block">
                       {user.email}
                     </span>
                   </li>
                   <li>
-                    <a className="justify-between py-2.5 text-base font-medium" onClick={closeDropdowns}>
-                      Profile
-                      <span className="badge badge-md bg-[#5eb839] border-[#5eb839] text-white font-semibold">Active</span>
-                    </a>
+                    <NavLink
+                      to="/profile"
+                      onClick={closeDropdowns}
+                      className="justify-between py-2.5 text-base font-medium"
+                    >
+                      Profil
+                      <span className="badge badge-md bg-accent border-accent text-white font-semibold">Aktif</span>
+                    </NavLink>
                   </li>
                   <li>
                     <div
                       onClick={() => setSrsMode(!srsMode)}
                       className="flex items-center justify-between py-2.5 text-base font-medium cursor-pointer hover:bg-base-200/60 rounded-lg"
                     >
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">🧠</span>
-                        <span>SRS Mode</span>
-                      </span>
+                      <span>Mode SRS</span>
                       <input
                         type="checkbox"
                         checked={srsMode}
@@ -255,23 +367,22 @@ function AppContent() {
                       />
                     </div>
                   </li>
-                  {role === 'admin' ? (
+                  {role === 'admin' && (
                     <li>
-                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2.5 text-base">
-                        Dashboard
-                        <span className="badge badge-accent badge-xs">Admin</span>
-                      </NavLink>
-                    </li>
-                  ) : (
-                    <li>
-                      <NavLink to="/dashboard" onClick={closeDropdowns} className="justify-between text-accent font-semibold py-2.5 text-base">
-                        Progres
-                        <span className="badge badge-accent badge-xs">User</span>
+                      <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-amber-400 font-semibold py-2.5 text-base">
+                        Dasbor
+                        <span className="badge badge-warning badge-xs">Admin</span>
                       </NavLink>
                     </li>
                   )}
-                  <li><button onClick={() => void onLogout()} className="py-2.5 text-base font-medium">Logout</button></li>
-                  <li><button onClick={() => void onDelete()} className="text-error py-2.5 text-base font-medium">Hapus Akun</button></li>
+                  <li>
+                    <button onClick={() => void onLogout()} className="py-2.5 text-base font-medium text-error flex items-center gap-2.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5 shrink-0">
+                        <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
+                      </svg>
+                      <span>Keluar</span>
+                    </button>
+                  </li>
                 </ul>
               </div>
             ) : (
@@ -284,51 +395,42 @@ function AppContent() {
                   <svg className="w-5 h-5 opacity-75" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <span>Sign in</span>
+                  <span>Masuk</span>
                 </div>
                 <ul tabIndex={-1} className="menu menu-md dropdown-content bg-base-100 rounded-box z-50 mt-2 w-72 p-3 shadow-xl border border-base-200 text-base">
                   <li className="menu-title px-4 py-2 border-b border-base-200 mb-1">
                     <span className="font-semibold text-base-content text-base block">
-                      Tamu (Guest)
+                      Tamu
                     </span>
                     <span className="text-xs text-base-content/60 font-normal block">
                       Masuk untuk sinkronisasi cloud
                     </span>
                   </li>
-                  <li>
-                    <div
-                      onClick={() => setSrsMode(!srsMode)}
-                      className="flex items-center justify-between py-2.5 text-base font-medium cursor-pointer hover:bg-base-200/60 rounded-lg"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="text-lg">🧠</span>
-                        <span>SRS Mode</span>
-                      </span>
-                      <input
-                        type="checkbox"
-                        checked={srsMode}
-                        onChange={() => setSrsMode(!srsMode)}
-                        className="toggle toggle-success toggle-sm pointer-events-none"
-                      />
-                    </div>
-                  </li>
-                  <div className="pt-2.5 mt-1 border-t border-base-200 px-1 flex justify-center">
-                    <GoogleSignInButton
-                      width={248}
+                  <li className="pt-2 mt-1">
+                    <button
+                      type="button"
                       disabled={loading}
-                      onSuccess={closeDropdowns}
-                      onError={toast}
-                      onFallbackClick={() => {
+                      onClick={() => {
                         closeDropdowns()
                         onLogin()
                       }}
-                    />
-                  </div>
+                      className="btn btn-md w-full rounded-full bg-pill hover:bg-pill-on border border-white/15 hover:border-white/30 text-ink text-base font-semibold normal-case mt-1 shadow-none"
+                    >
+                      Masuk
+                    </button>
+                  </li>
                 </ul>
               </div>
             )}
             </div>
           </div>
+        </div>
+        <div
+          className={`w-full transition-all duration-300 ${
+            scrolled ? 'px-0' : 'px-4 sm:px-6 md:px-12 lg:px-20 xl:px-[120px]'
+          }`}
+        >
+          <div className="h-0.5 w-full bg-ink/20" />
         </div>
       </header>
 
@@ -348,16 +450,20 @@ function AppContent() {
                   onClick={() => setMobileOpen(false)}
                   className="flex items-center no-underline"
                 >
-                  <img src="/logo_flashcard.svg" alt="Flashcard Logo" className="h-9 w-auto block" />
+                  <Logo className="h-9 w-auto block" />
                 </NavLink>
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  aria-label="Close Menu"
-                  className="w-11 h-11 rounded-xl bg-pill hover:bg-pill-on border-0 text-ink flex items-center justify-center cursor-pointer transition-colors"
+                  aria-label="Tutup Menu"
+                  className="w-11 h-11 rounded-xl bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="fill-current w-5 h-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 512 512"
+                  >
+                    <polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
                   </svg>
                 </button>
               </div>
@@ -370,7 +476,7 @@ function AppContent() {
                     type="button"
                     onClick={() => setOpenHira(!openHira)}
                     className={`w-full flex items-center justify-between py-2 bg-transparent border-0 text-left text-[17px] font-semibold cursor-pointer ${
-                      isHiragana ? 'text-[#5eb839]' : 'text-ink'
+                      isHiragana ? 'text-accent' : 'text-ink'
                     }`}
                   >
                     <span>Hiragana</span>
@@ -390,22 +496,22 @@ function AppContent() {
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
                           `block py-3.5 text-[15px] no-underline border-b border-line/70 ${
-                            isActive ? 'text-[#5eb839] font-semibold' : 'text-muted hover:text-ink'
+                            isActive ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
                           }`
                         }
                       >
-                        Hiragana Flashcards
+                        Flashcard Hiragana
                       </NavLink>
                       <NavLink
                         to="/hiragana/word"
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
                           `block py-3.5 text-[15px] no-underline ${
-                            isActive ? 'text-[#5eb839] font-semibold' : 'text-muted hover:text-ink'
+                            isActive ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
                           }`
                         }
                       >
-                        Hiragana Words
+                        Kata Hiragana
                       </NavLink>
                     </div>
                   )}
@@ -417,7 +523,7 @@ function AppContent() {
                     type="button"
                     onClick={() => setOpenKata(!openKata)}
                     className={`w-full flex items-center justify-between py-2 bg-transparent border-0 text-left text-[17px] font-semibold cursor-pointer ${
-                      isKatakana ? 'text-[#5eb839]' : 'text-ink'
+                      isKatakana ? 'text-accent' : 'text-ink'
                     }`}
                   >
                     <span>Katakana</span>
@@ -437,43 +543,42 @@ function AppContent() {
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
                           `block py-3.5 text-[15px] no-underline border-b border-line/70 ${
-                            isActive ? 'text-[#5eb839] font-semibold' : 'text-muted hover:text-ink'
+                            isActive ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
                           }`
                         }
                       >
-                        Katakana Flashcards
+                        Flashcard Katakana
                       </NavLink>
                       <NavLink
                         to="/katakana/word"
                         onClick={() => setMobileOpen(false)}
                         className={({ isActive }) =>
                           `block py-3.5 text-[15px] no-underline ${
-                            isActive ? 'text-[#5eb839] font-semibold' : 'text-muted hover:text-ink'
+                            isActive ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
                           }`
                         }
                       >
-                        Katakana Words
+                        Kata Katakana
                       </NavLink>
                     </div>
                   )}
                 </div>
 
-                {/* SRS Mode Row */}
-                <div
-                  onClick={() => setSrsMode(!srsMode)}
-                  className="border-b border-line py-4 flex items-center justify-between cursor-pointer"
-                >
-                  <span className="text-[17px] font-semibold text-ink flex items-center gap-2">
-                    <span>🧠</span>
-                    <span>SRS Mode</span>
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={srsMode}
-                    onChange={() => setSrsMode(!srsMode)}
-                    className="toggle toggle-md pointer-events-none"
-                  />
-                </div>
+                {/* SRS Mode Row (only when logged in) */}
+                {user && (
+                  <div
+                    onClick={() => setSrsMode(!srsMode)}
+                    className="border-b border-line py-4 flex items-center justify-between cursor-pointer"
+                  >
+                    <span className="text-[17px] font-semibold text-ink">Mode SRS</span>
+                    <input
+                      type="checkbox"
+                      checked={srsMode}
+                      onChange={() => setSrsMode(!srsMode)}
+                      className="toggle toggle-md pointer-events-none"
+                    />
+                  </div>
+                )}
 
                 {role === 'admin' && (
                   <div className="border-b border-line py-4">
@@ -481,10 +586,24 @@ function AppContent() {
                       to="/admin"
                       onClick={() => setMobileOpen(false)}
                       className={({ isActive }) =>
-                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-accent'}`
+                        `flex items-center gap-2.5 text-[17px] font-semibold no-underline ${isActive ? 'text-accent' : 'text-amber-400'}`
                       }
                     >
-                      Dashboard
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="w-5 h-5 shrink-0"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                        />
+                      </svg>
+                      <span>Dasbor</span>
                     </NavLink>
                   </div>
                 )}
@@ -495,10 +614,24 @@ function AppContent() {
                       to="/dashboard"
                       onClick={() => setMobileOpen(false)}
                       className={({ isActive }) =>
-                        `block text-[17px] font-semibold no-underline ${isActive ? 'text-[#5eb839]' : 'text-accent'}`
+                        `flex items-center gap-2.5 text-[17px] font-semibold no-underline ${isActive ? 'text-accent' : 'text-sky-400'}`
                       }
                     >
-                      Progres
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="w-5 h-5 shrink-0"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                        />
+                      </svg>
+                      <span>Progres</span>
                     </NavLink>
                   </div>
                 )}
@@ -509,7 +642,11 @@ function AppContent() {
             <div className="px-6 py-5">
               {user ? (
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3 px-4 py-2.5 rounded-full bg-pill border border-line">
+                  <NavLink
+                    to="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 rounded-full bg-pill hover:bg-pill-on border border-line no-underline transition-colors"
+                  >
                     <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
                       <img
                         alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
@@ -523,38 +660,39 @@ function AppContent() {
                     <span className="text-sm font-semibold text-ink truncate flex-1">
                       {user.user_metadata?.full_name ?? user.email}
                     </span>
-                  </div>
+                  </NavLink>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => void onLogout()}
-                      className="flex-1 h-11 rounded-full bg-pill hover:bg-pill-on border border-line text-ink font-semibold text-sm cursor-pointer transition-colors"
+                      className="flex-1 h-11 rounded-full bg-pill hover:bg-pill-on border border-line text-error font-semibold text-sm cursor-pointer transition-colors inline-flex items-center justify-center gap-2"
                     >
-                      Logout
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void onDelete()}
-                      className="flex-1 h-11 rounded-full bg-pill hover:bg-pill-on border border-line text-bad font-semibold text-sm cursor-pointer transition-colors"
-                    >
-                      Hapus Akun
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-5 shrink-0">
+                        <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
+                      </svg>
+                      <span>Keluar</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <GoogleSignInButton
-                  width={260}
+                <button
+                  type="button"
                   disabled={loading}
-                  onSuccess={() => setMobileOpen(false)}
-                  onError={(m) => {
-                    setMobileOpen(false)
-                    toast(m)
-                  }}
-                  onFallbackClick={() => {
+                  onClick={() => {
                     setMobileOpen(false)
                     onLogin()
                   }}
-                />
+                  className="w-full h-12 rounded-full bg-pill hover:bg-pill-on border border-line text-ink font-semibold text-[15px] flex items-center justify-center gap-2.5 cursor-pointer transition-colors"
+                >
+                  <svg className="w-5 h-5 text-ink" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a3 3 0 110 6 3 3 0 010-6zm0 12.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <span>Masuk</span>
+                </button>
               )}
             </div>
           </aside>
@@ -564,8 +702,8 @@ function AppContent() {
       <main
         className={
           isPractice
-            ? 'w-full max-w-full m-0 flex flex-col px-4 pt-4 pb-6 md:px-16 md:pt-5 md:pb-8 xl:px-[120px] xl:pt-6 xl:pb-10'
-            : 'w-full max-w-full m-0 px-5 pt-4 pb-10 md:px-16 md:pt-5 md:pb-12 xl:px-[120px] xl:pt-6 xl:pb-14'
+            ? 'relative z-10 w-full max-w-full m-0 flex flex-col px-4 pt-4 pb-6 md:px-16 md:pt-5 md:pb-8 xl:px-[120px] xl:pt-6 xl:pb-10'
+            : 'relative z-10 w-full max-w-full m-0 px-5 pt-4 pb-10 md:px-16 md:pt-5 md:pb-12 xl:px-[120px] xl:pt-6 xl:pb-14'
         }
       >
         <InstallPrompt />
@@ -579,6 +717,7 @@ function AppContent() {
           <Route path="/katakana/word" element={<Home script="katakana" mode="word" onHint={toast} />} />
           <Route path="/practice/:script" element={<Practice />} />
           <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/profile" element={<Profile onDeleteAccount={onDelete} />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />
@@ -588,13 +727,19 @@ function AppContent() {
         </Routes>
       </main>
 
+      <GoogleSignInModal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        onFallbackOAuth={() => void signIn()}
+      />
+
       <dialog id="my_modal_1" className="modal">
         <div className="modal-box">
           <h3 className="text-lg font-bold">Informasi</h3>
           <p className="py-4">{msg}</p>
           <div className="modal-action">
             <form method="dialog">
-              <button className="btn">Close</button>
+              <button className="btn">Tutup</button>
             </form>
           </div>
         </div>
@@ -613,7 +758,7 @@ function AppContent() {
               >
                 Hapus Akun
               </button>
-              <button className="btn w-36 h-11 min-h-11">Close</button>
+              <button className="btn w-36 h-11 min-h-11">Tutup</button>
             </form>
           </div>
         </div>

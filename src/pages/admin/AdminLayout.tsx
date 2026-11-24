@@ -12,7 +12,7 @@ export default function AdminLayout() {
     return (
       <div className="text-center py-[60px]">
         <h2 className="text-2xl font-bold mb-2">Akses Terbatas</h2>
-        <p className="text-muted text-[13px]">Halaman ini hanya dapat diakses oleh akun dengan role administrator.</p>
+        <p className="text-muted text-[13px]">Halaman ini hanya dapat diakses oleh akun dengan peran administrator.</p>
         <Navigate to="/" replace />
       </div>
     )
@@ -27,7 +27,7 @@ export default function AdminLayout() {
     <div>
       <div className="flex gap-2 border-b border-line pb-3 mb-6">
         <NavLink to="/admin" end className={navClass}>
-          Ringkasan (Overview)
+          Ringkasan
         </NavLink>
         <NavLink to="/admin/users" className={navClass}>
           Daftar Pengguna

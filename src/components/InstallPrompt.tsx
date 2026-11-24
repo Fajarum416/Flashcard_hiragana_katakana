@@ -52,8 +52,8 @@ export function InstallPrompt() {
     return (
       <div className="bg-panel border border-accent rounded-xl px-4 py-3 my-3 mx-auto max-w-[1240px] flex items-center justify-between gap-3 text-[13px]">
         <div>
-          <strong>Install Enna Card di iPhone/iPad:</strong> Ketuk tombol <strong>Share</strong>{' '}
-          <span className="text-base">⎋</span> di Safari, lalu pilih <strong>Add to Home Screen</strong> [+] untuk
+          <strong>Pasang Enna Card di iPhone/iPad:</strong> Ketuk tombol <strong>Bagikan</strong>{' '}
+          <span className="text-base">⎋</span> di Safari, lalu pilih <strong>Tambah ke Layar Utama</strong> [+] untuk
           akses offline cepat.
         </div>
         <button
@@ -74,10 +74,10 @@ export function InstallPrompt() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-xs px-3.5 py-1.5 cursor-pointer transition-all"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-semibold text-xs px-3.5 py-1.5 cursor-pointer transition-all"
             onClick={handleInstallClick}
           >
-            Install App
+            Pasang Aplikasi
           </button>
           <button
             type="button"

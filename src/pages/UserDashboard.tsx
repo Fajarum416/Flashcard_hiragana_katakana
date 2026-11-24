@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
 import { fetchUserDetail, type SessionRow } from '../lib/admin'
 import { db } from '../lib/db'
@@ -22,22 +22,22 @@ const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: 
   learning: {
     boxClass: 'bg-[rgba(235,185,80,0.25)] border-[#e6a23c]',
     textClass: 'text-[#e6a23c]',
-    label: 'Belajar (Box 1-2)',
+    label: 'Belajar (Kotak 1-2)',
   },
   almost: {
     boxClass: 'bg-[rgba(138,167,255,0.25)] border-accent',
     textClass: 'text-accent',
-    label: 'Hampir (Box 3)',
+    label: 'Hampir (Kotak 3)',
   },
   mastered: {
     boxClass: 'bg-[rgba(94,196,154,0.25)] border-ok',
     textClass: 'text-ok',
-    label: 'Hafal (Box 4-5, ≥80%)',
+    label: 'Hafal (Kotak 4-5, ≥80%)',
   },
 }
 
 export default function UserDashboard() {
-  const { user, role, loading: authLoading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const localStats = useSelection((s) => s.stats)
 
   const [progress, setProgress] = useState<Map<string, ProgressRow>>(new Map())
@@ -115,20 +115,19 @@ export default function UserDashboard() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-        <Link to="/hiragana/flashcard" className="text-muted text-[13px] underline hover:text-ink">
-          ← Kembali ke Latihan Flashcard
-        </Link>
-        {error && <span className="text-xs text-muted">Menampilkan sinkronisasi terakhir ({error})</span>}
-      </div>
+      {error && (
+        <div className="mb-4 text-xs text-muted">
+          Menampilkan sinkronisasi terakhir ({error})
+        </div>
+      )}
 
-      {/* User Profile & Summary Header */}
+      {/* Progress Summary Header */}
       <div className="bg-panel border border-line rounded-xl p-5 mb-6">
-        <div className="flex justify-between items-start flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-line shrink-0">
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-line shrink-0">
               <img
-                alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
+                alt={user.user_metadata?.full_name ?? user.email ?? 'Profil'}
                 className="w-full h-full object-cover"
                 src={
                   user.user_metadata?.avatar_url ||
@@ -137,22 +136,13 @@ export default function UserDashboard() {
                 }
               />
             </div>
-            <div>
-              <h2 className="m-0 mb-1 text-xl font-bold">
-                {user.user_metadata?.full_name || 'Learner'}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="m-0 text-xl font-bold">
+                {user.user_metadata?.full_name || user.email || 'Pelajar'}
               </h2>
-              <div className="text-muted text-[13px] mb-2">{user.email}</div>
-              <div className="flex gap-2 flex-wrap">
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-muted font-medium">
-                  Role: {role ?? 'user'}
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#5eb839] text-white font-semibold">
-                  Status: Aktif
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-ink font-medium">
-                  🔥 Streak: {userStreak} hari
-                </span>
-              </div>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-ink font-medium">
+                🔥 Beruntun: {userStreak} hari
+              </span>
             </div>
           </div>
 
@@ -214,7 +204,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'hiragana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+                    activeTab === 'hiragana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
                   }`}
                   onClick={() => setActiveTab('hiragana')}
                 >
@@ -223,7 +213,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'katakana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+                    activeTab === 'katakana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
                   }`}
                   onClick={() => setActiveTab('katakana')}
                 >
@@ -243,7 +233,7 @@ export default function UserDashboard() {
             </div>
 
             {/* Gojuon Heatmap */}
-            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Single (Gojūon & Dakuten - 71 Huruf)</h4>
+            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
             <div className="overflow-x-auto pb-3 mb-5">
               <div className="grid grid-cols-[repeat(16,minmax(48px,1fr))] gap-1.5 min-w-[800px]">
                 {COL_IDS.map((id) => (
@@ -256,7 +246,7 @@ export default function UserDashboard() {
                       const level = masteryLevel(stat)
                       const st = LEVEL_STYLES[level]
                       const title = stat
-                        ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                        ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Kotak: ${stat.box}`
                         : `${cell.k} (${cell.r}) - Belum dicoba`
                       return (
                         <div
@@ -275,7 +265,7 @@ export default function UserDashboard() {
             </div>
 
             {/* Yoon Heatmap */}
-            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Composite (Yōon - 33 Huruf)</h4>
+            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
             <div className="overflow-x-auto pb-3">
               <div className="grid grid-cols-[repeat(11,minmax(64px,1fr))] gap-1.5 min-w-[700px]">
                 {YOON_IDS.map((id) => (
@@ -287,7 +277,7 @@ export default function UserDashboard() {
                       const level = masteryLevel(stat)
                       const st = LEVEL_STYLES[level]
                       const title = stat
-                        ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                        ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Kotak: ${stat.box}`
                         : `${cell.k} (${cell.r}) - Belum dicoba`
                       return (
                         <div
@@ -332,10 +322,10 @@ export default function UserDashboard() {
                       return (
                         <tr key={s.id}>
                           <th>{idx + 1}</th>
-                          <td>{new Date(s.started_at).toLocaleString()}</td>
+                          <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
                           <td className="capitalize">{s.script}</td>
                           <td>
-                            {s.mode === 'char' ? 'Characters' : 'Words'} {s.composite ? '(Comp)' : '(Single)'}
+                            {s.mode === 'char' ? 'Huruf' : 'Kata'} {s.composite ? '(Gabungan)' : '(Tunggal)'}
                           </td>
                           <td>{s.total_cards}</td>
                           <td className="text-ok">{s.correct_cards}</td>
