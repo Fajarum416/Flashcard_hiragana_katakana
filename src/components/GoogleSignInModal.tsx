@@ -158,7 +158,7 @@ export function GoogleSignInModal({ open, onClose, onFallbackOAuth }: GoogleSign
         if (e.target === dialogRef.current) onClose()
       }}
     >
-      <div className="modal-box max-w-sm border border-white/10 bg-[#1a1d24] text-ink">
+      <div className="modal-box max-w-sm border border-line bg-panel text-ink">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-bold">Masuk ke Enna Card</h3>
           <button

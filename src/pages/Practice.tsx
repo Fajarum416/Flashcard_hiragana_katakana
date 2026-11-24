@@ -4,7 +4,6 @@ import type { Script } from '../data/kana'
 import { buildDeck, shuffle, type Card } from '../lib/deck'
 import { accuracy, norm } from '../lib/romaji'
 import { queueSession, recordAnswer } from '../lib/sync'
-import { getBox } from '../lib/srs'
 import { TypeStyleSwitches, scriptTitle } from '../components/TypeStyleSwitches'
 import { useSelection } from '../store/useSelection'
 
@@ -159,7 +158,7 @@ function Session({ script }: { script: Script }) {
         </p>
         <div className="flex justify-center gap-3 flex-wrap">
           <Link
-            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-semibold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all"
             to={backUrl}
             onClick={() => useSelection.getState().useDefault(script)}
           >
@@ -186,7 +185,7 @@ function Session({ script }: { script: Script }) {
         <div className="flex gap-3 justify-center flex-wrap">
           <button
             type="button"
-            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-sm md:text-[15px] px-7 py-3 cursor-pointer inline-block transition-all"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-semibold text-sm md:text-[15px] px-7 py-3 cursor-pointer inline-block transition-all"
             onClick={() => dispatch({ t: 'reset', q: makeDeck(script) })}
           >
             Mulai Ulang
@@ -228,11 +227,6 @@ function Session({ script }: { script: Script }) {
   return (
     <div className="flex flex-col justify-between p-0 w-full">
       <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 py-10 sm:py-16 md:py-40 lg:py-52 text-center">
-        {card.id && (
-          <div className="text-xs text-muted bg-pill px-2.5 py-0.5 rounded-full">
-            Kotak Hafalan: Kotak {getBox(useSelection.getState().stats[card.id])} / 5
-          </div>
-        )}
         <div className="[perspective:1000px] w-full flex justify-center">
           <div
             key={s.i}
@@ -259,31 +253,31 @@ function Session({ script }: { script: Script }) {
         </div>
       </div>
       <div className="grid grid-cols-1 min-[481px]:grid-cols-[1fr_auto] gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 border-t border-line pt-5 md:pt-6 shrink-0 w-full">
-        <div className="flex items-center border border-line rounded-full bg-pill/40 py-2 px-1 w-full justify-between min-[481px]:col-span-2 md:col-span-1 md:w-auto md:justify-self-start">
-          <div className="flex-1 min-w-0 px-3 py-0.5 text-center md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+        <div className="flex items-center border border-line rounded-full bg-pill/40 h-[62px] md:h-[68px] px-2 w-full justify-between min-[481px]:col-span-2 md:col-span-1 md:w-auto md:justify-self-start">
+          <div className="flex-1 min-w-0 px-2 py-0.5 text-center md:flex-none md:w-[120px] lg:w-[140px] shrink-0">
             <small className="block text-muted text-[11px] font-normal mb-0.5">
               Akurasi
             </small>
-            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">{accuracy(s.ok, s.i)}%</span>
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink whitespace-nowrap tabular-nums">{accuracy(s.ok, s.i)}%</span>
           </div>
-          <div className="flex-1 min-w-0 px-3 py-0.5 text-center border-l border-line md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+          <div className="flex-1 min-w-0 px-2 py-0.5 text-center border-l border-line md:flex-none md:w-[120px] lg:w-[140px] shrink-0">
             <small className="block text-muted text-[11px] font-normal mb-0.5">
               Tersisa
             </small>
-            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">{s.q.length - s.i}</span>
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink whitespace-nowrap tabular-nums">{s.q.length - s.i}</span>
           </div>
-          <div className="flex-1 min-w-0 px-3 py-0.5 text-center border-l border-line md:flex-none md:px-6 lg:px-7 md:min-w-[95px] lg:min-w-[110px]">
+          <div className="flex-1 min-w-0 px-2 py-0.5 text-center border-l border-line md:flex-none md:w-[120px] lg:w-[140px] shrink-0">
             <small className="block text-muted text-[11px] font-normal mb-0.5">
               Salah
             </small>
-            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink">
+            <span className="text-[20px] md:text-[22px] lg:text-[24px] font-normal leading-tight text-ink whitespace-nowrap tabular-nums">
               {s.bad} / {s.q.length}
             </span>
           </div>
         </div>
         <input
           ref={inputRef}
-          className={`w-full min-w-0 h-[50px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[56px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted focus:outline-none focus-visible:outline-none focus:border-white/30 ${inpBorderClass}`}
+          className={`w-full min-w-0 h-[62px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[68px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted focus:outline-none focus-visible:outline-none focus:border-white/30 ${inpBorderClass}`}
           value={s.value}
           placeholder="ketik romaji"
           autoComplete="off"

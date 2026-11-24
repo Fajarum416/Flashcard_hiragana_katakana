@@ -74,7 +74,7 @@ export function InstallPrompt() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-semibold text-xs px-3.5 py-1.5 cursor-pointer transition-all"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-semibold text-xs px-3.5 py-1.5 cursor-pointer transition-all"
             onClick={handleInstallClick}
           >
             Pasang Aplikasi

@@ -47,12 +47,12 @@ export default function Home({ script, mode, onHint }: Props) {
                   <div key={c.k} className="w-full max-w-[104px] text-center mb-5 sm:mb-[46px]">
                     <b
                       className={`block jp font-light text-[36px]/[1.2] border-b border-line pb-1 sm:pb-2 ${
-                        on ? 'text-accent' : 'text-[#f0f3f8]'
+                        on ? 'text-accent' : 'text-ink'
                       }`}
                     >
                       {c.k}
                     </b>
-                    <i className="block not-italic text-[#78859e] text-[15px] pt-1 sm:pt-2">{c.r}</i>
+                    <i className="block not-italic text-muted text-[15px] pt-1 sm:pt-2">{c.r}</i>
                   </div>
                 ))}
               </div>
@@ -80,12 +80,12 @@ export default function Home({ script, mode, onHint }: Props) {
                   <div key={i} className="w-full max-w-[80px] text-center mb-5 sm:mb-[46px]">
                     <b
                       className={`block jp font-light text-[42px]/[1.2] border-b border-line pb-1 sm:pb-2 ${
-                        on ? 'text-accent' : 'text-[#f0f3f8]'
+                        on ? 'text-accent' : 'text-ink'
                       }`}
                     >
                       {c ? c.k : '-'}
                     </b>
-                    <i className="block not-italic text-[#78859e] text-[15px] pt-1 sm:pt-2">{c ? c.r : '-'}</i>
+                    <i className="block not-italic text-muted text-[15px] pt-1 sm:pt-2">{c ? c.r : '-'}</i>
                   </div>
                 ))}
               </div>
@@ -160,7 +160,7 @@ export default function Home({ script, mode, onHint }: Props) {
         </span>
         {deck.length ? (
           <Link
-            className="border-0 rounded-full bg-[#5eb839] hover:bg-[#4ea32e] text-white font-bold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all shadow-md"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-bold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all shadow-md"
             to={`/practice/${sc}`}
           >
             Mulai Latihan -{' '}

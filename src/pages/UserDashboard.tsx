@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
 import { fetchUserDetail, type SessionRow } from '../lib/admin'
 import { db } from '../lib/db'
@@ -37,7 +37,7 @@ const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: 
 }
 
 export default function UserDashboard() {
-  const { user, role, loading: authLoading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const localStats = useSelection((s) => s.stats)
 
   const [progress, setProgress] = useState<Map<string, ProgressRow>>(new Map())
@@ -115,21 +115,17 @@ export default function UserDashboard() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between flex-wrap gap-2">
-        <Link
-          to="/hiragana/flashcard"
-          className="inline-flex items-center gap-1.5 border border-line rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-xs px-4 py-2 no-underline cursor-pointer transition-all"
-        >
-          ← Kembali
-        </Link>
-        {error && <span className="text-xs text-muted">Menampilkan sinkronisasi terakhir ({error})</span>}
-      </div>
+      {error && (
+        <div className="mb-4 text-xs text-muted">
+          Menampilkan sinkronisasi terakhir ({error})
+        </div>
+      )}
 
-      {/* User Profile & Summary Header */}
+      {/* Progress Summary Header */}
       <div className="bg-panel border border-line rounded-xl p-5 mb-6">
-        <div className="flex justify-between items-start flex-wrap gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full overflow-hidden ring-2 ring-line shrink-0">
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-line shrink-0">
               <img
                 alt={user.user_metadata?.full_name ?? user.email ?? 'Profil'}
                 className="w-full h-full object-cover"
@@ -140,22 +136,13 @@ export default function UserDashboard() {
                 }
               />
             </div>
-            <div>
-              <h2 className="m-0 mb-1 text-xl font-bold">
-                {user.user_metadata?.full_name || 'Pelajar'}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h2 className="m-0 text-xl font-bold">
+                {user.user_metadata?.full_name || user.email || 'Pelajar'}
               </h2>
-              <div className="text-muted text-[13px] mb-2">{user.email}</div>
-              <div className="flex gap-2 flex-wrap">
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-muted font-medium">
-                  Peran: {role === 'admin' ? 'Admin' : 'Pengguna'}
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#5eb839] text-white font-semibold">
-                  Status: Aktif
-                </span>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-ink font-medium">
-                  🔥 Beruntun: {userStreak} hari
-                </span>
-              </div>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-ink font-medium">
+                🔥 Beruntun: {userStreak} hari
+              </span>
             </div>
           </div>
 
@@ -217,7 +204,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'hiragana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+                    activeTab === 'hiragana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
                   }`}
                   onClick={() => setActiveTab('hiragana')}
                 >
@@ -226,7 +213,7 @@ export default function UserDashboard() {
                 <button
                   type="button"
                   className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'katakana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
+                    activeTab === 'katakana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
                   }`}
                   onClick={() => setActiveTab('katakana')}
                 >

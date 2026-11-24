@@ -41,10 +41,10 @@ export function TypeStyleSwitches({
 export const scriptTitle = (sc: 'hiragana' | 'katakana') =>
   sc === 'hiragana' ? (
     <>
-      Latihan Hiragana <span className="jp text-muted font-normal ml-2.5 text-[22px]">ひらがな</span>
+      Flashcard Hiragana <span className="jp text-muted font-normal ml-2.5 text-[22px]">ひらがな</span>
     </>
   ) : (
     <>
-      Latihan Katakana <span className="jp text-muted font-normal ml-2.5 text-[22px]">カタカナ</span>
+      Flashcard Katakana <span className="jp text-muted font-normal ml-2.5 text-[22px]">カタカナ</span>
     </>
   )
