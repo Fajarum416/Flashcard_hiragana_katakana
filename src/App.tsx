@@ -440,7 +440,7 @@ function AppContent() {
                       className="justify-between py-2.5 text-base font-medium"
                     >
                       Profil
-                      <span className="badge badge-md bg-accent border-accent text-white font-semibold">Aktif</span>
+                      <span className="badge badge-soft badge-success badge-md font-semibold">Aktif</span>
                     </NavLink>
                   </li>
                   <li>
@@ -461,7 +461,7 @@ function AppContent() {
                     <li>
                       <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-amber-400 font-semibold py-2.5 text-base">
                         Dasbor
-                        <span className="badge badge-warning badge-xs">Admin</span>
+                        <span className="badge badge-soft badge-warning badge-xs">Admin</span>
                       </NavLink>
                     </li>
                   )}

@@ -79,7 +79,7 @@ export default function VocabHome() {
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <span className="badge badge-sm font-bold text-accent bg-accent/10 border-accent/20 px-2.5 py-2">
+                  <span className="badge badge-soft badge-accent badge-sm font-bold">
                     Bab {ch.chapter}
                   </span>
                   <span className="text-xs font-semibold text-muted">
