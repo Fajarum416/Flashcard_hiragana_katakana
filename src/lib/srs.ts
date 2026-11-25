@@ -33,7 +33,8 @@ export const MASTERY_LABELS: Record<number, string> = {
 
 /** Mengembalikan label tingkat hafalan yang ramah pengguna berdasarkan nilai box (1-5). */
 export function getMasteryLabel(box?: number): string {
-  const level = Math.max(1, Math.min(5, box ?? 1))
+  if (box === undefined) return 'Baru'
+  const level = Math.max(1, Math.min(5, box))
   return MASTERY_LABELS[level] ?? 'Perlu Ulang'
 }
 

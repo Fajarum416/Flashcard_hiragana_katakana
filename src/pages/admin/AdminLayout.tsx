@@ -25,12 +25,18 @@ export default function AdminLayout() {
 
   return (
     <div>
-      <div className="flex gap-2 border-b border-line pb-3 mb-6">
+      <div className="flex flex-wrap gap-2 border-b border-line pb-3 mb-6">
         <NavLink to="/admin" end className={navClass}>
           Ringkasan
         </NavLink>
         <NavLink to="/admin/users" className={navClass}>
           Daftar Pengguna
+        </NavLink>
+        <NavLink to="/admin/vocab" className={navClass}>
+          Kelola Kosakata
+        </NavLink>
+        <NavLink to="/admin/kanji" className={navClass}>
+          Kelola Kanji
         </NavLink>
       </div>
       <Outlet />

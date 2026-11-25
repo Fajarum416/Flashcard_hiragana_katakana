@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { db } from '../lib/db'
 import { useSelection } from './useSelection'
 import { useVocabStore } from './useVocabStore'
+import { useKanjiStore } from './useKanjiStore'
 
 export type Role = 'user' | 'admin'
 
@@ -78,8 +79,10 @@ export const useAuth = create<AuthState>((set) => ({
     // Bersihkan seluruh progres lokal dan antrean sinkronisasi offline
     useSelection.getState().resetOnLogout()
     useVocabStore.getState().resetOnLogout()
+    useKanjiStore.getState().resetOnLogout()
     try {
       localStorage.removeItem('vocab_progress_storage_v1')
+      localStorage.removeItem('kanji_progress_storage_v1')
       localStorage.removeItem('kana-legacy-snapshot')
       localStorage.removeItem('kana-legacy-migrated')
     } catch {
@@ -90,6 +93,8 @@ export const useAuth = create<AuthState>((set) => ({
       db.pending_sessions.clear(),
       db.pending_vocab_answers.clear(),
       db.pending_vocab_sessions.clear(),
+      db.pending_kanji_answers.clear(),
+      db.pending_kanji_sessions.clear(),
     ])
 
     await supabase.auth.signOut()
