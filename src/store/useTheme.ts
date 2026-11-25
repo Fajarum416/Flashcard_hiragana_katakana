@@ -10,7 +10,7 @@ interface ThemeState {
 }
 
 const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'dark'
+  if (typeof window === 'undefined') return 'light'
   const stored = localStorage.getItem('kana_theme')
   if (stored) {
     try {
@@ -20,7 +20,7 @@ const getInitialTheme = (): Theme => {
       }
     } catch {}
   }
-  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+  return 'light'
 }
 
 export const applyTheme = (theme: Theme) => {

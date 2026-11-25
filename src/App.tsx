@@ -4,6 +4,7 @@ import { supabaseEnabled } from './lib/supabase'
 import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
 import { useSelection } from './store/useSelection'
+import { useVocabStore } from './store/useVocabStore'
 import { useTheme } from './store/useTheme'
 import { Logo } from './components/Logo'
 import { BackgroundPattern } from './components/BackgroundPattern'
@@ -15,6 +16,8 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminOverview from './pages/admin/Overview'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
+import VocabHome from './pages/vocab/VocabHome'
+import VocabPractice from './pages/vocab/VocabPractice'
 import { InstallPrompt } from './components/InstallPrompt'
 import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
 
@@ -22,8 +25,9 @@ function AppContent() {
   const [msg, setMsg] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [openHira, setOpenHira] = useState(true)
-  const [openKata, setOpenKata] = useState(true)
+  const [openHira, setOpenHira] = useState(false)
+  const [openKata, setOpenKata] = useState(false)
+  const [openVocab, setOpenVocab] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
@@ -60,6 +64,7 @@ function AppContent() {
     setMobileOpen(false)
     await signOut()
     resetOnLogout()
+    useVocabStore.getState().resetOnLogout()
     navigate('/hiragana/flashcard', { replace: true })
   }
 
@@ -74,6 +79,7 @@ function AppContent() {
     const err = await deleteAccount()
     if (!err) {
       resetOnLogout()
+      useVocabStore.getState().resetOnLogout()
       navigate('/hiragana/flashcard', { replace: true })
     }
     toast(err ? `Gagal menghapus akun: ${err}` : 'Akun berhasil dihapus')
@@ -93,6 +99,7 @@ function AppContent() {
   const isHiragana = location.pathname.startsWith('/hiragana') || location.pathname.startsWith('/practice/hiragana')
   const isKatakana = location.pathname.startsWith('/katakana') || location.pathname.startsWith('/practice/katakana')
   const isPractice = location.pathname.startsWith('/practice/')
+  const isVocab = location.pathname.startsWith('/vocab')
 
   return (
     <>
@@ -229,6 +236,36 @@ function AppContent() {
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
                     >
                       Kata Katakana
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                popoverTarget="k3"
+                className={`text-base font-semibold ${isVocab ? 'text-accent font-bold' : ''}`}
+              >
+                Kosakata
+              </button>
+              <div id="k3" popover="auto">
+                <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-44 text-base">
+                  <li>
+                    <NavLink
+                      to="/vocab?level=n5"
+                      onClick={closeDropdowns}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search !== '?level=n4' ? '!text-accent font-bold' : ''}`}
+                    >
+                      N5
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/vocab?level=n4"
+                      onClick={closeDropdowns}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=n4' ? '!text-accent font-bold' : ''}`}
+                    >
+                      N4
                     </NavLink>
                   </li>
                 </ul>
@@ -564,6 +601,53 @@ function AppContent() {
                   )}
                 </div>
 
+                {/* Kosakata Section */}
+                <div className="border-b border-line py-3">
+                  <button
+                    type="button"
+                    onClick={() => setOpenVocab(!openVocab)}
+                    className={`w-full flex items-center justify-between py-2 bg-transparent border-0 text-left text-[17px] font-semibold cursor-pointer ${
+                      isVocab ? 'text-accent' : 'text-ink'
+                    }`}
+                  >
+                    <span>Kosakata</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${openVocab ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openVocab && (
+                    <div className="mt-1">
+                      <NavLink
+                        to="/vocab?level=n5"
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `block py-3.5 text-[15px] no-underline border-b border-line/70 ${
+                            isActive && location.search !== '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                          }`
+                        }
+                      >
+                        N5
+                      </NavLink>
+                      <NavLink
+                        to="/vocab?level=n4"
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `block py-3.5 text-[15px] no-underline ${
+                            isActive && location.search === '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                          }`
+                        }
+                      >
+                        N4
+                      </NavLink>
+                    </div>
+                  )}
+                </div>
+
                 {/* SRS Mode Row (only when logged in) */}
                 {user && (
                   <div
@@ -716,6 +800,8 @@ function AppContent() {
           <Route path="/katakana/flashcard" element={<Home script="katakana" mode="char" onHint={toast} />} />
           <Route path="/katakana/word" element={<Home script="katakana" mode="word" onHint={toast} />} />
           <Route path="/practice/:script" element={<Practice />} />
+          <Route path="/vocab" element={<VocabHome />} />
+          <Route path="/vocab/:level/:chapter" element={<VocabPractice />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/profile" element={<Profile onDeleteAccount={onDelete} />} />
           <Route path="/admin" element={<AdminLayout />}>
