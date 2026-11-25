@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { fetchUsers, setRole, type AdminUser } from '../../lib/admin'
 import { downloadCsv, toCsv } from '../../lib/csv'
 import { useAuth } from '../../store/useAuth'
+import { showToast } from '../../store/useToast'
 
 export default function AdminUsers() {
   const currentUser = useAuth((s) => s.user)
@@ -12,12 +13,6 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('')
   const [pendingRole, setPendingRole] = useState<{ user: AdminUser; nextRole: 'user' | 'admin' } | null>(null)
   const [savingRoleId, setSavingRoleId] = useState<string | null>(null)
-  const [noticeMsg, setNoticeMsg] = useState('')
-
-  const showNotice = (m: string) => {
-    setNoticeMsg(m)
-    ;(document.getElementById('users_notice_modal') as HTMLDialogElement | null)?.showModal()
-  }
 
   useEffect(() => {
     fetchUsers()
@@ -54,11 +49,12 @@ export default function AdminUsers() {
     try {
       await setRole(user.id, nextRole)
       setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, role: nextRole } : u)))
-      showNotice(
+      showToast(
         `Peran ${user.display_name || user.email} berhasil diubah menjadi ${nextRole === 'admin' ? 'Admin' : 'Pengguna'}.`,
+        'success',
       )
     } catch (err: any) {
-      showNotice(`Gagal mengubah peran: ${err?.message ?? 'Terjadi kesalahan'}`)
+      showToast(`Gagal mengubah peran: ${err?.message ?? 'Terjadi kesalahan'}`, 'error')
     } finally {
       setSavingRoleId(null)
       setPendingRole(null)
@@ -223,18 +219,6 @@ export default function AdminUsers() {
               >
                 Simpan Peran
               </button>
-            </form>
-          </div>
-        </div>
-      </dialog>
-
-      <dialog id="users_notice_modal" className="modal">
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Informasi</h3>
-          <p className="py-4">{noticeMsg}</p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Tutup</button>
             </form>
           </div>
         </div>

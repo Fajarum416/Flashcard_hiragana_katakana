@@ -10,6 +10,7 @@ import {
   type ManagedKanjiChapter,
 } from '../../lib/content'
 import { useContentStore } from '../../store/useContentStore'
+import { showToast } from '../../store/useToast'
 import type { KanjiExample, KanjiItem, KanjiLevel } from '../../data/kanji/types'
 
 export default function AdminKanji() {
@@ -18,8 +19,11 @@ export default function AdminKanji() {
   const [selectedChapterId, setSelectedChapterId] = useState<string>('')
   const [busy, setBusy] = useState(false)
   const [uploadingImg, setUploadingImg] = useState(false)
-  const [notice, setNotice] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<{
+    title: string
+    message: string
+    onConfirm: () => Promise<void>
+  } | null>(null)
 
   // Form Bab
   const [chapterModalOpen, setChapterModalOpen] = useState(false)
@@ -54,10 +58,9 @@ export default function AdminKanji() {
 
   const isBuiltInOnly = activeChapter?.id.startsWith('builtin-')
 
-  const showSuccess = (msg: string) => {
-    setError(null)
-    setNotice(msg)
-    window.setTimeout(() => setNotice(null), 4000)
+  const showSuccess = (msg: string) => showToast(msg, 'success')
+  const setError = (msg: string | null) => {
+    if (msg) showToast(msg, 'error')
   }
 
   const handleSeed = async () => {
@@ -117,20 +120,25 @@ export default function AdminKanji() {
     }
   }
 
-  const handleDeleteChapter = async (ch: ManagedKanjiChapter) => {
+  const handleDeleteChapter = (ch: ManagedKanjiChapter) => {
     if (ch.id.startsWith('builtin-')) return
-    if (!window.confirm(`Hapus "${ch.title}" beserta seluruh Kanji di dalamnya?`)) return
-    setBusy(true)
-    try {
-      await deleteKanjiChapter(ch.id)
-      await refresh(true)
-      setSelectedChapterId('')
-      showSuccess('Bab Kanji dihapus.')
-    } catch (err: any) {
-      setError(err?.message ?? 'Gagal menghapus bab')
-    } finally {
-      setBusy(false)
-    }
+    setConfirmDelete({
+      title: 'Hapus Bab Kanji?',
+      message: `Hapus "${ch.title}" beserta seluruh Kanji di dalamnya? Tindakan ini tidak bisa dibatalkan.`,
+      onConfirm: async () => {
+        setBusy(true)
+        try {
+          await deleteKanjiChapter(ch.id)
+          await refresh(true)
+          setSelectedChapterId('')
+          showSuccess('Bab Kanji dihapus.')
+        } catch (err: any) {
+          setError(err?.message ?? 'Gagal menghapus bab')
+        } finally {
+          setBusy(false)
+        }
+      },
+    })
   }
 
   const openNewKanji = () => {
@@ -221,18 +229,23 @@ export default function AdminKanji() {
     }
   }
 
-  const handleDeleteKanji = async (kanjiId: string) => {
-    if (!window.confirm('Hapus Kanji ini?')) return
-    setBusy(true)
-    try {
-      await deleteKanjiItem(kanjiId)
-      await refresh(true)
-      showSuccess('Kanji dihapus.')
-    } catch (err: any) {
-      setError(err?.message ?? 'Gagal menghapus Kanji')
-    } finally {
-      setBusy(false)
-    }
+  const handleDeleteKanji = (kanjiId: string) => {
+    setConfirmDelete({
+      title: 'Hapus Kanji?',
+      message: 'Yakin ingin menghapus Kanji ini? Tindakan ini tidak bisa dibatalkan.',
+      onConfirm: async () => {
+        setBusy(true)
+        try {
+          await deleteKanjiItem(kanjiId)
+          await refresh(true)
+          showSuccess('Kanji dihapus.')
+        } catch (err: any) {
+          setError(err?.message ?? 'Gagal menghapus Kanji')
+        } finally {
+          setBusy(false)
+        }
+      },
+    })
   }
 
   const handleCsvImport = async (e: React.FormEvent) => {
@@ -294,9 +307,6 @@ export default function AdminKanji() {
         </div>
       </div>
 
-      {notice && <div className="alert alert-success text-sm py-2.5 rounded-xl">{notice}</div>}
-      {error && <div className="alert alert-error text-sm py-2.5 rounded-xl">{error}</div>}
-
       {isBuiltInOnly && (
         <div className="bg-warning/15 border border-warning/40 text-ink rounded-xl p-3.5 text-xs sm:text-sm">
           Data saat ini masih berasal dari fallback kode lokal. Klik <strong>Seed Data Bawaan</strong> agar seluruh bab & Kanji masuk ke Supabase untuk dikelola dan diberi ilustrasi.
@@ -314,7 +324,7 @@ export default function AdminKanji() {
               setSelectedChapterId('')
             }}
             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              level === lv ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
+              level === lv ? 'bg-base-100 text-accent border border-line shadow-sm' : 'text-muted hover:text-ink'
             }`}
           >
             {lv === 'jft' ? 'JFT' : `JLPT ${lv.toUpperCase()}`}
@@ -333,7 +343,7 @@ export default function AdminKanji() {
                 onClick={() => setSelectedChapterId(ch.id)}
                 className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${
                   isSelected
-                    ? 'bg-accent/10 border-accent text-ink'
+                    ? 'bg-base-200 border-accent text-ink shadow-sm'
                     : 'bg-panel border-line hover:border-accent/40 text-ink'
                 }`}
               >
@@ -353,7 +363,10 @@ export default function AdminKanji() {
                       className="btn btn-xs btn-ghost text-muted hover:text-ink"
                       title="Edit Bab"
                     >
-                      ✏️
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                        <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -361,7 +374,9 @@ export default function AdminKanji() {
                       className="btn btn-xs btn-ghost text-error"
                       title="Hapus Bab"
                     >
-                      🗑️
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                        <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                      </svg>
                     </button>
                   </div>
                 )}
@@ -402,53 +417,87 @@ export default function AdminKanji() {
               {activeChapter.items.length === 0 ? (
                 <p className="text-sm text-muted py-8 text-center">Belum ada Kanji di bab ini.</p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {activeChapter.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-bg/40 border border-line rounded-xl p-3.5 flex items-center gap-3 justify-between"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {item.image ? (
-                          <img
-                            src={item.image}
-                            alt={item.kanji}
-                            className="w-12 h-12 rounded-lg object-cover border border-line shrink-0 bg-panel"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-lg bg-pill border border-line flex items-center justify-center text-2xl font-black font-japanese text-ink shrink-0">
-                            {item.kanji}
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-lg font-black font-japanese text-ink">{item.kanji}</span>
-                            <span className="text-sm font-bold text-accent truncate">{item.meaning}</span>
-                          </div>
-                          <div className="text-xs text-muted truncate">On: {item.onyomi}</div>
-                          <div className="text-xs text-muted truncate">Kun: {item.kunyomi}</div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-1 shrink-0">
-                        <button
-                          type="button"
-                          disabled={isBuiltInOnly}
-                          onClick={() => openEditKanji(item)}
-                          className="btn btn-xs btn-ghost text-ink"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          disabled={isBuiltInOnly}
-                          onClick={() => void handleDeleteKanji(item.id)}
-                          className="btn btn-xs btn-ghost text-error"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="table table-fixed w-full min-w-[760px]">
+                    <thead>
+                      <tr>
+                        <th className="w-12">#</th>
+                        <th className="w-36">Kanji</th>
+                        <th className="w-40">Arti</th>
+                        <th className="w-44">Bacaan</th>
+                        <th className="w-44">Mnemonic</th>
+                        <th className="w-32"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeChapter.items.map((item, idx) => (
+                        <tr key={item.id}>
+                          <th>{idx + 1}</th>
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <div className="avatar shrink-0">
+                                <div className="mask mask-squircle h-12 w-12 bg-pill flex items-center justify-center border border-dashed border-line">
+                                  {item.image ? (
+                                    <img src={item.image} alt={item.kanji} className="object-cover" />
+                                  ) : (
+                                    <span className="text-[10px] text-muted text-center leading-tight px-1">
+                                      Belum upload
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="font-bold font-japanese text-lg truncate">{item.kanji}</div>
+                            </div>
+                          </td>
+                          <td className="font-medium text-sm truncate" title={item.meaning}>
+                            {item.meaning}
+                          </td>
+                          <td>
+                            <div className="font-japanese text-sm truncate" title={item.onyomi || '-'}>
+                              On: {item.onyomi || '-'}
+                            </div>
+                            <span
+                              className="badge badge-ghost badge-sm font-japanese max-w-full truncate"
+                              title={item.kunyomi || '-'}
+                            >
+                              Kun: {item.kunyomi || '-'}
+                            </span>
+                          </td>
+                          <td className="text-xs opacity-70 truncate" title={item.mnemonic || '-'}>
+                            {item.mnemonic || '-'}
+                          </td>
+                          <th className="text-right whitespace-nowrap space-x-1">
+                            <button
+                              type="button"
+                              disabled={isBuiltInOnly}
+                              onClick={() => openEditKanji(item)}
+                              className="btn btn-ghost btn-sm text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isBuiltInOnly}
+                              onClick={() => void handleDeleteKanji(item.id)}
+                              className="btn btn-ghost btn-sm text-sm text-error"
+                            >
+                              Hapus
+                            </button>
+                          </th>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>#</th>
+                        <th>Kanji</th>
+                        <th>Arti</th>
+                        <th>Bacaan</th>
+                        <th>Mnemonic</th>
+                        <th></th>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
               )}
             </>
@@ -656,6 +705,30 @@ export default function AdminKanji() {
             </button>
           </div>
         </form>
+      </dialog>
+      {/* Modal Konfirmasi Hapus */}
+      <dialog className={`modal ${confirmDelete ? 'modal-open' : ''}`}>
+        <div className="modal-box bg-panel border border-line">
+          <h3 className="text-lg font-bold">{confirmDelete?.title}</h3>
+          <p className="py-4 text-sm text-muted">{confirmDelete?.message}</p>
+          <div className="modal-action">
+            <button type="button" className="btn" onClick={() => setConfirmDelete(null)}>
+              Tutup
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              className="btn btn-error text-white"
+              onClick={async () => {
+                const fn = confirmDelete?.onConfirm
+                setConfirmDelete(null)
+                if (fn) await fn()
+              }}
+            >
+              Hapus
+            </button>
+          </div>
+        </div>
       </dialog>
     </div>
   )

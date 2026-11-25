@@ -9,6 +9,7 @@ import {
   type ManagedVocabChapter,
 } from '../../lib/content'
 import { useContentStore } from '../../store/useContentStore'
+import { showToast } from '../../store/useToast'
 import type { VocabWord } from '../../data/vocab/types'
 
 export default function AdminVocab() {
@@ -16,8 +17,11 @@ export default function AdminVocab() {
   const [level, setLevel] = useState<'n5' | 'n4'>('n5')
   const [selectedChapterId, setSelectedChapterId] = useState<string>('')
   const [busy, setBusy] = useState(false)
-  const [notice, setNotice] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<{
+    title: string
+    message: string
+    onConfirm: () => Promise<void>
+  } | null>(null)
 
   // Form Bab
   const [chapterModalOpen, setChapterModalOpen] = useState(false)
@@ -52,10 +56,9 @@ export default function AdminVocab() {
 
   const isBuiltInOnly = activeChapter?.id.startsWith('builtin-')
 
-  const showSuccess = (msg: string) => {
-    setError(null)
-    setNotice(msg)
-    window.setTimeout(() => setNotice(null), 4000)
+  const showSuccess = (msg: string) => showToast(msg, 'success')
+  const setError = (msg: string | null) => {
+    if (msg) showToast(msg, 'error')
   }
 
   const handleSeed = async () => {
@@ -115,20 +118,25 @@ export default function AdminVocab() {
     }
   }
 
-  const handleDeleteChapter = async (ch: ManagedVocabChapter) => {
+  const handleDeleteChapter = (ch: ManagedVocabChapter) => {
     if (ch.id.startsWith('builtin-')) return
-    if (!window.confirm(`Hapus "${ch.title}" beserta seluruh kosakatanya?`)) return
-    setBusy(true)
-    try {
-      await deleteVocabChapter(ch.id)
-      await refresh(true)
-      setSelectedChapterId('')
-      showSuccess('Bab berhasil dihapus.')
-    } catch (err: any) {
-      setError(err?.message ?? 'Gagal menghapus bab')
-    } finally {
-      setBusy(false)
-    }
+    setConfirmDelete({
+      title: 'Hapus Bab Kosakata?',
+      message: `Hapus "${ch.title}" beserta seluruh kosakatanya? Tindakan ini tidak bisa dibatalkan.`,
+      onConfirm: async () => {
+        setBusy(true)
+        try {
+          await deleteVocabChapter(ch.id)
+          await refresh(true)
+          setSelectedChapterId('')
+          showSuccess('Bab berhasil dihapus.')
+        } catch (err: any) {
+          setError(err?.message ?? 'Gagal menghapus bab')
+        } finally {
+          setBusy(false)
+        }
+      },
+    })
   }
 
   const openNewWord = () => {
@@ -188,18 +196,23 @@ export default function AdminVocab() {
     }
   }
 
-  const handleDeleteWord = async (wordId: string) => {
-    if (!window.confirm('Hapus kosakata ini?')) return
-    setBusy(true)
-    try {
-      await deleteVocabWord(wordId)
-      await refresh(true)
-      showSuccess('Kosakata dihapus.')
-    } catch (err: any) {
-      setError(err?.message ?? 'Gagal menghapus kosakata')
-    } finally {
-      setBusy(false)
-    }
+  const handleDeleteWord = (wordId: string) => {
+    setConfirmDelete({
+      title: 'Hapus Kosakata?',
+      message: 'Yakin ingin menghapus kosakata ini? Tindakan ini tidak bisa dibatalkan.',
+      onConfirm: async () => {
+        setBusy(true)
+        try {
+          await deleteVocabWord(wordId)
+          await refresh(true)
+          showSuccess('Kosakata dihapus.')
+        } catch (err: any) {
+          setError(err?.message ?? 'Gagal menghapus kosakata')
+        } finally {
+          setBusy(false)
+        }
+      },
+    })
   }
 
   const handleCsvImport = async (e: React.FormEvent) => {
@@ -261,9 +274,6 @@ export default function AdminVocab() {
         </div>
       </div>
 
-      {notice && <div className="alert alert-success text-sm py-2.5 rounded-xl">{notice}</div>}
-      {error && <div className="alert alert-error text-sm py-2.5 rounded-xl">{error}</div>}
-
       {isBuiltInOnly && (
         <div className="bg-warning/15 border border-warning/40 text-ink rounded-xl p-3.5 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2">
           <span>
@@ -283,7 +293,7 @@ export default function AdminVocab() {
               setSelectedChapterId('')
             }}
             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              level === lv ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
+              level === lv ? 'bg-base-100 text-accent border border-line shadow-sm' : 'text-muted hover:text-ink'
             }`}
           >
             JLPT {lv.toUpperCase()}
@@ -302,7 +312,7 @@ export default function AdminVocab() {
                 onClick={() => setSelectedChapterId(ch.id)}
                 className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${
                   isSelected
-                    ? 'bg-accent/10 border-accent text-ink'
+                    ? 'bg-base-200 border-accent text-ink shadow-sm'
                     : 'bg-panel border-line hover:border-accent/40 text-ink'
                 }`}
               >
@@ -322,7 +332,10 @@ export default function AdminVocab() {
                       className="btn btn-xs btn-ghost text-muted hover:text-ink"
                       title="Edit Bab"
                     >
-                      ✏️
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                        <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -330,7 +343,9 @@ export default function AdminVocab() {
                       className="btn btn-xs btn-ghost text-error"
                       title="Hapus Bab"
                     >
-                      🗑️
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+                        <path fillRule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clipRule="evenodd" />
+                      </svg>
                     </button>
                   </div>
                 )}
@@ -372,30 +387,44 @@ export default function AdminVocab() {
                 <p className="text-sm text-muted py-8 text-center">Belum ada kosakata di bab ini.</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="table table-sm">
+                  <table className="table table-fixed w-full min-w-[680px]">
                     <thead>
                       <tr>
-                        <th>Kata</th>
-                        <th>Bacaan</th>
-                        <th>Arti</th>
-                        <th className="text-right">Aksi</th>
+                        <th className="w-12">#</th>
+                        <th className="w-36">Kosakata</th>
+                        <th className="w-44">Arti</th>
+                        <th className="w-40">Bacaan</th>
+                        <th className="w-28">Jenis</th>
+                        <th className="w-32"></th>
                       </tr>
                     </thead>
                     <tbody>
-                      {activeChapter.words.map((w) => (
+                      {activeChapter.words.map((w, idx) => (
                         <tr key={w.id}>
-                          <td className="font-japanese font-bold text-base">{w.kanji || w.kana}</td>
-                          <td>
-                            <div className="font-japanese text-xs">{w.kana}</div>
-                            <div className="text-xs text-muted">{w.romaji}</div>
+                          <th>{idx + 1}</th>
+                          <td className="font-bold font-japanese text-base truncate" title={w.kanji || w.kana}>
+                            {w.kanji || w.kana}
                           </td>
-                          <td className="font-medium text-xs sm:text-sm max-w-[200px] truncate">{w.meaning}</td>
-                          <td className="text-right space-x-1 whitespace-nowrap">
+                          <td className="font-medium text-sm truncate" title={w.meaning}>
+                            {w.meaning}
+                          </td>
+                          <td>
+                            <div className="font-japanese text-sm truncate" title={w.kana}>
+                              {w.kana}
+                            </div>
+                            <span className="badge badge-ghost badge-sm max-w-full truncate" title={w.romaji}>
+                              {w.romaji}
+                            </span>
+                          </td>
+                          <td className="text-xs opacity-70 truncate" title={w.type || '-'}>
+                            {w.type || '-'}
+                          </td>
+                          <th className="text-right whitespace-nowrap space-x-1">
                             <button
                               type="button"
                               disabled={isBuiltInOnly}
                               onClick={() => openEditWord(w)}
-                              className="btn btn-xs btn-ghost text-ink"
+                              className="btn btn-ghost btn-sm text-sm"
                             >
                               Edit
                             </button>
@@ -403,14 +432,24 @@ export default function AdminVocab() {
                               type="button"
                               disabled={isBuiltInOnly}
                               onClick={() => void handleDeleteWord(w.id)}
-                              className="btn btn-xs btn-ghost text-error"
+                              className="btn btn-ghost btn-sm text-sm text-error"
                             >
                               Hapus
                             </button>
-                          </td>
+                          </th>
                         </tr>
                       ))}
                     </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>#</th>
+                        <th>Kosakata</th>
+                        <th>Arti</th>
+                        <th>Bacaan</th>
+                        <th>Jenis</th>
+                        <th></th>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               )}
@@ -591,6 +630,30 @@ export default function AdminVocab() {
             </button>
           </div>
         </form>
+      </dialog>
+      {/* Modal Konfirmasi Hapus */}
+      <dialog className={`modal ${confirmDelete ? 'modal-open' : ''}`}>
+        <div className="modal-box bg-panel border border-line">
+          <h3 className="text-lg font-bold">{confirmDelete?.title}</h3>
+          <p className="py-4 text-sm text-muted">{confirmDelete?.message}</p>
+          <div className="modal-action">
+            <button type="button" className="btn" onClick={() => setConfirmDelete(null)}>
+              Tutup
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              className="btn btn-error text-white"
+              onClick={async () => {
+                const fn = confirmDelete?.onConfirm
+                setConfirmDelete(null)
+                if (fn) await fn()
+              }}
+            >
+              Hapus
+            </button>
+          </div>
+        </div>
       </dialog>
     </div>
   )

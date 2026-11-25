@@ -26,9 +26,10 @@ import KanjiHome from './pages/kanji/KanjiHome'
 import KanjiPractice from './pages/kanji/KanjiPractice'
 import { InstallPrompt } from './components/InstallPrompt'
 import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
+import { ToastContainer } from './components/ToastContainer'
+import { showToast } from './store/useToast'
 
 function AppContent() {
-  const [msg, setMsg] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(false)
@@ -47,8 +48,7 @@ function AppContent() {
   }, [])
 
   const toast = (m: string) => {
-    setMsg(m)
-    ;(document.getElementById('my_modal_1') as HTMLDialogElement | null)?.showModal()
+    showToast(m, 'info')
   }
 
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
@@ -928,23 +928,13 @@ function AppContent() {
         </Routes>
       </main>
 
+      <ToastContainer />
+
       <GoogleSignInModal
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
         onFallbackOAuth={() => void signIn()}
       />
-
-      <dialog id="my_modal_1" className="modal">
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Informasi</h3>
-          <p className="py-4">{msg}</p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Tutup</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
 
       <dialog id="delete_account_modal" className="modal">
         <div className="modal-box">

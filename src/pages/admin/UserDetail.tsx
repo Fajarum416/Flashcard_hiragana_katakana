@@ -4,6 +4,7 @@ import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../../data/ka
 import { fetchUserDetail, resetProgress, setDisabled, setRole, type UserDetail } from '../../lib/admin'
 import { masteryLevel, streak, type Level } from '../../lib/mastery'
 import { useAuth } from '../../store/useAuth'
+import { showToast } from '../../store/useToast'
 
 const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: string }> = {
   none: {
@@ -40,12 +41,6 @@ export default function AdminUserDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Script>('hiragana')
-  const [modalMsg, setModalMsg] = useState('')
-
-  const showNotice = (m: string) => {
-    setModalMsg(m)
-    ;(document.getElementById('admin_notice_modal') as HTMLDialogElement | null)?.showModal()
-  }
 
   const load = () => {
     if (!id) return
@@ -78,10 +73,10 @@ export default function AdminUserDetail() {
     ;(document.getElementById('reset_confirm_modal') as HTMLDialogElement | null)?.close()
     try {
       await resetProgress(profile.id)
-      showNotice('Progres berhasil direset.')
+      showToast('Progres berhasil direset.', 'success')
       load()
     } catch (err: any) {
-      showNotice(`Gagal mereset: ${err.message}`)
+      showToast(`Gagal mereset: ${err.message}`, 'error')
     }
   }
 
@@ -90,10 +85,10 @@ export default function AdminUserDetail() {
     const action = profile.disabled ? 'mengaktifkan' : 'menonaktifkan'
     try {
       await setDisabled(profile.id, !profile.disabled)
-      showNotice(`Akun berhasil di-${action}.`)
+      showToast(`Akun berhasil di-${action}.`, 'success')
       load()
     } catch (err: any) {
-      showNotice(`Gagal: ${err.message}`)
+      showToast(`Gagal: ${err.message}`, 'error')
     }
   }
 
@@ -102,10 +97,10 @@ export default function AdminUserDetail() {
     const nextRole = profile.role === 'admin' ? 'user' : 'admin'
     try {
       await setRole(profile.id, nextRole)
-      showNotice(`Peran berhasil diubah menjadi ${nextRole === 'admin' ? 'Admin' : 'Pengguna'}.`)
+      showToast(`Peran berhasil diubah menjadi ${nextRole === 'admin' ? 'Admin' : 'Pengguna'}.`, 'success')
       load()
     } catch (err: any) {
-      showNotice(`Gagal mengubah peran: ${err.message}`)
+      showToast(`Gagal mengubah peran: ${err.message}`, 'error')
     }
   }
 
@@ -384,18 +379,6 @@ export default function AdminUserDetail() {
               >
                 Simpan Peran
               </button>
-            </form>
-          </div>
-        </div>
-      </dialog>
-
-      <dialog id="admin_notice_modal" className="modal">
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Informasi</h3>
-          <p className="py-4">{modalMsg}</p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Tutup</button>
             </form>
           </div>
         </div>

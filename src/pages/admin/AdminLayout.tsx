@@ -19,7 +19,7 @@ export default function AdminLayout() {
   }
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `no-underline px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors ${
+    `no-underline px-4 py-2 rounded-full text-sm sm:text-[15px] font-medium transition-colors ${
       isActive ? 'bg-pill-on text-ink' : 'text-muted hover:text-ink'
     }`
 

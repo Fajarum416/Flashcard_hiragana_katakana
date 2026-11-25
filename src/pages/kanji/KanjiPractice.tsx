@@ -324,7 +324,7 @@ export default function KanjiPractice() {
                 : 'btn-ghost text-muted hover:text-ink'
             }`}
           >
-            Pilihan Ganda
+            Kuiz
           </button>
         </div>
       </div>
