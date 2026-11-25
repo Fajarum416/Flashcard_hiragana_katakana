@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { N5_CHAPTERS, N4_CHAPTERS } from '../../data/vocab'
+import { useContentStore } from '../../store/useContentStore'
 import { useVocabStore } from '../../store/useVocabStore'
 
 export default function VocabHome() {
@@ -8,8 +8,9 @@ export default function VocabHome() {
   const setLevel = (next: 'n5' | 'n4') => setSearchParams({ level: next })
   const navigate = useNavigate()
   const { getChapterStats, showRomajiFront, toggleShowRomajiFront } = useVocabStore()
+  const vocabChapters = useContentStore((s) => s.vocabChapters)
 
-  const chapters = level === 'n5' ? N5_CHAPTERS : N4_CHAPTERS
+  const chapters = vocabChapters.filter((c) => c.level === level)
 
   return (
     <div className="w-full space-y-6">

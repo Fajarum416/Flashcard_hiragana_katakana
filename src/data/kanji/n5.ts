@@ -1,0 +1,357 @@
+import type { KanjiChapter } from './types'
+
+export const N5_KANJI_CHAPTERS: KanjiChapter[] = [
+  {
+    level: 'n5',
+    chapter: 1,
+    title: 'Bab 1: Angka & Satuan',
+    description: 'Kanji dasar angka satu sampai sepuluh yang paling sering digunakan.',
+    items: [
+      {
+        id: 'n5-k01-01',
+        kanji: '一',
+        onyomi: 'イチ (ichi)',
+        kunyomi: 'ひと・つ (hitotsu)',
+        meaning: 'Satu',
+        examples: [
+          { word: '一人', reading: 'ひとり', meaning: 'satu orang' },
+          { word: '一月', reading: 'いちがつ', meaning: 'Januari' },
+        ],
+      },
+      {
+        id: 'n5-k01-02',
+        kanji: '二',
+        onyomi: 'ニ (ni)',
+        kunyomi: 'ふた・つ (futatsu)',
+        meaning: 'Dua',
+        examples: [
+          { word: '二人', reading: 'ふたり', meaning: 'dua orang' },
+          { word: '二月', reading: 'にがつ', meaning: 'Februari' },
+        ],
+      },
+      {
+        id: 'n5-k01-03',
+        kanji: '三',
+        onyomi: 'サン (san)',
+        kunyomi: 'みっ・つ (mittsu)',
+        meaning: 'Tiga',
+        examples: [
+          { word: '三日', reading: 'みっか', meaning: 'tanggal 3' },
+          { word: '三月', reading: 'さんがつ', meaning: 'Maret' },
+        ],
+      },
+      {
+        id: 'n5-k01-04',
+        kanji: '四',
+        onyomi: 'シ (shi)',
+        kunyomi: 'よん・よっつ (yon / yottsu)',
+        meaning: 'Empat',
+        examples: [
+          { word: '四月', reading: 'しがつ', meaning: 'April' },
+          { word: '四日', reading: 'よっか', meaning: 'tanggal 4' },
+        ],
+      },
+      {
+        id: 'n5-k01-05',
+        kanji: '五',
+        onyomi: 'ゴ (go)',
+        kunyomi: 'いつ・つ (itsutsu)',
+        meaning: 'Lima',
+        examples: [
+          { word: '五月', reading: 'ごがつ', meaning: 'Mei' },
+          { word: '五日', reading: 'いつか', meaning: 'tanggal 5' },
+        ],
+      },
+      {
+        id: 'n5-k01-06',
+        kanji: '六',
+        onyomi: 'ロク (roku)',
+        kunyomi: 'むっ・つ (muttsu)',
+        meaning: 'Enam',
+        examples: [
+          { word: '六月', reading: 'ろくがつ', meaning: 'Juni' },
+          { word: '六日', reading: 'むいか', meaning: 'tanggal 6' },
+        ],
+      },
+      {
+        id: 'n5-k01-07',
+        kanji: '七',
+        onyomi: 'シチ (shichi)',
+        kunyomi: 'なな・つ (nanatsu)',
+        meaning: 'Tujuh',
+        examples: [
+          { word: '七月', reading: 'しちがつ', meaning: 'Juli' },
+          { word: '七日', reading: 'なのか', meaning: 'tanggal 7' },
+        ],
+      },
+      {
+        id: 'n5-k01-08',
+        kanji: '八',
+        onyomi: 'ハチ (hachi)',
+        kunyomi: 'やっ・つ (yattsu)',
+        meaning: 'Delapan',
+        examples: [
+          { word: '八月', reading: 'はちがつ', meaning: 'Agustus' },
+          { word: '八日', reading: 'ようか', meaning: 'tanggal 8' },
+        ],
+      },
+      {
+        id: 'n5-k01-09',
+        kanji: '九',
+        onyomi: 'キュウ・ク (kyuu / ku)',
+        kunyomi: 'ここの・つ (kokonotsu)',
+        meaning: 'Sembilan',
+        examples: [
+          { word: '九月', reading: 'くがつ', meaning: 'September' },
+          { word: '九日', reading: 'ここのか', meaning: 'tanggal 9' },
+        ],
+      },
+      {
+        id: 'n5-k01-10',
+        kanji: '十',
+        onyomi: 'ジュウ (juu)',
+        kunyomi: 'とお (too)',
+        meaning: 'Sepuluh',
+        examples: [
+          { word: '十月', reading: 'じゅうがつ', meaning: 'Oktober' },
+          { word: '十分', reading: 'じゅっぷん', meaning: '10 menit' },
+        ],
+      },
+    ],
+  },
+  {
+    level: 'n5',
+    chapter: 2,
+    title: 'Bab 2: Waktu & Hari',
+    description: 'Kanji dasar untuk menyatakan hari, bulan, tahun, dan waktu.',
+    items: [
+      {
+        id: 'n5-k02-01',
+        kanji: '日',
+        onyomi: 'ニチ・ジツ (nichi / jitsu)',
+        kunyomi: 'ひ・か (hi / ka)',
+        meaning: 'Matahari / Hari',
+        examples: [
+          { word: '日本', reading: 'にほん', meaning: 'Jepang' },
+          { word: '毎日', reading: 'まいにち', meaning: 'setiap hari' },
+        ],
+      },
+      {
+        id: 'n5-k02-02',
+        kanji: '月',
+        onyomi: 'ゲツ・ガツ (getsu / gatsu)',
+        kunyomi: 'つき (tsuki)',
+        meaning: 'Bulan',
+        examples: [
+          { word: '月曜日', reading: 'げつようび', meaning: 'hari Senin' },
+          { word: '今月', reading: 'こんげつ', meaning: 'bulan ini' },
+        ],
+      },
+      {
+        id: 'n5-k02-03',
+        kanji: '火',
+        onyomi: 'カ (ka)',
+        kunyomi: 'ひ (hi)',
+        meaning: 'Api',
+        examples: [
+          { word: '火曜日', reading: 'かようび', meaning: 'hari Selasa' },
+          { word: '火事', reading: 'かじ', meaning: 'kebakaran' },
+        ],
+      },
+      {
+        id: 'n5-k02-04',
+        kanji: '水',
+        onyomi: 'スイ (sui)',
+        kunyomi: 'みず (mizu)',
+        meaning: 'Air',
+        examples: [
+          { word: '水曜日', reading: 'すいようび', meaning: 'hari Rabu' },
+          { word: 'お水', reading: 'おみず', meaning: 'air minum' },
+        ],
+      },
+      {
+        id: 'n5-k02-05',
+        kanji: '木',
+        onyomi: 'モク・ボク (moku / boku)',
+        kunyomi: 'き (ki)',
+        meaning: 'Pohon / Kayu',
+        examples: [
+          { word: '木曜日', reading: 'もくようび', meaning: 'hari Kamis' },
+          { word: '大きい木', reading: 'おおきいき', meaning: 'pohon besar' },
+        ],
+      },
+      {
+        id: 'n5-k02-06',
+        kanji: '金',
+        onyomi: 'キン・コン (kin / kon)',
+        kunyomi: 'かね (kane)',
+        meaning: 'Emas / Uang',
+        examples: [
+          { word: '金曜日', reading: 'きんようび', meaning: 'hari Jumat' },
+          { word: 'お金', reading: 'おかね', meaning: 'uang' },
+        ],
+      },
+      {
+        id: 'n5-k02-07',
+        kanji: '土',
+        onyomi: 'ド・ト (do / to)',
+        kunyomi: 'つち (tsuchi)',
+        meaning: 'Tanah',
+        examples: [
+          { word: '土曜日', reading: 'どようび', meaning: 'hari Sabtu' },
+          { word: '土地', reading: 'とち', meaning: 'lahan / tanah' },
+        ],
+      },
+      {
+        id: 'n5-k02-08',
+        kanji: '年',
+        onyomi: 'ネン (nen)',
+        kunyomi: 'とし (toshi)',
+        meaning: 'Tahun',
+        examples: [
+          { word: '今年', reading: 'ことし', meaning: 'tahun ini' },
+          { word: '来年', reading: 'らいねん', meaning: 'tahun depan' },
+        ],
+      },
+      {
+        id: 'n5-k02-09',
+        kanji: '時',
+        onyomi: 'ジ (ji)',
+        kunyomi: 'とき (toki)',
+        meaning: 'Waktu / Jam',
+        examples: [
+          { word: '時間', reading: 'じかん', meaning: 'waktu' },
+          { word: '時計', reading: 'とけい', meaning: 'jam / arloji' },
+        ],
+      },
+      {
+        id: 'n5-k02-10',
+        kanji: '分',
+        onyomi: 'フン・ブン (fun / bun)',
+        kunyomi: 'わ・かる (wakaru)',
+        meaning: 'Menit / Mengerti / Bagian',
+        examples: [
+          { word: '五分', reading: 'ごふん', meaning: '5 menit' },
+          { word: '自分', reading: 'じぶん', meaning: 'diri sendiri' },
+        ],
+      },
+    ],
+  },
+  {
+    level: 'n5',
+    chapter: 3,
+    title: 'Bab 3: Alam & Arah',
+    description: 'Kanji elemen alam dan petunjuk arah dasar.',
+    items: [
+      {
+        id: 'n5-k03-01',
+        kanji: '山',
+        onyomi: 'サン (san)',
+        kunyomi: 'やま (yama)',
+        meaning: 'Gunung',
+        examples: [
+          { word: '富士山', reading: 'ふじさん', meaning: 'Gunung Fuji' },
+          { word: '山道', reading: 'やまみち', meaning: 'jalan gunung' },
+        ],
+      },
+      {
+        id: 'n5-k03-02',
+        kanji: '川',
+        onyomi: 'セン (sen)',
+        kunyomi: 'かわ (kawa)',
+        meaning: 'Sungai',
+        examples: [
+          { word: '小川', reading: 'おがわ', meaning: 'sungai kecil' },
+        ],
+      },
+      {
+        id: 'n5-k03-03',
+        kanji: '田',
+        onyomi: 'デン (den)',
+        kunyomi: 'た (ta)',
+        meaning: 'Sawah',
+        examples: [
+          { word: '田んぼ', reading: 'たんぼ', meaning: 'sawah padi' },
+          { word: '山田', reading: 'やまだ', meaning: 'marga Yamada' },
+        ],
+      },
+      {
+        id: 'n5-k03-04',
+        kanji: '人',
+        onyomi: 'ジン・ニン (jin / nin)',
+        kunyomi: 'ひと (hito)',
+        meaning: 'Orang / Manusia',
+        examples: [
+          { word: '日本人', reading: 'にほんじん', meaning: 'orang Jepang' },
+          { word: '大人', reading: 'おとな', meaning: 'orang dewasa' },
+        ],
+      },
+      {
+        id: 'n5-k03-05',
+        kanji: '上',
+        onyomi: 'ジョウ (jou)',
+        kunyomi: 'うえ・あ・がる (ue / agaru)',
+        meaning: 'Atas / Naik',
+        examples: [
+          { word: '上手', reading: 'じょうず', meaning: 'pandai / mahir' },
+          { word: '机の上', reading: 'つくえのうえ', meaning: 'di atas meja' },
+        ],
+      },
+      {
+        id: 'n5-k03-06',
+        kanji: '下',
+        onyomi: 'カ・ゲ (ka / ge)',
+        kunyomi: 'した・さ・がる (shita / sagaru)',
+        meaning: 'Bawah / Turun',
+        examples: [
+          { word: '地下鉄', reading: 'ちかてつ', meaning: 'kereta bawah tanah' },
+          { word: '下手', reading: 'へた', meaning: 'kurang mahir' },
+        ],
+      },
+      {
+        id: 'n5-k03-07',
+        kanji: '中',
+        onyomi: 'チュウ (chuu)',
+        kunyomi: 'なか (naka)',
+        meaning: 'Tengah / Dalam',
+        examples: [
+          { word: '一日中', reading: 'いちにちじゅう', meaning: 'seharian penuh' },
+          { word: '部屋の中', reading: 'へやのなか', meaning: 'di dalam kamar' },
+        ],
+      },
+      {
+        id: 'n5-k03-08',
+        kanji: '左',
+        onyomi: 'サ (sa)',
+        kunyomi: 'ひだり (hidari)',
+        meaning: 'Kiri',
+        examples: [
+          { word: '左手', reading: 'ひだりて', meaning: 'tangan kiri' },
+          { word: '左側', reading: 'ひだりがわ', meaning: 'sisi kiri' },
+        ],
+      },
+      {
+        id: 'n5-k03-09',
+        kanji: '右',
+        onyomi: 'ウ・ユウ (u / yuu)',
+        kunyomi: 'みぎ (migi)',
+        meaning: 'Kanan',
+        examples: [
+          { word: '右手', reading: 'みぎて', meaning: 'tangan kanan' },
+          { word: '右側', reading: 'みぎがわ', meaning: 'sisi kanan' },
+        ],
+      },
+      {
+        id: 'n5-k03-10',
+        kanji: '口',
+        onyomi: 'コウ・ク (kou / ku)',
+        kunyomi: 'くち (kuchi)',
+        meaning: 'Mulut / Pintu Masuk',
+        examples: [
+          { word: '入口', reading: 'いりぐち', meaning: 'pintu masuk' },
+          { word: '出口', reading: 'でぐち', meaning: 'pintu keluar' },
+        ],
+      },
+    ],
+  },
+]

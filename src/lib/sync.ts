@@ -4,6 +4,7 @@ import { parseSelection, pickSelection } from './settings'
 import { useAuth } from '../store/useAuth'
 import { useSelection } from '../store/useSelection'
 import { useVocabStore } from '../store/useVocabStore'
+import { useKanjiStore } from '../store/useKanjiStore'
 
 const LEGACY_SNAPSHOT = 'kana-legacy-snapshot'
 const LEGACY_DONE = 'kana-legacy-migrated'
@@ -68,6 +69,39 @@ export async function queueVocabSession(s: VocabSessionInput): Promise<void> {
   void syncNow()
 }
 
+/** Mencatat satu jawaban kanji: update stats lokal, lalu masuk antrean sync ke tabel kanji_progress. */
+export async function recordKanjiAnswer(
+  kanjiId: string,
+  level: string,
+  chapter: number,
+  correct: boolean
+): Promise<void> {
+  useKanjiStore.getState().recordAnswer(kanjiId, correct)
+  await db.pending_kanji_answers.add({
+    userId: useAuth.getState().user?.id ?? '',
+    kanjiId,
+    level,
+    chapter,
+    correct,
+    at: Date.now(),
+  })
+  void syncNow()
+}
+
+export interface KanjiSessionInput {
+  level: string
+  chapter: number
+  totalCards: number
+  correctCards: number
+  durationSec: number
+  startedAt: string
+}
+
+export async function queueKanjiSession(s: KanjiSessionInput): Promise<void> {
+  await db.pending_kanji_sessions.add({ ...s, userId: useAuth.getState().user?.id ?? '' })
+  void syncNow()
+}
+
 /** Progres sebelum Tahap 4 hanya ada di stats lokal. Simpan salinannya sekali untuk dimigrasi. */
 function initLegacySnapshot() {
   if (localStorage.getItem(LEGACY_SNAPSHOT) !== null) return
@@ -127,6 +161,8 @@ async function flush(): Promise<boolean> {
   await db.pending_sessions.where('userId').equals('').modify({ userId: user.id })
   await db.pending_vocab_answers.where('userId').equals('').modify({ userId: user.id })
   await db.pending_vocab_sessions.where('userId').equals('').modify({ userId: user.id })
+  await db.pending_kanji_answers.where('userId').equals('').modify({ userId: user.id })
+  await db.pending_kanji_sessions.where('userId').equals('').modify({ userId: user.id })
 
   // 1. Flush antrean jawaban kana
   const answers = await db.pending_answers.where('userId').equals(user.id).sortBy('id')
@@ -194,6 +230,41 @@ async function flush(): Promise<boolean> {
     await db.pending_vocab_sessions.delete(vs.id!)
   }
 
+  // 5. Flush antrean jawaban kanji ke tabel kanji_progress
+  const kanjiAnswers = await db.pending_kanji_answers.where('userId').equals(user.id).sortBy('id')
+  for (const ka of kanjiAnswers) {
+    const { error } = await supabase.rpc('record_kanji_answer', {
+      p_kanji_id: ka.kanjiId,
+      p_level: ka.level,
+      p_chapter: ka.chapter,
+      p_correct: ka.correct,
+    })
+    if (error) {
+      console.warn('[sync] record_kanji_answer gagal:', error.message)
+      return false
+    }
+    await db.pending_kanji_answers.delete(ka.id!)
+  }
+
+  // 6. Flush antrean sesi kanji ke tabel kanji_sessions
+  const kanjiSessions = await db.pending_kanji_sessions.where('userId').equals(user.id).sortBy('id')
+  for (const ks of kanjiSessions) {
+    const { error } = await supabase.from('kanji_sessions').insert({
+      user_id: user.id,
+      level: ks.level,
+      chapter: ks.chapter,
+      total_cards: ks.totalCards,
+      correct_cards: ks.correctCards,
+      duration_sec: ks.durationSec,
+      started_at: ks.startedAt,
+    })
+    if (error) {
+      console.warn('[sync] insert kanji_sessions gagal:', error.message)
+      return false
+    }
+    await db.pending_kanji_sessions.delete(ks.id!)
+  }
+
   return true
 }
 
@@ -215,10 +286,11 @@ async function pushSettings(): Promise<void> {
 /** Server menjadi sumber kebenaran: ambil progres dan pilihan kolom. */
 async function pull(userId: string): Promise<void> {
   if (!supabase) return
-  const [prog, set, vprog] = await Promise.all([
+  const [prog, set, vprog, kprog] = await Promise.all([
     supabase.from('card_progress').select('kana_id, ok, no, box, last_reviewed_at'),
     supabase.from('user_settings').select('selection').eq('user_id', userId).maybeSingle(),
     supabase.from('vocab_progress').select('word_id, ok, no, box, last_reviewed_at'),
+    supabase.from('kanji_progress').select('kanji_id, ok, no, box, last_reviewed_at'),
   ])
 
   // Pull progress aksara kana
@@ -251,6 +323,22 @@ async function pull(userId: string): Promise<void> {
       }
     }
     useVocabStore.getState().setStats(vocabStats)
+  }
+
+  // Pull progress kanji dari tabel kanji_progress
+  if (kprog.error) {
+    console.warn('[sync] ambil kanji_progress gagal (tabel belum dibuat?):', kprog.error.message)
+  } else if (kprog.data) {
+    const kanjiStats: Record<string, { ok: number; no: number; box?: number; lastReviewedAt?: number }> = {}
+    for (const r of kprog.data) {
+      kanjiStats[r.kanji_id] = {
+        ok: r.ok,
+        no: r.no,
+        box: r.box,
+        lastReviewedAt: r.last_reviewed_at ? new Date(r.last_reviewed_at).getTime() : undefined,
+      }
+    }
+    useKanjiStore.getState().setStats(kanjiStats)
   }
 
   if (set.error) {

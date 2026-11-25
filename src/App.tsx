@@ -5,6 +5,8 @@ import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
 import { useSelection } from './store/useSelection'
 import { useVocabStore } from './store/useVocabStore'
+import { useKanjiStore } from './store/useKanjiStore'
+import { useContentStore } from './store/useContentStore'
 import { useTheme } from './store/useTheme'
 import { Logo } from './components/Logo'
 import { BackgroundPattern } from './components/BackgroundPattern'
@@ -16,18 +18,24 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminOverview from './pages/admin/Overview'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
+import AdminVocab from './pages/admin/AdminVocab'
+import AdminKanji from './pages/admin/AdminKanji'
 import VocabHome from './pages/vocab/VocabHome'
 import VocabPractice from './pages/vocab/VocabPractice'
+import KanjiHome from './pages/kanji/KanjiHome'
+import KanjiPractice from './pages/kanji/KanjiPractice'
 import { InstallPrompt } from './components/InstallPrompt'
 import { GoogleSignInModal, googleClientId } from './components/GoogleSignInModal'
+import { ToastContainer } from './components/ToastContainer'
+import { showToast } from './store/useToast'
 
 function AppContent() {
-  const [msg, setMsg] = useState('')
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openHira, setOpenHira] = useState(false)
   const [openKata, setOpenKata] = useState(false)
   const [openVocab, setOpenVocab] = useState(false)
+  const [openKanji, setOpenKanji] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
@@ -40,8 +48,7 @@ function AppContent() {
   }, [])
 
   const toast = (m: string) => {
-    setMsg(m)
-    ;(document.getElementById('my_modal_1') as HTMLDialogElement | null)?.showModal()
+    showToast(m, 'info')
   }
 
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
@@ -49,6 +56,9 @@ function AppContent() {
   const { theme, toggleTheme } = useTheme()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
+  useEffect(() => {
+    void useContentStore.getState().init()
+  }, [])
 
   const onLogin = () => {
     if (!supabaseEnabled) return toast('Supabase belum dikonfigurasi (isi VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di .env)')
@@ -65,6 +75,7 @@ function AppContent() {
     await signOut()
     resetOnLogout()
     useVocabStore.getState().resetOnLogout()
+    useKanjiStore.getState().resetOnLogout()
     navigate('/hiragana/flashcard', { replace: true })
   }
 
@@ -80,6 +91,7 @@ function AppContent() {
     if (!err) {
       resetOnLogout()
       useVocabStore.getState().resetOnLogout()
+      useKanjiStore.getState().resetOnLogout()
       navigate('/hiragana/flashcard', { replace: true })
     }
     toast(err ? `Gagal menghapus akun: ${err}` : 'Akun berhasil dihapus')
@@ -100,6 +112,7 @@ function AppContent() {
   const isKatakana = location.pathname.startsWith('/katakana') || location.pathname.startsWith('/practice/katakana')
   const isPractice = location.pathname.startsWith('/practice/')
   const isVocab = location.pathname.startsWith('/vocab')
+  const isKanji = location.pathname.startsWith('/kanji')
 
   return (
     <>
@@ -266,6 +279,46 @@ function AppContent() {
                       className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=n4' ? '!text-accent font-bold' : ''}`}
                     >
                       N4
+                    </NavLink>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Kanji Megamenu */}
+              <button
+                type="button"
+                popoverTarget="k4"
+                className={`text-base font-semibold ${isKanji ? 'text-accent font-bold' : ''}`}
+              >
+                Kanji
+              </button>
+              <div id="k4" popover="auto">
+                <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-44 text-base">
+                  <li>
+                    <NavLink
+                      to="/kanji?level=n5"
+                      onClick={closeDropdowns}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search !== '?level=n4' && location.search !== '?level=jft' ? '!text-accent font-bold' : ''}`}
+                    >
+                      JLPT N5
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/kanji?level=n4"
+                      onClick={closeDropdowns}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=n4' ? '!text-accent font-bold' : ''}`}
+                    >
+                      JLPT N4
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/kanji?level=jft"
+                      onClick={closeDropdowns}
+                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=jft' ? '!text-accent font-bold' : ''}`}
+                    >
+                      JFT
                     </NavLink>
                   </li>
                 </ul>
@@ -648,6 +701,64 @@ function AppContent() {
                   )}
                 </div>
 
+                {/* Kanji Section */}
+                <div className="border-b border-line py-3">
+                  <button
+                    type="button"
+                    onClick={() => setOpenKanji(!openKanji)}
+                    className={`w-full flex items-center justify-between py-2 bg-transparent border-0 text-left text-[17px] font-semibold cursor-pointer ${
+                      isKanji ? 'text-accent' : 'text-ink'
+                    }`}
+                  >
+                    <span>Kanji</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform duration-200 ${openKanji ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openKanji && (
+                    <div className="mt-1">
+                      <NavLink
+                        to="/kanji?level=n5"
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `block py-3.5 text-[15px] no-underline border-b border-line/70 ${
+                            isActive && location.search !== '?level=n4' && location.search !== '?level=jft' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                          }`
+                        }
+                      >
+                        JLPT N5
+                      </NavLink>
+                      <NavLink
+                        to="/kanji?level=n4"
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `block py-3.5 text-[15px] no-underline border-b border-line/70 ${
+                            isActive && location.search === '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                          }`
+                        }
+                      >
+                        JLPT N4
+                      </NavLink>
+                      <NavLink
+                        to="/kanji?level=jft"
+                        onClick={() => setMobileOpen(false)}
+                        className={({ isActive }) =>
+                          `block py-3.5 text-[15px] no-underline ${
+                            isActive && location.search === '?level=jft' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                          }`
+                        }
+                      >
+                        JFT
+                      </NavLink>
+                    </div>
+                  )}
+                </div>
+
                 {/* SRS Mode Row (only when logged in) */}
                 {user && (
                   <div
@@ -802,34 +913,28 @@ function AppContent() {
           <Route path="/practice/:script" element={<Practice />} />
           <Route path="/vocab" element={<VocabHome />} />
           <Route path="/vocab/:level/:chapter" element={<VocabPractice />} />
+          <Route path="/kanji" element={<KanjiHome />} />
+          <Route path="/kanji/:level/:chapter" element={<KanjiPractice />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/profile" element={<Profile onDeleteAccount={onDelete} />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="users/:id" element={<AdminUserDetail />} />
+            <Route path="vocab" element={<AdminVocab />} />
+            <Route path="kanji" element={<AdminKanji />} />
           </Route>
           <Route path="*" element={<Navigate to="/hiragana/flashcard" replace />} />
         </Routes>
       </main>
+
+      <ToastContainer />
 
       <GoogleSignInModal
         open={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
         onFallbackOAuth={() => void signIn()}
       />
-
-      <dialog id="my_modal_1" className="modal">
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Informasi</h3>
-          <p className="py-4">{msg}</p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Tutup</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
 
       <dialog id="delete_account_modal" className="modal">
         <div className="modal-box">

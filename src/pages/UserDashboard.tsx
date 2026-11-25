@@ -10,7 +10,9 @@ import { syncNow } from '../lib/sync'
 import { useAuth } from '../store/useAuth'
 import { useSelection } from '../store/useSelection'
 import { useVocabStore } from '../store/useVocabStore'
-import { getAllWords, N5_CHAPTERS, N4_CHAPTERS } from '../data/vocab'
+import { useKanjiStore } from '../store/useKanjiStore'
+import { useContentStore } from '../store/useContentStore'
+import { type KanjiLevel } from '../data/kanji'
 
 const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: string }> = {
   none: {
@@ -48,14 +50,21 @@ export default function UserDashboard() {
   const [sessions, setSessions] = useState<SessionRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [mainTab, setMainTab] = useState<'kana' | 'vocab'>('kana')
+  const [mainTab, setMainTab] = useState<'kana' | 'vocab' | 'kanji'>('kana')
   const [activeTab, setActiveTab] = useState<Script>('hiragana')
   const [vocabLevel, setVocabLevel] = useState<'n5' | 'n4'>('n5')
   const [vocabSessions, setVocabSessions] = useState<any[]>([])
+  const [kanjiLevel, setKanjiLevel] = useState<KanjiLevel>('n5')
+  const [kanjiSessions, setKanjiSessions] = useState<any[]>([])
   const weakScrollRef = useRef<HTMLDivElement>(null)
+  const weakKanjiScrollRef = useRef<HTMLDivElement>(null)
 
   const vocabStats = useVocabStore((s) => s.stats)
   const getChapterStats = useVocabStore((s) => s.getChapterStats)
+  const kanjiStats = useKanjiStore((s) => s.stats)
+  const getKanjiChapterStats = useKanjiStore((s) => s.getChapterStats)
+  const vocabChapters = useContentStore((s) => s.vocabChapters)
+  const kanjiChapters = useContentStore((s) => s.kanjiChapters)
 
   const load = async () => {
     if (!user) return
@@ -113,6 +122,34 @@ export default function UserDashboard() {
         }
       }
       setVocabSessions([...localVocabRows, ...remoteVocabSessions])
+
+      // Load kanji sessions from Dexie and Supabase
+      const pendingKanjiSes = await db.pending_kanji_sessions.toArray()
+      const localKanjiRows = pendingKanjiSes.map((p, idx) => ({
+        id: `local-kanji-${p.id ?? idx}`,
+        level: p.level,
+        chapter: p.chapter,
+        total_cards: p.totalCards,
+        correct_cards: p.correctCards,
+        duration_sec: p.durationSec,
+        started_at: p.startedAt,
+      }))
+
+      let remoteKanjiSessions: any[] = []
+      if (supabase) {
+        try {
+          const { data: kSes } = await supabase
+            .from('kanji_sessions')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('started_at', { ascending: false })
+            .limit(20)
+          if (kSes) remoteKanjiSessions = kSes
+        } catch {
+          /* Abaikan jika tabel belum ada */
+        }
+      }
+      setKanjiSessions([...localKanjiRows, ...remoteKanjiSessions])
     } catch (err: any) {
       // Fallback ke data lokal jika sedang offline
       const fallback = new Map<string, ProgressRow>()
@@ -153,7 +190,9 @@ export default function UserDashboard() {
   const userStreak = streak(sessions.map((s) => s.started_at))
 
   // Analitik Kosakata
-  const allVocab = getAllWords()
+  const n5VocabChapters = vocabChapters.filter((c) => c.level === 'n5')
+  const n4VocabChapters = vocabChapters.filter((c) => c.level === 'n4')
+  const allVocab = vocabChapters.flatMap((c) => c.words)
   const totalVocabWords = allVocab.length
   let vocabMastered = 0
   let vocabAlmost = 0
@@ -181,11 +220,10 @@ export default function UserDashboard() {
   // Kosakata yang butuh review / sering salah
   const weakWords = allVocab
     .map((w) => {
-      const isN4 = N4_CHAPTERS.some((c) => c.words.some((word) => word.id === w.id))
-      const ch = [...N5_CHAPTERS, ...N4_CHAPTERS].find((c) => c.words.some((word) => word.id === w.id))
+      const ch = vocabChapters.find((c) => c.words.some((word) => word.id === w.id))
       return {
         ...w,
-        level: isN4 ? 'N4' : 'N5',
+        level: (ch?.level ?? 'n5').toUpperCase(),
         chapter: ch?.chapter ?? 1,
       }
     })
@@ -199,7 +237,54 @@ export default function UserDashboard() {
       return sB - sA
     })
 
-  const activeChapters = vocabLevel === 'n5' ? N5_CHAPTERS : N4_CHAPTERS
+  const activeChapters = vocabLevel === 'n5' ? n5VocabChapters : n4VocabChapters
+
+  // Kalkulasi statistik Kanji
+  const allKanji = kanjiChapters.flatMap((c) => c.items)
+  const totalKanjiItems = allKanji.length
+  let kanjiMastered = 0
+  let kanjiNone = 0
+  let kanjiWeak = 0
+  let kanjiLearning = 0
+  let kanjiAlmost = 0
+
+  for (const k of allKanji) {
+    const s = kanjiStats[k.id]
+    if (!s || s.ok + s.no === 0) {
+      kanjiNone++
+    } else if ((s.box ?? 1) >= 4) {
+      kanjiMastered++
+    } else if ((s.box ?? 1) === 3) {
+      kanjiAlmost++
+    } else if ((s.box ?? 1) === 2) {
+      kanjiLearning++
+    } else {
+      kanjiWeak++
+    }
+  }
+
+  const kanjiPct = totalKanjiItems > 0 ? Math.round((kanjiMastered / totalKanjiItems) * 100) : 0
+
+  const weakKanji = allKanji
+    .map((k) => {
+      const ch = kanjiChapters.find((c) => c.items.some((item) => item.id === k.id))
+      return {
+        ...k,
+        level: (ch?.level ?? 'n5').toUpperCase(),
+        chapter: ch?.chapter ?? 1,
+      }
+    })
+    .filter((k) => {
+      const s = kanjiStats[k.id]
+      return s && (s.no > 0 || (s.ok > 0 && (s.box ?? 1) === 1))
+    })
+    .sort((a, b) => {
+      const sA = kanjiStats[a.id]?.no ?? 0
+      const sB = kanjiStats[b.id]?.no ?? 0
+      return sB - sA
+    })
+
+  const activeKanjiChapters = kanjiChapters.filter((c) => c.level === kanjiLevel)
 
   return (
     <div>
@@ -252,8 +337,8 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* 4 Mastery Progress Bars */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5 pt-5 border-t border-line">
+        {/* 5 Mastery Progress Bars */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-5 pt-5 border-t border-line">
           {/* Hiragana */}
           <div className="bg-bg/50 border border-line rounded-xl p-3.5">
             <div className="flex justify-between items-center text-xs text-muted mb-1.5">
@@ -287,11 +372,24 @@ export default function UserDashboard() {
             </div>
           </div>
 
+          {/* Kanji */}
+          <div className="bg-bg/50 border border-line rounded-xl p-3.5">
+            <div className="flex justify-between items-center text-xs text-muted mb-1.5">
+              <span>Kanji ({kanjiMastered}/{totalKanjiItems})</span>
+              <span className="font-semibold text-ink">{kanjiPct}%</span>
+            </div>
+            <div className="w-full h-2 bg-pill rounded overflow-hidden">
+              <div className="h-full bg-secondary transition-all" style={{ width: `${kanjiPct}%` }} />
+            </div>
+          </div>
+
           {/* Sesi */}
           <div className="bg-bg/50 border border-line rounded-xl p-3.5 flex items-center justify-between">
             <div>
               <small className="text-muted block text-xs">Total Sesi Latihan</small>
-              <span className="text-xl font-bold text-ink">{sessions.length} Sesi</span>
+              <span className="text-xl font-bold text-ink">
+                {sessions.length + vocabSessions.length + kanjiSessions.length} Sesi
+              </span>
             </div>
             <span className="text-2xl">📊</span>
           </div>
@@ -724,6 +822,278 @@ export default function UserDashboard() {
               </div>
             )}
           </div>
+          </div>
+
+          <input
+            type="radio"
+            name="dashboard_main_tabs"
+            className="tab font-bold text-sm"
+            aria-label="Kanji (N5, N4 & JFT)"
+            checked={mainTab === 'kanji'}
+            onChange={() => setMainTab('kanji')}
+          />
+          <div className="tab-content bg-base-100 border-base-300 p-4 sm:p-6 space-y-6">
+            {/* KANJI ANALYTICS VIEW */}
+            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
+              <h3 className="text-base font-semibold text-ink mb-1">Distribusi Tingkat Hafalan Kanji</h3>
+              <p className="text-xs text-muted mb-4">
+                Pengelompokan Kanji berdasarkan seberapa kuat ingatan Anda.
+              </p>
+
+              <div className="stats stats-vertical sm:stats-horizontal shadow-sm w-full bg-pill/50 border border-line rounded-2xl">
+                <div className="stat">
+                  <div className="stat-title text-muted text-xs">Belum Dipelajari</div>
+                  <div className="stat-value text-ink text-3xl font-black tabular-nums">{kanjiNone}</div>
+                  <div className="stat-desc text-muted">Belum dibuka</div>
+                </div>
+
+                <div className="stat">
+                  <div className="stat-title text-bad text-xs">Lemah / Ulangi</div>
+                  <div className="stat-value text-bad text-3xl font-black tabular-nums">{kanjiWeak}</div>
+                  <div className="stat-desc text-muted">Perlu diulang segera</div>
+                </div>
+
+                <div className="stat">
+                  <div className="stat-title text-[#e6a23c] text-xs">Belajar / Berkembang</div>
+                  <div className="stat-value text-[#e6a23c] text-3xl font-black tabular-nums">{kanjiLearning + kanjiAlmost}</div>
+                  <div className="stat-desc text-muted">Mulai hafal & berkembang</div>
+                </div>
+
+                <div className="stat">
+                  <div className="stat-title text-ok text-xs">Sudah Hafal Kuat</div>
+                  <div className="stat-value text-ok text-3xl font-black tabular-nums">{kanjiMastered}</div>
+                  <div className="stat-desc text-muted">Ingatan jangka panjang</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Weak Kanji / Needs Review Section */}
+            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="text-base font-semibold text-ink">
+                    Kanji yang Perlu Diperhatikan {weakKanji.length > 0 ? `(${weakKanji.length})` : ''}
+                  </h3>
+                  <p className="text-xs text-muted">
+                    Kanji yang sering salah saat latihan — geser ke samping untuk melihat lebih banyak.
+                  </p>
+                </div>
+
+                {weakKanji.length > 0 && (
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: -440, behavior: 'smooth' })}
+                      className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                      title="Geser ke kiri"
+                      aria-label="Geser ke kiri"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: 440, behavior: 'smooth' })}
+                      className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                      title="Geser ke kanan"
+                      aria-label="Geser ke kanan"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {weakKanji.length === 0 ? (
+                <div className="py-6 text-center text-sm text-muted bg-pill/30 rounded-xl border border-line/60">
+                  🎉 Bagus sekali! Belum ada Kanji yang sering salah.
+                </div>
+              ) : (
+                <div
+                  ref={weakKanjiScrollRef}
+                  className={`grid ${
+                    weakKanji.length > 5 ? 'grid-rows-2' : 'grid-rows-1'
+                  } grid-flow-col auto-cols-[200px] sm:auto-cols-[215px] gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory`}
+                >
+                  {weakKanji.map((k) => {
+                    const s = kanjiStats[k.id]
+                    return (
+                      <div
+                        key={k.id}
+                        className="snap-start bg-pill/40 border border-line rounded-xl p-3 flex flex-col justify-between gap-2"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-xs font-bold text-accent">{k.level} Bab {k.chapter}</span>
+                            <span className="badge badge-xs bg-error/20 text-error font-semibold border-0">
+                              Salah: {s?.no ?? 0}x
+                            </span>
+                          </div>
+                          <div className="text-2xl font-black text-ink font-japanese">{k.kanji}</div>
+                          <div className="text-xs text-muted truncate">On: {k.onyomi}</div>
+                        </div>
+                        <div className="text-xs font-semibold text-ink/90 border-t border-line/40 pt-1.5 truncate">
+                          {k.meaning}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Kanji Chapters Progress per Level */}
+            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <h3 className="text-base font-semibold text-ink">Progres Kanji per Bab</h3>
+                  <p className="text-xs text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab Kanji.</p>
+                </div>
+
+                {/* Level Switcher */}
+                <div className="inline-flex bg-pill border border-line rounded-xl p-1 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={() => setKanjiLevel('n5')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      kanjiLevel === 'n5' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    JLPT N5
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setKanjiLevel('n4')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      kanjiLevel === 'n4' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    JLPT N4
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setKanjiLevel('jft')}
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      kanjiLevel === 'jft' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    JFT
+                  </button>
+                </div>
+              </div>
+
+              {(() => {
+                const startedChapters = activeKanjiChapters
+                  .map((ch) => ({ ch, stats: getKanjiChapterStats(ch.items) }))
+                  .filter(({ stats }) => stats.okCount + stats.noCount > 0)
+
+                if (startedChapters.length === 0) {
+                  return (
+                    <div className="text-center py-8 px-4 bg-bg/40 border border-dashed border-line rounded-xl space-y-3">
+                      <p className="text-sm text-muted">
+                        Belum ada bab Kanji {kanjiLevel.toUpperCase()} yang dikerjakan.
+                      </p>
+                      <Link
+                        to={`/kanji?level=${kanjiLevel}`}
+                        className="btn btn-sm bg-accent hover:opacity-90 text-white border-0 font-semibold rounded-xl no-underline"
+                      >
+                        Mulai Latihan Kanji
+                      </Link>
+                    </div>
+                  )
+                }
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    {startedChapters.map(({ ch, stats }) => {
+                      const percentLearned = Math.round((stats.learned / ch.items.length) * 100) || 0
+
+                      return (
+                        <div key={`${ch.level}-${ch.chapter}`} className="bg-bg/40 border border-line rounded-xl p-4 flex flex-col justify-between gap-3">
+                          <div>
+                            <div className="flex items-center justify-between text-xs text-muted mb-1">
+                              <span className="font-bold text-accent">Bab {ch.chapter}</span>
+                              <span>{ch.items.length} Kanji</span>
+                            </div>
+                            <h4 className="font-bold text-ink text-sm">{ch.title}</h4>
+                          </div>
+
+                          <div className="space-y-2 pt-2 border-t border-line/50">
+                            <div className="flex justify-between items-center text-xs text-muted">
+                              <span>Hafal: {stats.learned}/{ch.items.length} kanji</span>
+                              <span className="font-semibold text-ink">Akurasi: {stats.accuracy}%</span>
+                            </div>
+                            <div className="w-full bg-pill rounded-full h-2 overflow-hidden border border-line/40">
+                              <div className="bg-accent h-full transition-all" style={{ width: `${percentLearned}%` }} />
+                            </div>
+                            <div className="flex justify-end pt-1">
+                              <Link
+                                to={`/kanji/${kanjiLevel}/${ch.chapter}`}
+                                className="btn btn-xs bg-accent hover:opacity-90 text-white font-semibold rounded-lg no-underline inline-flex items-center gap-1"
+                              >
+                                <span>Lanjut Latihan</span>
+                                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <polyline points="9 18 15 12 9 6" />
+                                </svg>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Riwayat Sesi Kanji */}
+            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
+              <h3 className="m-0 mb-4 text-base font-semibold text-ink">Riwayat Sesi Kanji ({kanjiSessions.length})</h3>
+              {kanjiSessions.length === 0 ? (
+                <p className="text-muted text-[13px]">Belum ada riwayat sesi latihan Kanji.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th></th>
+                        <th>Waktu Sesi</th>
+                        <th>Level</th>
+                        <th>Bab</th>
+                        <th>Total Kartu</th>
+                        <th>Benar</th>
+                        <th>Akurasi</th>
+                        <th>Durasi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kanjiSessions.map((s, idx) => {
+                        const acc = s.total_cards > 0 ? Math.round((s.correct_cards / s.total_cards) * 100) : 0
+                        return (
+                          <tr key={s.id}>
+                            <th>{idx + 1}</th>
+                            <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
+                            <td>
+                              <span className="badge badge-sm font-bold bg-accent/20 text-accent border-0">
+                                {s.level}
+                              </span>
+                            </td>
+                            <td>Bab {s.chapter}</td>
+                            <td>{s.total_cards}</td>
+                            <td className="text-ok">{s.correct_cards}</td>
+                            <td className="font-semibold">{acc}%</td>
+                            <td className="text-muted">{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

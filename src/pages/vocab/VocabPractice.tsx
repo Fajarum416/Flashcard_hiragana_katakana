@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { getChapter, type VocabWord } from '../../data/vocab'
+import { type VocabWord } from '../../data/vocab'
+import { useContentStore } from '../../store/useContentStore'
 import { useVocabStore } from '../../store/useVocabStore'
 import { recordVocabAnswer, queueVocabSession } from '../../lib/sync'
 import { getMasteryLabel, sortDeckBySRS } from '../../lib/srs'
@@ -14,7 +15,11 @@ export default function VocabPractice() {
   const chapterNum = parseInt(chapter, 10) || 1
   const validLevel = (level.toLowerCase() === 'n4' ? 'n4' : 'n5') as 'n5' | 'n4'
 
-  const chapterData = useMemo(() => getChapter(validLevel, chapterNum), [validLevel, chapterNum])
+  const vocabChapters = useContentStore((s) => s.vocabChapters)
+  const chapterData = useMemo(
+    () => vocabChapters.find((c) => c.level === validLevel && c.chapter === chapterNum),
+    [vocabChapters, validLevel, chapterNum]
+  )
 
   const [words, setWords] = useState<VocabWord[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -102,7 +107,7 @@ export default function VocabPractice() {
 
   // Session accuracy
   const totalReviewed = sessionCorrect + sessionIncorrect
-  const accuracy = totalReviewed > 0 ? Math.round((sessionCorrect / totalReviewed) * 100) : 100
+  const accuracy = totalReviewed > 0 ? Math.round((sessionCorrect / totalReviewed) * 100) : 0
   const quizInProgress = practiceMode === 'quiz' && !isQuizComplete && totalReviewed > 0
 
   const handleNext = useCallback(() => {
