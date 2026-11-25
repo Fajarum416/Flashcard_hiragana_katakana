@@ -12,25 +12,31 @@ export default function AdminLayout() {
     return (
       <div className="text-center py-[60px]">
         <h2 className="text-2xl font-bold mb-2">Akses Terbatas</h2>
-        <p className="text-muted text-[13px]">Halaman ini hanya dapat diakses oleh akun dengan role administrator.</p>
+        <p className="text-muted text-[13px]">Halaman ini hanya dapat diakses oleh akun dengan peran administrator.</p>
         <Navigate to="/" replace />
       </div>
     )
   }
 
   const navClass = ({ isActive }: { isActive: boolean }) =>
-    `no-underline px-3.5 py-1.5 rounded-full text-[13px] font-medium transition-colors ${
+    `no-underline px-4 py-2 rounded-full text-sm sm:text-[15px] font-medium transition-colors ${
       isActive ? 'bg-pill-on text-ink' : 'text-muted hover:text-ink'
     }`
 
   return (
     <div>
-      <div className="flex gap-2 border-b border-line pb-3 mb-6">
+      <div className="flex flex-wrap gap-2 border-b border-line pb-3 mb-6">
         <NavLink to="/admin" end className={navClass}>
-          Ringkasan (Overview)
+          Ringkasan
         </NavLink>
         <NavLink to="/admin/users" className={navClass}>
           Daftar Pengguna
+        </NavLink>
+        <NavLink to="/admin/vocab" className={navClass}>
+          Kelola Kosakata
+        </NavLink>
+        <NavLink to="/admin/kanji" className={navClass}>
+          Kelola Kanji
         </NavLink>
       </div>
       <Outlet />

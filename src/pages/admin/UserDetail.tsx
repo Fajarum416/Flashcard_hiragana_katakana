@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../../data/kana'
-import { fetchUserDetail, resetProgress, setDisabled, type UserDetail } from '../../lib/admin'
+import { fetchUserDetail, resetProgress, setDisabled, setRole, type UserDetail } from '../../lib/admin'
 import { masteryLevel, streak, type Level } from '../../lib/mastery'
 import { useAuth } from '../../store/useAuth'
+import { showToast } from '../../store/useToast'
 
 const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: string }> = {
   none: {
@@ -19,17 +20,17 @@ const LEVEL_STYLES: Record<Level, { boxClass: string; textClass: string; label: 
   learning: {
     boxClass: 'bg-[rgba(235,185,80,0.25)] border-[#e6a23c]',
     textClass: 'text-[#e6a23c]',
-    label: 'Belajar (Box 1-2)',
+    label: 'Belajar (Kotak 1-2)',
   },
   almost: {
     boxClass: 'bg-[rgba(138,167,255,0.25)] border-accent',
     textClass: 'text-accent',
-    label: 'Hampir (Box 3)',
+    label: 'Hampir (Kotak 3)',
   },
   mastered: {
     boxClass: 'bg-[rgba(94,196,154,0.25)] border-ok',
     textClass: 'text-ok',
-    label: 'Hafal (Box 4-5, ≥80%)',
+    label: 'Hafal (Kotak 4-5, ≥80%)',
   },
 }
 
@@ -40,12 +41,6 @@ export default function AdminUserDetail() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<Script>('hiragana')
-  const [modalMsg, setModalMsg] = useState('')
-
-  const showNotice = (m: string) => {
-    setModalMsg(m)
-    ;(document.getElementById('admin_notice_modal') as HTMLDialogElement | null)?.showModal()
-  }
 
   const load = () => {
     if (!id) return
@@ -78,10 +73,10 @@ export default function AdminUserDetail() {
     ;(document.getElementById('reset_confirm_modal') as HTMLDialogElement | null)?.close()
     try {
       await resetProgress(profile.id)
-      showNotice('Progres berhasil direset.')
+      showToast('Progres berhasil direset.', 'success')
       load()
     } catch (err: any) {
-      showNotice(`Gagal mereset: ${err.message}`)
+      showToast(`Gagal mereset: ${err.message}`, 'error')
     }
   }
 
@@ -90,18 +85,33 @@ export default function AdminUserDetail() {
     const action = profile.disabled ? 'mengaktifkan' : 'menonaktifkan'
     try {
       await setDisabled(profile.id, !profile.disabled)
-      showNotice(`Akun berhasil di-${action}.`)
+      showToast(`Akun berhasil di-${action}.`, 'success')
       load()
     } catch (err: any) {
-      showNotice(`Gagal: ${err.message}`)
+      showToast(`Gagal: ${err.message}`, 'error')
+    }
+  }
+
+  const handleToggleRole = async () => {
+    ;(document.getElementById('detail_role_confirm_modal') as HTMLDialogElement | null)?.close()
+    const nextRole = profile.role === 'admin' ? 'user' : 'admin'
+    try {
+      await setRole(profile.id, nextRole)
+      showToast(`Peran berhasil diubah menjadi ${nextRole === 'admin' ? 'Admin' : 'Pengguna'}.`, 'success')
+      load()
+    } catch (err: any) {
+      showToast(`Gagal mengubah peran: ${err.message}`, 'error')
     }
   }
 
   return (
     <div>
       <div className="mb-4">
-        <Link to="/admin/users" className="text-muted text-[13px] underline hover:text-ink">
-          ← Kembali ke Daftar Pengguna
+        <Link
+          to="/admin/users"
+          className="inline-flex items-center gap-1.5 border border-line rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-xs px-4 py-2 no-underline cursor-pointer transition-all"
+        >
+          ← Kembali
         </Link>
       </div>
 
@@ -118,7 +128,7 @@ export default function AdminUserDetail() {
                   profile.role === 'admin' ? 'bg-accent text-white' : 'bg-pill text-muted'
                 }`}
               >
-                Role: {profile.role}
+                Peran: {profile.role === 'admin' ? 'Admin' : 'Pengguna'}
               </span>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full text-white ${
@@ -128,7 +138,7 @@ export default function AdminUserDetail() {
                 Status: {profile.disabled ? 'Nonaktif' : 'Aktif'}
               </span>
               <span className="text-xs px-2 py-0.5 rounded-full bg-pill text-ink">
-                🔥 Streak: {userStreak} hari
+                🔥 Beruntun: {userStreak} hari
               </span>
             </div>
           </div>
@@ -142,15 +152,24 @@ export default function AdminUserDetail() {
               🔄 Reset Progres
             </button>
             {!isSelf && (
-              <button
-                type="button"
-                className={`border-0 rounded-full bg-pill hover:bg-pill-on font-semibold text-xs px-3.5 py-2 cursor-pointer transition-all ${
-                  profile.disabled ? 'text-ok' : 'text-bad'
-                }`}
-                onClick={() => (document.getElementById('status_confirm_modal') as HTMLDialogElement | null)?.showModal()}
-              >
-                {profile.disabled ? 'Aktifkan Akun' : 'Nonaktifkan Akun'}
-              </button>
+              <>
+                <button
+                  type="button"
+                  className="border-0 rounded-full bg-pill hover:bg-pill-on text-accent font-semibold text-xs px-3.5 py-2 cursor-pointer transition-all"
+                  onClick={() => (document.getElementById('detail_role_confirm_modal') as HTMLDialogElement | null)?.showModal()}
+                >
+                  {profile.role === 'admin' ? 'Jadikan Pengguna' : 'Jadikan Admin'}
+                </button>
+                <button
+                  type="button"
+                  className={`border-0 rounded-full bg-pill hover:bg-pill-on font-semibold text-xs px-3.5 py-2 cursor-pointer transition-all ${
+                    profile.disabled ? 'text-ok' : 'text-bad'
+                  }`}
+                  onClick={() => (document.getElementById('status_confirm_modal') as HTMLDialogElement | null)?.showModal()}
+                >
+                  {profile.disabled ? 'Aktifkan Akun' : 'Nonaktifkan Akun'}
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -198,7 +217,7 @@ export default function AdminUserDetail() {
         </div>
 
         {/* Gojuon Heatmap */}
-        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Single (Gojūon & Dakuten - 71 Huruf)</h4>
+        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
         <div className="overflow-x-auto pb-3 mb-5">
           <div className="grid grid-cols-[repeat(16,minmax(48px,1fr))] gap-1.5 min-w-[800px]">
             {COL_IDS.map((id) => (
@@ -211,7 +230,7 @@ export default function AdminUserDetail() {
                   const level = masteryLevel(stat)
                   const st = LEVEL_STYLES[level]
                   const title = stat
-                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Kotak: ${stat.box}`
                     : `${cell.k} (${cell.r}) - Belum dicoba`
                   return (
                     <div
@@ -230,7 +249,7 @@ export default function AdminUserDetail() {
         </div>
 
         {/* Yoon Heatmap */}
-        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Composite (Yōon - 33 Huruf)</h4>
+        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
         <div className="overflow-x-auto pb-3">
           <div className="grid grid-cols-[repeat(11,minmax(64px,1fr))] gap-1.5 min-w-[700px]">
             {YOON_IDS.map((id) => (
@@ -242,7 +261,7 @@ export default function AdminUserDetail() {
                   const level = masteryLevel(stat)
                   const st = LEVEL_STYLES[level]
                   const title = stat
-                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Box: ${stat.box}`
+                    ? `${cell.k} (${cell.r}) - Benar: ${stat.ok}, Salah: ${stat.no}, Kotak: ${stat.box}`
                     : `${cell.k} (${cell.r}) - Belum dicoba`
                   return (
                     <div
@@ -287,10 +306,10 @@ export default function AdminUserDetail() {
                   return (
                     <tr key={s.id}>
                       <th>{idx + 1}</th>
-                      <td>{new Date(s.started_at).toLocaleString()}</td>
+                      <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
                       <td className="capitalize">{s.script}</td>
                       <td>
-                        {s.mode === 'char' ? 'Characters' : 'Words'} {s.composite ? '(Comp)' : '(Single)'}
+                        {s.mode === 'char' ? 'Huruf' : 'Kata'} {s.composite ? '(Gabungan)' : '(Tunggal)'}
                       </td>
                       <td>{s.total_cards}</td>
                       <td className="text-ok">{s.correct_cards}</td>
@@ -313,7 +332,7 @@ export default function AdminUserDetail() {
           </p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2">
-              <button className="btn">Close</button>
+              <button className="btn">Tutup</button>
               <button type="button" className="btn btn-error text-white" onClick={() => void handleReset()}>
                 Reset Progres
               </button>
@@ -330,7 +349,7 @@ export default function AdminUserDetail() {
           </p>
           <div className="modal-action">
             <form method="dialog" className="flex gap-2">
-              <button className="btn">Close</button>
+              <button className="btn">Tutup</button>
               <button
                 type="button"
                 className={`btn text-white ${profile.disabled ? 'btn-success' : 'btn-error'}`}
@@ -343,13 +362,23 @@ export default function AdminUserDetail() {
         </div>
       </dialog>
 
-      <dialog id="admin_notice_modal" className="modal">
+      <dialog id="detail_role_confirm_modal" className="modal">
         <div className="modal-box">
-          <h3 className="text-lg font-bold">Informasi</h3>
-          <p className="py-4">{modalMsg}</p>
+          <h3 className="text-lg font-bold">Ubah Peran Pengguna?</h3>
+          <p className="py-4">
+            Yakin ingin mengubah peran {profile.display_name || profile.email} menjadi{' '}
+            <strong>{profile.role === 'admin' ? 'Pengguna' : 'Admin'}</strong>?
+          </p>
           <div className="modal-action">
-            <form method="dialog">
-              <button className="btn">Close</button>
+            <form method="dialog" className="flex gap-2">
+              <button className="btn">Tutup</button>
+              <button
+                type="button"
+                className="btn bg-[#5eb839] hover:bg-[#4ea32e] border-0 text-white"
+                onClick={() => void handleToggleRole()}
+              >
+                Simpan Peran
+              </button>
             </form>
           </div>
         </div>

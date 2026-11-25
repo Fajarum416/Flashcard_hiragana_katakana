@@ -90,3 +90,8 @@ export async function setDisabled(id: string, disabled: boolean): Promise<void> 
   const { error } = await client().rpc('admin_set_disabled', { p_user: id, p_disabled: disabled })
   if (error) throw new Error(error.message)
 }
+
+export async function setRole(id: string, role: 'user' | 'admin'): Promise<void> {
+  const { error } = await client().rpc('admin_set_role', { p_user: id, p_role: role })
+  if (error) throw new Error(error.message)
+}

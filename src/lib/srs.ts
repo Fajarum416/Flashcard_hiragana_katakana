@@ -23,6 +23,21 @@ export const BOX_WEIGHTS: Record<number, number> = {
   5: 1,
 }
 
+export const MASTERY_LABELS: Record<number, string> = {
+  1: 'Perlu Ulang',
+  2: 'Masih Belajar',
+  3: 'Hampir Hafal',
+  4: 'Lancar',
+  5: 'Hafal Kuat',
+}
+
+/** Mengembalikan label tingkat hafalan yang ramah pengguna berdasarkan nilai box (1-5). */
+export function getMasteryLabel(box?: number): string {
+  if (box === undefined) return 'Baru'
+  const level = Math.max(1, Math.min(5, box))
+  return MASTERY_LABELS[level] ?? 'Perlu Ulang'
+}
+
 /** Mendapatkan Box saat ini (1 sampai 5, default 1). */
 export function getBox(stat?: CardStat): number {
   if (!stat || !stat.box) return 1
