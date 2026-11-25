@@ -665,7 +665,7 @@ export default function UserDashboard() {
                       <div>
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className="text-xs font-bold text-accent">{w.level} Bab {w.chapter}</span>
-                          <span className="badge badge-xs bg-error/20 text-error font-semibold border-0">
+                          <span className="badge badge-soft badge-error badge-xs font-semibold">
                             Salah: {s?.no ?? 0}x
                           </span>
                         </div>
@@ -805,7 +805,7 @@ export default function UserDashboard() {
                           <th>{idx + 1}</th>
                           <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
                           <td>
-                            <span className="badge badge-sm font-bold bg-accent/20 text-accent border-0">
+                            <span className="badge badge-soft badge-accent badge-sm font-bold">
                               {s.level}
                             </span>
                           </td>
@@ -928,7 +928,7 @@ export default function UserDashboard() {
                         <div>
                           <div className="flex items-center justify-between gap-1 mb-1">
                             <span className="text-xs font-bold text-accent">{k.level} Bab {k.chapter}</span>
-                            <span className="badge badge-xs bg-error/20 text-error font-semibold border-0">
+                            <span className="badge badge-soft badge-error badge-xs font-semibold">
                               Salah: {s?.no ?? 0}x
                             </span>
                           </div>
@@ -1077,7 +1077,7 @@ export default function UserDashboard() {
                             <th>{idx + 1}</th>
                             <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
                             <td>
-                              <span className="badge badge-sm font-bold bg-accent/20 text-accent border-0">
+                              <span className="badge badge-soft badge-accent badge-sm font-bold">
                                 {s.level}
                               </span>
                             </td>

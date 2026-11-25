@@ -12,23 +12,31 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
+        id: '/',
         name: 'Enna Card | Flashcard',
         short_name: 'Enna Card',
-        description: 'Flashcard Hiragana dan Katakana offline (PWA)',
-        theme_color: '#1d212b',
-        background_color: '#1d212b',
+        description: 'Flashcard Hiragana, Katakana, Kanji, dan Kosakata Jepang offline (PWA)',
+        lang: 'id',
+        dir: 'ltr',
+        start_url: '/',
+        scope: '/',
+        theme_color: '#f8fafc',
+        background_color: '#f8fafc',
         display: 'standalone',
         orientation: 'portrait-primary',
+        categories: ['education'],
         icons: [
           {
             src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/icon-maskable-512.png',
@@ -40,6 +48,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        navigateFallbackDenylist: [/^\/\.well-known\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

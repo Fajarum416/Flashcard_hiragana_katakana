@@ -319,7 +319,7 @@ export default function AdminVocab() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="font-bold text-accent">Bab {ch.chapter}</span>
-                    {!ch.published && <span className="badge badge-xs badge-warning">Draft</span>}
+                    {!ch.published && <span className="badge badge-soft badge-warning badge-xs">Draft</span>}
                   </div>
                   <div className="font-bold text-sm truncate">{ch.title}</div>
                   <div className="text-xs text-muted">{ch.words.length} kosakata</div>
@@ -412,7 +412,7 @@ export default function AdminVocab() {
                             <div className="font-japanese text-sm truncate" title={w.kana}>
                               {w.kana}
                             </div>
-                            <span className="badge badge-ghost badge-sm max-w-full truncate" title={w.romaji}>
+                            <span className="badge badge-soft badge-info badge-sm max-w-full truncate" title={w.romaji}>
                               {w.romaji}
                             </span>
                           </td>

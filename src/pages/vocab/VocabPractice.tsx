@@ -461,7 +461,7 @@ export default function VocabPractice() {
         {/* Top Bar */}
         <div className="absolute inset-x-4 top-4 sm:inset-x-8 sm:top-6 z-10 grid grid-cols-3 items-center text-xs text-muted">
           <div className="justify-self-start">
-            <span className="badge badge-sm bg-pill border border-line text-ink font-semibold">
+            <span className="badge badge-soft badge-primary badge-sm font-semibold">
               {currentWord?.type || 'Kosakata'}
             </span>
           </div>
@@ -670,7 +670,7 @@ export default function VocabPractice() {
                   {currentWord?.kana} • <span className="italic">{currentWord?.romaji}</span>
                 </div>
               </div>
-              <span className="badge badge-xs sm:badge-sm font-semibold bg-panel border border-line text-accent shrink-0">
+              <span className="badge badge-soft badge-accent badge-xs sm:badge-sm font-semibold shrink-0">
                 {currentWord?.type || 'Kosakata'}
               </span>
             </div>
