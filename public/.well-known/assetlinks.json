@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "online.ennacard.twa",
+      "sha256_cert_fingerprints": [
+        "8C:DA:5E:65:7F:8D:5D:1B:A9:2C:0F:65:CC:9C:30:A9:9F:D5:69:97:69:9A:FA:34:7D:E8:49:85:8A:FF:9F:51"
+      ]
+    }
+  }
+]
