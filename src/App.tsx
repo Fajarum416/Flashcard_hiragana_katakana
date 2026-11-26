@@ -52,7 +52,7 @@ function AppContent() {
   }
 
   const { user, role, loading, init, signIn, signOut, deleteAccount } = useAuth()
-  const { srsMode, setSrsMode, resetOnLogout } = useSelection()
+  const { resetOnLogout } = useSelection()
   const { theme, toggleTheme } = useTheme()
   useEffect(() => init(), [init])
   useEffect(() => startSync(), [])
@@ -132,6 +132,37 @@ function AppContent() {
 
           {/* Navbar End: Desktop Megamenu + Profile (sm:flex) & Mobile Hamburger Button (sm:hidden) */}
           <div className="navbar-end w-auto gap-2 sm:gap-3">
+            {/* Mobile Progres Icon Button on Navbar */}
+            {user && role !== 'admin' && (
+              <NavLink
+                to="/dashboard"
+                title="Progres"
+                aria-label="Progres"
+                className={({ isActive }) =>
+                  `sm:hidden btn btn-ghost btn-circle w-10 h-10 min-h-10 border no-underline transition-colors ${
+                    isActive
+                      ? 'bg-accent/15 border-accent text-accent'
+                      : 'bg-pill border-line text-ink hover:bg-pill-on'
+                  }`
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.75"
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
+                  />
+                </svg>
+              </NavLink>
+            )}
+
             {/* Mobile Theme Toggle Button using swap swap-rotate */}
             <label className="sm:hidden swap swap-rotate cursor-pointer p-1 text-ink">
               {/* this hidden checkbox controls the state */}
@@ -443,20 +474,6 @@ function AppContent() {
                       <span className="badge badge-soft badge-success badge-md font-semibold">Aktif</span>
                     </NavLink>
                   </li>
-                  <li>
-                    <div
-                      onClick={() => setSrsMode(!srsMode)}
-                      className="flex items-center justify-between py-2.5 text-base font-medium cursor-pointer hover:bg-base-200/60 rounded-lg"
-                    >
-                      <span>Mode SRS</span>
-                      <input
-                        type="checkbox"
-                        checked={srsMode}
-                        onChange={() => setSrsMode(!srsMode)}
-                        className="toggle toggle-success toggle-sm pointer-events-none"
-                      />
-                    </div>
-                  </li>
                   {role === 'admin' && (
                     <li>
                       <NavLink to="/admin" onClick={closeDropdowns} className="justify-between text-amber-400 font-semibold py-2.5 text-base">
@@ -524,14 +541,24 @@ function AppContent() {
         </div>
       </header>
 
-      {/* Mobile Right Slide-Over Drawer (matches reference design) */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[100] sm:hidden">
-          <div
-            className="fixed inset-0 bg-black/50 transition-opacity"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="fixed top-0 right-0 bottom-0 w-[85%] max-w-[440px] bg-bg border-l border-line flex flex-col justify-between overflow-y-auto shadow-2xl z-[101]">
+      {/* Mobile Right Slide-Over Drawer (smooth open & close animation) */}
+      <div
+        aria-hidden={!mobileOpen}
+        className={`fixed inset-0 z-[100] sm:hidden transition-[visibility] duration-300 ${
+          mobileOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
+        }`}
+      >
+        <div
+          className={`fixed inset-0 bg-black/50 backdrop-blur-[1px] transition-opacity duration-300 ease-out ${
+            mobileOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setMobileOpen(false)}
+        />
+        <aside
+          className={`fixed top-0 right-0 bottom-0 w-[85%] max-w-[440px] bg-bg border-l border-line flex flex-col justify-between overflow-y-auto shadow-2xl z-[101] transform transition-transform duration-300 ease-out ${
+            mobileOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
             <div>
               {/* Drawer Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-line">
@@ -759,22 +786,6 @@ function AppContent() {
                   )}
                 </div>
 
-                {/* SRS Mode Row (only when logged in) */}
-                {user && (
-                  <div
-                    onClick={() => setSrsMode(!srsMode)}
-                    className="border-b border-line py-4 flex items-center justify-between cursor-pointer"
-                  >
-                    <span className="text-[17px] font-semibold text-ink">Mode SRS</span>
-                    <input
-                      type="checkbox"
-                      checked={srsMode}
-                      onChange={() => setSrsMode(!srsMode)}
-                      className="toggle toggle-md pointer-events-none"
-                    />
-                  </div>
-                )}
-
                 {role === 'admin' && (
                   <div className="border-b border-line py-4">
                     <NavLink
@@ -803,33 +814,6 @@ function AppContent() {
                   </div>
                 )}
 
-                {user && role !== 'admin' && (
-                  <div className="border-b border-line py-4">
-                    <NavLink
-                      to="/dashboard"
-                      onClick={() => setMobileOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-2.5 text-[17px] font-semibold no-underline ${isActive ? 'text-accent' : 'text-sky-400'}`
-                      }
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-5 h-5 shrink-0"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
-                        />
-                      </svg>
-                      <span>Progres</span>
-                    </NavLink>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -891,8 +875,7 @@ function AppContent() {
               )}
             </div>
           </aside>
-        </div>
-      )}
+      </div>
 
       <main
         className={

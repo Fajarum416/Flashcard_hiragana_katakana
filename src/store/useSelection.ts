@@ -64,7 +64,7 @@ export const useSelection = create<AppState>()(
             script: 'hiragana',
             mode: 'char',
             comp: false,
-            srsMode: false,
+            srsMode: true,
             sel: { hiragana: [], katakana: [] },
             selY: { hiragana: [], katakana: [] },
             stats: {},
