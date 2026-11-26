@@ -280,13 +280,15 @@ function Session({ script }: { script: Script }) {
           className={`w-full min-w-0 h-[62px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[68px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted focus:outline-none focus-visible:outline-none focus:border-white/30 ${inpBorderClass}`}
           value={s.value}
           placeholder="ketik romaji"
+          inputMode="text"
+          enterKeyHint="go"
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
-          disabled={s.lock}
           aria-label="Ketik romaji"
           onChange={(e) => {
+            if (s.lock) return
             dispatch({ t: 'type', v: e.target.value })
             check(e.target.value, false)
           }}

@@ -295,10 +295,10 @@ export default function UserDashboard() {
       )}
 
       {/* Progress Summary Header */}
-      <div className="bg-panel border border-line rounded-xl p-5 mb-6">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-line shrink-0">
+      <div className="bg-panel border border-line rounded-xl p-3.5 sm:p-4 mb-4">
+        <div className="flex justify-between items-center flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-line shrink-0">
               <img
                 alt={user.user_metadata?.full_name ?? user.email ?? 'Profil'}
                 className="w-full h-full object-cover"
@@ -310,112 +310,135 @@ export default function UserDashboard() {
               />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="m-0 text-xl font-bold text-ink">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h2 className="m-0 text-base sm:text-lg font-bold text-ink">
                   {user.user_metadata?.full_name || user.email || 'Pelajar'}
                 </h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-ink font-medium border border-line">
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-pill text-ink font-medium border border-line">
                   🔥 {userStreak} hari
                 </span>
               </div>
               {user.email && (
-                <p className="text-xs text-muted m-0 mt-0.5">
+                <p className="text-[11px] text-muted m-0 mt-0.5">
                   {user.email}
                 </p>
               )}
             </div>
           </div>
-
-          <div className="flex gap-2 flex-wrap">
-            <button
-              type="button"
-              className="border border-line rounded-full bg-pill hover:bg-pill-on text-ink font-semibold text-xs px-4 py-2 cursor-pointer transition-colors"
-              onClick={() => void load()}
-            >
-              ↻ Segarkan Data
-            </button>
-          </div>
         </div>
 
         {/* 5 Mastery Progress Bars */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mt-5 pt-5 border-t border-line">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5 mt-3.5 pt-3.5 border-t border-line">
           {/* Hiragana */}
-          <div className="bg-bg/50 border border-line rounded-xl p-3.5">
-            <div className="flex justify-between items-center text-xs text-muted mb-1.5">
+          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
+            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
               <span>Hiragana ({hiraMastered}/{TOTAL_CARDS})</span>
               <span className="font-semibold text-ink">{hiraPct}%</span>
             </div>
-            <div className="w-full h-2 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
               <div className="h-full bg-ok transition-all" style={{ width: `${hiraPct}%` }} />
             </div>
           </div>
 
           {/* Katakana */}
-          <div className="bg-bg/50 border border-line rounded-xl p-3.5">
-            <div className="flex justify-between items-center text-xs text-muted mb-1.5">
+          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
+            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
               <span>Katakana ({kataMastered}/{TOTAL_CARDS})</span>
               <span className="font-semibold text-ink">{kataPct}%</span>
             </div>
-            <div className="w-full h-2 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
               <div className="h-full bg-accent transition-all" style={{ width: `${kataPct}%` }} />
             </div>
           </div>
 
           {/* Kosakata */}
-          <div className="bg-bg/50 border border-line rounded-xl p-3.5">
-            <div className="flex justify-between items-center text-xs text-muted mb-1.5">
+          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
+            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
               <span>Kosakata ({vocabMastered}/{totalVocabWords})</span>
               <span className="font-semibold text-ink">{vocabPct}%</span>
             </div>
-            <div className="w-full h-2 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
               <div className="h-full bg-[#e6a23c] transition-all" style={{ width: `${vocabPct}%` }} />
             </div>
           </div>
 
           {/* Kanji */}
-          <div className="bg-bg/50 border border-line rounded-xl p-3.5">
-            <div className="flex justify-between items-center text-xs text-muted mb-1.5">
+          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
+            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
               <span>Kanji ({kanjiMastered}/{totalKanjiItems})</span>
               <span className="font-semibold text-ink">{kanjiPct}%</span>
             </div>
-            <div className="w-full h-2 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
               <div className="h-full bg-secondary transition-all" style={{ width: `${kanjiPct}%` }} />
             </div>
           </div>
 
           {/* Sesi */}
-          <div className="bg-bg/50 border border-line rounded-xl p-3.5 flex items-center justify-between">
+          <div className="col-span-2 sm:col-span-1 bg-bg/50 border border-line rounded-xl p-2.5 flex items-center justify-between">
             <div>
-              <small className="text-muted block text-xs">Total Sesi Latihan</small>
-              <span className="text-xl font-bold text-ink">
+              <small className="text-muted block text-[11px]">Total Sesi Latihan</small>
+              <span className="text-base sm:text-lg font-bold text-ink">
                 {sessions.length + vocabSessions.length + kanjiSessions.length} Sesi
               </span>
             </div>
-            <span className="text-2xl">📊</span>
+            <span className="text-xl">📊</span>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-muted text-[13px] text-center py-10">Memuat data analitik...</p>
+        <p className="text-muted text-[13px] text-center py-8">Memuat data analitik...</p>
       ) : (
-        <div className="tabs tabs-lift">
-          <input
-            type="radio"
-            name="dashboard_main_tabs"
-            className="tab font-bold text-sm"
-            aria-label="Hiragana & Katakana"
-            checked={mainTab === 'kana'}
-            onChange={() => setMainTab('kana')}
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-4 sm:p-6">
-            {/* KANA ANALYTICS VIEW */}
+        <div>
+          {/* Tab Navigation: 1 baris rapi di semua ukuran layar */}
+          <div className="grid grid-cols-3 gap-1 bg-pill border border-line rounded-xl p-1 mb-4">
+            <button
+              type="button"
+              onClick={() => setMainTab('kana')}
+              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
+                mainTab === 'kana'
+                  ? 'bg-panel text-accent shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              <span className="sm:hidden">Kana</span>
+              <span className="hidden sm:inline">Hiragana & Katakana</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainTab('vocab')}
+              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
+                mainTab === 'vocab'
+                  ? 'bg-panel text-accent shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              <span className="sm:hidden">Kosakata</span>
+              <span className="hidden sm:inline">Kosakata (N5 & N4)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainTab('kanji')}
+              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
+                mainTab === 'kanji'
+                  ? 'bg-panel text-accent shadow-sm'
+                  : 'text-muted hover:text-ink'
+              }`}
+            >
+              <span className="sm:hidden">Kanji</span>
+              <span className="hidden sm:inline">Kanji (N5, N4 & JFT)</span>
+            </button>
+          </div>
+
+          {mainTab === 'kana' && (
+            <div>
+              {/* KANA ANALYTICS VIEW */}
           {/* Heatmap Section */}
-          <div className="bg-panel border border-line rounded-2xl p-5 mb-6 shadow-sm">
-            <div className="flex justify-between items-center flex-wrap gap-3 mb-4">
+          <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 mb-4 shadow-sm">
+            <div className="flex justify-between items-center flex-wrap gap-2.5 mb-3">
               <div>
-                <h3 className="m-0 text-base font-semibold text-ink">Heatmap Hafalan Karakter</h3>
-                <p className="text-muted text-xs mt-1 mb-0">
+                <h3 className="m-0 text-sm sm:text-base font-semibold text-ink">Heatmap Hafalan Karakter</h3>
+                <p className="text-muted text-xs mt-0.5 mb-0">
                   Status hafalan tiap huruf berdasarkan tingkat akurasi & pengulangan.
                 </p>
               </div>
@@ -514,101 +537,51 @@ export default function UserDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Session History */}
-          <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-            <h3 className="m-0 mb-4 text-base font-semibold text-ink">Riwayat Pengerjaan Latihan ({sessions.length})</h3>
-            {sessions.length === 0 ? (
-              <p className="text-muted text-[13px]">Belum ada riwayat sesi latihan yang dikerjakan.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Waktu Sesi</th>
-                      <th>Aksara</th>
-                      <th>Mode</th>
-                      <th>Total Kartu</th>
-                      <th>Benar</th>
-                      <th>Akurasi</th>
-                      <th>Durasi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sessions.map((s, idx) => {
-                      const acc = s.total_cards > 0 ? Math.round((s.correct_cards / s.total_cards) * 100) : 0
-                      return (
-                        <tr key={s.id}>
-                          <th>{idx + 1}</th>
-                          <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
-                          <td className="capitalize">{s.script}</td>
-                          <td>
-                            {s.mode === 'char' ? 'Huruf' : 'Kata'} {s.composite ? '(Gabungan)' : '(Tunggal)'}
-                          </td>
-                          <td>{s.total_cards}</td>
-                          <td className="text-ok">{s.correct_cards}</td>
-                          <td className="font-semibold">{acc}%</td>
-                          <td className="text-muted">{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
-          </div>
+          )}
 
-          <input
-            type="radio"
-            name="dashboard_main_tabs"
-            className="tab font-bold text-sm"
-            aria-label="Kosakata (JLPT N5 & N4)"
-            checked={mainTab === 'vocab'}
-            onChange={() => setMainTab('vocab')}
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-4 sm:p-6 space-y-6">
-            {/* VOCABULARY ANALYTICS VIEW */}
+          {mainTab === 'vocab' && (
+            <div className="space-y-4">
+              {/* VOCABULARY ANALYTICS VIEW */}
           {/* SRS Distribution Overview */}
-          <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-            <h3 className="text-base font-semibold text-ink mb-1">Distribusi Tingkat Hafalan Kosakata</h3>
-            <p className="text-xs text-muted mb-4">
+          <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
+            <h3 className="text-sm sm:text-base font-semibold text-ink mb-0.5">Distribusi Tingkat Hafalan Kosakata</h3>
+            <p className="text-xs text-muted mb-3">
               Pengelompokan kosakata berdasarkan seberapa kuat ingatan Anda.
             </p>
 
-            <div className="stats stats-vertical sm:stats-horizontal shadow-sm w-full bg-pill/50 border border-line rounded-2xl">
-              <div className="stat">
-                <div className="stat-title text-muted text-xs">Belum Dipelajari</div>
-                <div className="stat-value text-ink text-3xl font-black tabular-nums">{vocabNone}</div>
-                <div className="stat-desc text-muted">Belum dibuka</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                <div className="text-[11px] font-medium text-muted">Belum Dipelajari</div>
+                <div className="text-xl sm:text-2xl font-black text-ink tabular-nums mt-0.5">{vocabNone}</div>
+                <div className="text-[11px] text-muted">Belum dibuka</div>
               </div>
 
-              <div className="stat">
-                <div className="stat-title text-bad text-xs">Lemah / Ulangi</div>
-                <div className="stat-value text-bad text-3xl font-black tabular-nums">{vocabWeak}</div>
-                <div className="stat-desc text-muted">Perlu diulang segera</div>
+              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                <div className="text-[11px] font-medium text-bad">Lemah / Ulangi</div>
+                <div className="text-xl sm:text-2xl font-black text-bad tabular-nums mt-0.5">{vocabWeak}</div>
+                <div className="text-[11px] text-muted">Perlu diulang segera</div>
               </div>
 
-              <div className="stat">
-                <div className="stat-title text-[#e6a23c] text-xs">Belajar / Berkembang</div>
-                <div className="stat-value text-[#e6a23c] text-3xl font-black tabular-nums">{vocabLearning + vocabAlmost}</div>
-                <div className="stat-desc text-muted">Sedang berproses</div>
+              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                <div className="text-[11px] font-medium text-[#e6a23c]">Belajar / Berkembang</div>
+                <div className="text-xl sm:text-2xl font-black text-[#e6a23c] tabular-nums mt-0.5">{vocabLearning + vocabAlmost}</div>
+                <div className="text-[11px] text-muted">Sedang berproses</div>
               </div>
 
-              <div className="stat">
-                <div className="stat-title text-ok text-xs">Sudah Hafal Kuat</div>
-                <div className="stat-value text-ok text-3xl font-black tabular-nums">{vocabMastered}</div>
-                <div className="stat-desc text-muted">Ingatan jangka panjang</div>
+              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                <div className="text-[11px] font-medium text-ok">Sudah Hafal Kuat</div>
+                <div className="text-xl sm:text-2xl font-black text-ok tabular-nums mt-0.5">{vocabMastered}</div>
+                <div className="text-[11px] text-muted">Ingatan jangka panjang</div>
               </div>
             </div>
           </div>
 
           {/* Weak Words / Needs Review Section */}
-          <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3 mb-2.5">
               <div>
-                <h3 className="text-base font-semibold text-ink">
+                <h3 className="text-sm sm:text-base font-semibold text-ink">
                   Kosakata yang Perlu Diperhatikan {weakWords.length > 0 ? `(${weakWords.length})` : ''}
                 </h3>
                 <p className="text-xs text-muted">
@@ -620,23 +593,23 @@ export default function UserDashboard() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
-                    onClick={() => weakScrollRef.current?.scrollBy({ left: -440, behavior: 'smooth' })}
-                    className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                    onClick={() => weakScrollRef.current?.scrollBy({ left: -360, behavior: 'smooth' })}
+                    className="w-7 h-7 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
                     title="Geser ke kiri"
                     aria-label="Geser ke kiri"
                   >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <polyline points="15 18 9 12 15 6" />
                     </svg>
                   </button>
                   <button
                     type="button"
-                    onClick={() => weakScrollRef.current?.scrollBy({ left: 440, behavior: 'smooth' })}
-                    className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                    onClick={() => weakScrollRef.current?.scrollBy({ left: 360, behavior: 'smooth' })}
+                    className="w-7 h-7 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
                     title="Geser ke kanan"
                     aria-label="Geser ke kanan"
                   >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <polyline points="9 18 15 12 9 6" />
                     </svg>
                   </button>
@@ -645,7 +618,7 @@ export default function UserDashboard() {
             </div>
 
             {weakWords.length === 0 ? (
-              <div className="py-6 text-center text-sm text-muted bg-pill/30 rounded-xl border border-line/60">
+              <div className="py-4 text-center text-xs sm:text-sm text-muted bg-pill/30 rounded-xl border border-line/60">
                 🎉 Bagus sekali! Belum ada kosakata yang sering salah.
               </div>
             ) : (
@@ -653,26 +626,26 @@ export default function UserDashboard() {
                 ref={weakScrollRef}
                 className={`grid ${
                   weakWords.length > 5 ? 'grid-rows-2' : 'grid-rows-1'
-                } grid-flow-col auto-cols-[200px] sm:auto-cols-[215px] gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory`}
+                } grid-flow-col auto-cols-[160px] sm:auto-cols-[180px] gap-2.5 overflow-x-auto pb-1.5 scroll-smooth snap-x snap-mandatory`}
               >
                 {weakWords.map((w) => {
                   const s = vocabStats[w.id]
                   return (
                     <div
                       key={w.id}
-                      className="snap-start bg-pill/40 border border-line rounded-xl p-3 flex flex-col justify-between gap-2"
+                      className="snap-start bg-pill/40 border border-line rounded-xl p-2.5 flex flex-col justify-between gap-1.5"
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="text-xs font-bold text-accent">{w.level} Bab {w.chapter}</span>
+                        <div className="flex items-center justify-between gap-1 mb-0.5">
+                          <span className="text-[11px] font-bold text-accent">{w.level} Bab {w.chapter}</span>
                           <span className="badge badge-soft badge-error badge-xs font-semibold">
-                            Salah: {s?.no ?? 0}x
+                            {s?.no ?? 0}x
                           </span>
                         </div>
-                        <div className="text-xl font-bold text-ink font-japanese">{w.kanji || w.kana}</div>
-                        <div className="text-xs text-muted">{w.kana} • {w.romaji}</div>
+                        <div className="text-base sm:text-lg font-bold text-ink font-japanese truncate">{w.kanji || w.kana}</div>
+                        <div className="text-[11px] text-muted truncate">{w.kana} • {w.romaji}</div>
                       </div>
-                      <div className="text-xs font-semibold text-ink/90 border-t border-line/40 pt-1.5 truncate">
+                      <div className="text-[11px] font-semibold text-ink/90 border-t border-line/40 pt-1 truncate">
                         {w.meaning}
                       </div>
                     </div>
@@ -683,10 +656,10 @@ export default function UserDashboard() {
           </div>
 
           {/* Chapters Progress per Level */}
-          <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
               <div>
-                <h3 className="text-base font-semibold text-ink">Progres Kosakata per Bab</h3>
+                <h3 className="text-sm sm:text-base font-semibold text-ink">Progres Kosakata per Bab</h3>
                 <p className="text-xs text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab.</p>
               </div>
 
@@ -735,34 +708,34 @@ export default function UserDashboard() {
               }
 
               return (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                   {startedChapters.map(({ ch, stats }) => {
                     const percentLearned = Math.round((stats.learned / ch.words.length) * 100) || 0
 
                     return (
-                      <div key={ch.chapter} className="bg-bg/40 border border-line rounded-xl p-4 flex flex-col justify-between gap-3">
+                      <div key={ch.chapter} className="bg-bg/40 border border-line rounded-xl p-3 flex flex-col justify-between gap-2">
                         <div>
-                          <div className="flex items-center justify-between text-xs text-muted mb-1">
+                          <div className="flex items-center justify-between text-[11px] text-muted mb-0.5">
                             <span className="font-bold text-accent">Bab {ch.chapter}</span>
                             <span>{ch.words.length} Kosakata</span>
                           </div>
-                          <h4 className="font-bold text-ink text-sm">{ch.title}</h4>
+                          <h4 className="font-bold text-ink text-xs sm:text-sm truncate">{ch.title}</h4>
                         </div>
 
-                        <div className="space-y-2 pt-2 border-t border-line/50">
-                          <div className="flex justify-between items-center text-xs text-muted">
-                            <span>Hafal: {stats.learned}/{ch.words.length} kata</span>
+                        <div className="space-y-1.5 pt-1.5 border-t border-line/50">
+                          <div className="flex justify-between items-center text-[11px] text-muted">
+                            <span>Hafal: {stats.learned}/{ch.words.length}</span>
                             <span className="font-semibold text-ink">Akurasi: {stats.accuracy}%</span>
                           </div>
-                          <div className="w-full bg-pill rounded-full h-2 overflow-hidden border border-line/40">
+                          <div className="w-full bg-pill rounded-full h-1.5 overflow-hidden border border-line/40">
                             <div className="bg-accent h-full transition-all" style={{ width: `${percentLearned}%` }} />
                           </div>
-                          <div className="flex justify-end pt-1">
+                          <div className="flex justify-end pt-0.5">
                             <Link
                               to={`/vocab/${vocabLevel}/${ch.chapter}`}
                               className="btn btn-xs bg-accent hover:opacity-90 text-white font-semibold rounded-lg no-underline inline-flex items-center gap-1"
                             >
-                              <span>Lanjut Latihan</span>
+                              <span>Lanjut</span>
                               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                 <polyline points="9 18 15 12 9 6" />
                               </svg>
@@ -776,102 +749,50 @@ export default function UserDashboard() {
               )
             })()}
           </div>
-
-          {/* Riwayat Sesi Kosakata */}
-          <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-            <h3 className="m-0 mb-4 text-base font-semibold text-ink">Riwayat Sesi Kosakata ({vocabSessions.length})</h3>
-            {vocabSessions.length === 0 ? (
-              <p className="text-muted text-[13px]">Belum ada riwayat sesi latihan kosakata.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Waktu Sesi</th>
-                      <th>Level</th>
-                      <th>Bab</th>
-                      <th>Total Kartu</th>
-                      <th>Benar</th>
-                      <th>Akurasi</th>
-                      <th>Durasi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vocabSessions.map((s, idx) => {
-                      const acc = s.total_cards > 0 ? Math.round((s.correct_cards / s.total_cards) * 100) : 0
-                      return (
-                        <tr key={s.id}>
-                          <th>{idx + 1}</th>
-                          <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
-                          <td>
-                            <span className="badge badge-soft badge-accent badge-sm font-bold">
-                              {s.level}
-                            </span>
-                          </td>
-                          <td>Bab {s.chapter}</td>
-                          <td>{s.total_cards}</td>
-                          <td className="text-ok">{s.correct_cards}</td>
-                          <td className="font-semibold">{acc}%</td>
-                          <td className="text-muted">{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
-          </div>
+          )}
 
-          <input
-            type="radio"
-            name="dashboard_main_tabs"
-            className="tab font-bold text-sm"
-            aria-label="Kanji (N5, N4 & JFT)"
-            checked={mainTab === 'kanji'}
-            onChange={() => setMainTab('kanji')}
-          />
-          <div className="tab-content bg-base-100 border-base-300 p-4 sm:p-6 space-y-6">
-            {/* KANJI ANALYTICS VIEW */}
-            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-              <h3 className="text-base font-semibold text-ink mb-1">Distribusi Tingkat Hafalan Kanji</h3>
-              <p className="text-xs text-muted mb-4">
+          {mainTab === 'kanji' && (
+            <div className="space-y-4">
+              {/* KANJI ANALYTICS VIEW */}
+            <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
+              <h3 className="text-sm sm:text-base font-semibold text-ink mb-0.5">Distribusi Tingkat Hafalan Kanji</h3>
+              <p className="text-xs text-muted mb-3">
                 Pengelompokan Kanji berdasarkan seberapa kuat ingatan Anda.
               </p>
 
-              <div className="stats stats-vertical sm:stats-horizontal shadow-sm w-full bg-pill/50 border border-line rounded-2xl">
-                <div className="stat">
-                  <div className="stat-title text-muted text-xs">Belum Dipelajari</div>
-                  <div className="stat-value text-ink text-3xl font-black tabular-nums">{kanjiNone}</div>
-                  <div className="stat-desc text-muted">Belum dibuka</div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                  <div className="text-[11px] font-medium text-muted">Belum Dipelajari</div>
+                  <div className="text-xl sm:text-2xl font-black text-ink tabular-nums mt-0.5">{kanjiNone}</div>
+                  <div className="text-[11px] text-muted">Belum dibuka</div>
                 </div>
 
-                <div className="stat">
-                  <div className="stat-title text-bad text-xs">Lemah / Ulangi</div>
-                  <div className="stat-value text-bad text-3xl font-black tabular-nums">{kanjiWeak}</div>
-                  <div className="stat-desc text-muted">Perlu diulang segera</div>
+                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                  <div className="text-[11px] font-medium text-bad">Lemah / Ulangi</div>
+                  <div className="text-xl sm:text-2xl font-black text-bad tabular-nums mt-0.5">{kanjiWeak}</div>
+                  <div className="text-[11px] text-muted">Perlu diulang segera</div>
                 </div>
 
-                <div className="stat">
-                  <div className="stat-title text-[#e6a23c] text-xs">Belajar / Berkembang</div>
-                  <div className="stat-value text-[#e6a23c] text-3xl font-black tabular-nums">{kanjiLearning + kanjiAlmost}</div>
-                  <div className="stat-desc text-muted">Mulai hafal & berkembang</div>
+                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                  <div className="text-[11px] font-medium text-[#e6a23c]">Belajar / Berkembang</div>
+                  <div className="text-xl sm:text-2xl font-black text-[#e6a23c] tabular-nums mt-0.5">{kanjiLearning + kanjiAlmost}</div>
+                  <div className="text-[11px] text-muted">Mulai hafal & berkembang</div>
                 </div>
 
-                <div className="stat">
-                  <div className="stat-title text-ok text-xs">Sudah Hafal Kuat</div>
-                  <div className="stat-value text-ok text-3xl font-black tabular-nums">{kanjiMastered}</div>
-                  <div className="stat-desc text-muted">Ingatan jangka panjang</div>
+                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
+                  <div className="text-[11px] font-medium text-ok">Sudah Hafal Kuat</div>
+                  <div className="text-xl sm:text-2xl font-black text-ok tabular-nums mt-0.5">{kanjiMastered}</div>
+                  <div className="text-[11px] text-muted">Ingatan jangka panjang</div>
                 </div>
               </div>
             </div>
 
             {/* Weak Kanji / Needs Review Section */}
-            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-2.5">
                 <div>
-                  <h3 className="text-base font-semibold text-ink">
+                  <h3 className="text-sm sm:text-base font-semibold text-ink">
                     Kanji yang Perlu Diperhatikan {weakKanji.length > 0 ? `(${weakKanji.length})` : ''}
                   </h3>
                   <p className="text-xs text-muted">
@@ -883,23 +804,23 @@ export default function UserDashboard() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       type="button"
-                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: -440, behavior: 'smooth' })}
-                      className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: -360, behavior: 'smooth' })}
+                      className="w-7 h-7 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
                       title="Geser ke kiri"
                       aria-label="Geser ke kiri"
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <polyline points="15 18 9 12 15 6" />
                       </svg>
                     </button>
                     <button
                       type="button"
-                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: 440, behavior: 'smooth' })}
-                      className="w-8 h-8 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
+                      onClick={() => weakKanjiScrollRef.current?.scrollBy({ left: 360, behavior: 'smooth' })}
+                      className="w-7 h-7 rounded-lg bg-pill hover:bg-pill-on border border-line text-ink flex items-center justify-center cursor-pointer transition-colors"
                       title="Geser ke kanan"
                       aria-label="Geser ke kanan"
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <polyline points="9 18 15 12 9 6" />
                       </svg>
                     </button>
@@ -908,7 +829,7 @@ export default function UserDashboard() {
               </div>
 
               {weakKanji.length === 0 ? (
-                <div className="py-6 text-center text-sm text-muted bg-pill/30 rounded-xl border border-line/60">
+                <div className="py-4 text-center text-xs sm:text-sm text-muted bg-pill/30 rounded-xl border border-line/60">
                   🎉 Bagus sekali! Belum ada Kanji yang sering salah.
                 </div>
               ) : (
@@ -916,26 +837,26 @@ export default function UserDashboard() {
                   ref={weakKanjiScrollRef}
                   className={`grid ${
                     weakKanji.length > 5 ? 'grid-rows-2' : 'grid-rows-1'
-                  } grid-flow-col auto-cols-[200px] sm:auto-cols-[215px] gap-3 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory`}
+                  } grid-flow-col auto-cols-[160px] sm:auto-cols-[180px] gap-2.5 overflow-x-auto pb-1.5 scroll-smooth snap-x snap-mandatory`}
                 >
                   {weakKanji.map((k) => {
                     const s = kanjiStats[k.id]
                     return (
                       <div
                         key={k.id}
-                        className="snap-start bg-pill/40 border border-line rounded-xl p-3 flex flex-col justify-between gap-2"
+                        className="snap-start bg-pill/40 border border-line rounded-xl p-2.5 flex flex-col justify-between gap-1.5"
                       >
                         <div>
-                          <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-xs font-bold text-accent">{k.level} Bab {k.chapter}</span>
+                          <div className="flex items-center justify-between gap-1 mb-0.5">
+                            <span className="text-[11px] font-bold text-accent">{k.level} Bab {k.chapter}</span>
                             <span className="badge badge-soft badge-error badge-xs font-semibold">
-                              Salah: {s?.no ?? 0}x
+                              {s?.no ?? 0}x
                             </span>
                           </div>
-                          <div className="text-2xl font-black text-ink font-japanese">{k.kanji}</div>
-                          <div className="text-xs text-muted truncate">On: {k.onyomi}</div>
+                          <div className="text-lg sm:text-xl font-black text-ink font-japanese">{k.kanji}</div>
+                          <div className="text-[11px] text-muted truncate">On: {k.onyomi}</div>
                         </div>
-                        <div className="text-xs font-semibold text-ink/90 border-t border-line/40 pt-1.5 truncate">
+                        <div className="text-[11px] font-semibold text-ink/90 border-t border-line/40 pt-1 truncate">
                           {k.meaning}
                         </div>
                       </div>
@@ -946,10 +867,10 @@ export default function UserDashboard() {
             </div>
 
             {/* Kanji Chapters Progress per Level */}
-            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <div>
-                  <h3 className="text-base font-semibold text-ink">Progres Kanji per Bab</h3>
+                  <h3 className="text-sm sm:text-base font-semibold text-ink">Progres Kanji per Bab</h3>
                   <p className="text-xs text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab Kanji.</p>
                 </div>
 
@@ -1007,34 +928,34 @@ export default function UserDashboard() {
                 }
 
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                     {startedChapters.map(({ ch, stats }) => {
                       const percentLearned = Math.round((stats.learned / ch.items.length) * 100) || 0
 
                       return (
-                        <div key={`${ch.level}-${ch.chapter}`} className="bg-bg/40 border border-line rounded-xl p-4 flex flex-col justify-between gap-3">
+                        <div key={`${ch.level}-${ch.chapter}`} className="bg-bg/40 border border-line rounded-xl p-3 flex flex-col justify-between gap-2">
                           <div>
-                            <div className="flex items-center justify-between text-xs text-muted mb-1">
+                            <div className="flex items-center justify-between text-[11px] text-muted mb-0.5">
                               <span className="font-bold text-accent">Bab {ch.chapter}</span>
                               <span>{ch.items.length} Kanji</span>
                             </div>
-                            <h4 className="font-bold text-ink text-sm">{ch.title}</h4>
+                            <h4 className="font-bold text-ink text-xs sm:text-sm truncate">{ch.title}</h4>
                           </div>
 
-                          <div className="space-y-2 pt-2 border-t border-line/50">
-                            <div className="flex justify-between items-center text-xs text-muted">
-                              <span>Hafal: {stats.learned}/{ch.items.length} kanji</span>
+                          <div className="space-y-1.5 pt-1.5 border-t border-line/50">
+                            <div className="flex justify-between items-center text-[11px] text-muted">
+                              <span>Hafal: {stats.learned}/{ch.items.length}</span>
                               <span className="font-semibold text-ink">Akurasi: {stats.accuracy}%</span>
                             </div>
-                            <div className="w-full bg-pill rounded-full h-2 overflow-hidden border border-line/40">
+                            <div className="w-full bg-pill rounded-full h-1.5 overflow-hidden border border-line/40">
                               <div className="bg-accent h-full transition-all" style={{ width: `${percentLearned}%` }} />
                             </div>
-                            <div className="flex justify-end pt-1">
+                            <div className="flex justify-end pt-0.5">
                               <Link
                                 to={`/kanji/${kanjiLevel}/${ch.chapter}`}
                                 className="btn btn-xs bg-accent hover:opacity-90 text-white font-semibold rounded-lg no-underline inline-flex items-center gap-1"
                               >
-                                <span>Lanjut Latihan</span>
+                                <span>Lanjut</span>
                                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                   <polyline points="9 18 15 12 9 6" />
                                 </svg>
@@ -1048,53 +969,8 @@ export default function UserDashboard() {
                 )
               })()}
             </div>
-
-            {/* Riwayat Sesi Kanji */}
-            <div className="bg-panel border border-line rounded-2xl p-5 shadow-sm">
-              <h3 className="m-0 mb-4 text-base font-semibold text-ink">Riwayat Sesi Kanji ({kanjiSessions.length})</h3>
-              {kanjiSessions.length === 0 ? (
-                <p className="text-muted text-[13px]">Belum ada riwayat sesi latihan Kanji.</p>
-              ) : (
-                <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>Waktu Sesi</th>
-                        <th>Level</th>
-                        <th>Bab</th>
-                        <th>Total Kartu</th>
-                        <th>Benar</th>
-                        <th>Akurasi</th>
-                        <th>Durasi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {kanjiSessions.map((s, idx) => {
-                        const acc = s.total_cards > 0 ? Math.round((s.correct_cards / s.total_cards) * 100) : 0
-                        return (
-                          <tr key={s.id}>
-                            <th>{idx + 1}</th>
-                            <td>{new Date(s.started_at).toLocaleString('id-ID')}</td>
-                            <td>
-                              <span className="badge badge-soft badge-accent badge-sm font-bold">
-                                {s.level}
-                              </span>
-                            </td>
-                            <td>Bab {s.chapter}</td>
-                            <td>{s.total_cards}</td>
-                            <td className="text-ok">{s.correct_cards}</td>
-                            <td className="font-semibold">{acc}%</td>
-                            <td className="text-muted">{s.duration_sec ? `${s.duration_sec} dtk` : '-'}</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
           </div>
+          )}
         </div>
       )}
     </div>
