@@ -49,7 +49,17 @@ export const useAuth = create<AuthState>((set) => ({
       loadRole(session?.user.id)
       if (event === 'SIGNED_IN' && session) {
         // tidak menunggu; kegagalan di sini tidak boleh mengganggu login
-        void client.from('profiles').update({ last_login_at: new Date().toISOString() }).eq('id', session.user.id)
+        const meta = session.user.user_metadata
+        const avatarUrl = (meta?.avatar_url || meta?.picture || null) as string | null
+        const fullName = (meta?.full_name || null) as string | null
+        void client
+          .from('profiles')
+          .update({
+            last_login_at: new Date().toISOString(),
+            ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+            ...(fullName ? { display_name: fullName } : {}),
+          })
+          .eq('id', session.user.id)
       }
     })
     return () => data.subscription.unsubscribe()

@@ -124,10 +124,13 @@ function AppContent() {
   const isDashboard = location.pathname.startsWith('/dashboard')
   const isVocab = location.pathname.startsWith('/vocab')
   const isKanji = location.pathname.startsWith('/kanji')
+  const isAdmin = location.pathname.startsWith('/admin')
 
   return (
     <>
       <BackgroundPattern />
+      {!isAdmin && (
+      <>
       <header
         className={`sticky top-0 z-50 w-full transition-all duration-200 ${
           scrolled ? 'bg-panel/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
@@ -911,14 +914,18 @@ function AppContent() {
             </div>
           </aside>
       </div>
+      </>
+      )}
 
       <main
         className={
-          isPractice
-            ? 'relative z-10 w-full max-w-full m-0 flex flex-col px-4 pt-3 pb-2 md:px-16 md:pt-5 md:pb-8 xl:px-[120px] xl:pt-6 xl:pb-10'
-            : isDashboard
-              ? 'relative z-10 w-full max-w-full m-0 px-5 pt-4 pb-3 md:px-16 md:pt-5 md:pb-5 xl:px-[120px] xl:pt-6 xl:pb-6'
-              : 'relative z-10 w-full max-w-full m-0 px-5 pt-4 pb-10 md:px-16 md:pt-5 md:pb-12 xl:px-[120px] xl:pt-6 xl:pb-14'
+          isAdmin
+            ? 'relative z-10 w-full max-w-full m-0 min-h-screen'
+            : isPractice
+              ? 'relative z-10 w-full max-w-full m-0 flex flex-col px-4 pt-3 pb-2 md:px-16 md:pt-5 md:pb-8 xl:px-[120px] xl:pt-6 xl:pb-10'
+              : isDashboard
+                ? 'relative z-10 w-full max-w-full m-0 px-5 pt-4 pb-3 md:px-16 md:pt-5 md:pb-5 xl:px-[120px] xl:pt-6 xl:pb-6'
+                : 'relative z-10 w-full max-w-full m-0 px-5 pt-4 pb-10 md:px-16 md:pt-5 md:pb-12 xl:px-[120px] xl:pt-6 xl:pb-14'
         }
       >
         <InstallPrompt />
@@ -937,7 +944,7 @@ function AppContent() {
           <Route path="/kanji/:level/:chapter" element={<KanjiPractice />} />
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/profile" element={<Profile onDeleteAccount={onDelete} />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminLayout onLogout={onLogout} />}>
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="users/:id" element={<AdminUserDetail />} />
