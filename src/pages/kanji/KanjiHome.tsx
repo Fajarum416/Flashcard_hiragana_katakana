@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { SlidingTabs } from '../../components/Segmented'
 import { type KanjiLevel } from '../../data/kanji'
 import { useContentStore } from '../../store/useContentStore'
 import { useKanjiStore } from '../../store/useKanjiStore'
@@ -28,41 +29,21 @@ export default function KanjiHome() {
         </div>
 
         {/* Level Switcher (N5 / N4 / JFT) */}
-        <div className="flex items-center gap-1 sm:gap-1.5 bg-pill p-1 rounded-xl border border-line self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setLevel('n5')}
-            className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              level === 'n5'
-                ? 'bg-panel text-accent shadow-sm'
-                : 'text-muted hover:text-ink'
-            }`}
-          >
-            JLPT N5
-          </button>
-          <button
-            type="button"
-            onClick={() => setLevel('n4')}
-            className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              level === 'n4'
-                ? 'bg-panel text-accent shadow-sm'
-                : 'text-muted hover:text-ink'
-            }`}
-          >
-            JLPT N4
-          </button>
-          <button
-            type="button"
-            onClick={() => setLevel('jft')}
-            className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer ${
-              level === 'jft'
-                ? 'bg-panel text-accent shadow-sm'
-                : 'text-muted hover:text-ink'
-            }`}
-          >
-            JFT
-          </button>
-        </div>
+        <SlidingTabs
+          ariaLabel="Pilih Level Kanji"
+          value={level}
+          onChange={setLevel}
+          className="inline-flex items-center gap-1 sm:gap-1.5 bg-pill p-1 rounded-xl border border-line self-start sm:self-auto"
+          indicatorClassName="bg-panel rounded-lg shadow-sm"
+          buttonClassName="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-bold"
+          activeButtonClassName="text-accent"
+          inactiveButtonClassName="text-muted hover:text-ink"
+          options={[
+            { value: 'n5', label: 'JLPT N5' },
+            { value: 'n4', label: 'JLPT N4' },
+            { value: 'jft', label: 'JFT' },
+          ]}
+        />
       </div>
 
       {/* Chapters Grid */}

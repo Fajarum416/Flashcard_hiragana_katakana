@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SlidingTabs } from '../../components/Segmented'
 import {
   deleteKanjiChapter,
   deleteKanjiItem,
@@ -314,23 +315,24 @@ export default function AdminKanji() {
       )}
 
       {/* Level Switcher */}
-      <div className="inline-flex bg-pill border border-line rounded-xl p-1">
-        {(['n5', 'n4', 'jft'] as const).map((lv) => (
-          <button
-            key={lv}
-            type="button"
-            onClick={() => {
-              setLevel(lv)
-              setSelectedChapterId('')
-            }}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              level === lv ? 'bg-base-100 text-accent border border-line shadow-sm' : 'text-muted hover:text-ink'
-            }`}
-          >
-            {lv === 'jft' ? 'JFT' : `JLPT ${lv.toUpperCase()}`}
-          </button>
-        ))}
-      </div>
+      <SlidingTabs
+        ariaLabel="Level Kanji Admin"
+        value={level}
+        onChange={(lv) => {
+          setLevel(lv)
+          setSelectedChapterId('')
+        }}
+        className="inline-flex bg-pill border border-line rounded-xl p-1"
+        indicatorClassName="bg-base-100 border border-line rounded-lg shadow-sm"
+        buttonClassName="px-4 py-1.5 rounded-lg text-xs font-bold"
+        activeButtonClassName="text-accent"
+        inactiveButtonClassName="text-muted hover:text-ink"
+        options={[
+          { value: 'n5', label: 'JLPT N5' },
+          { value: 'n4', label: 'JLPT N4' },
+          { value: 'jft', label: 'JFT' },
+        ]}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Sidebar Daftar Bab */}

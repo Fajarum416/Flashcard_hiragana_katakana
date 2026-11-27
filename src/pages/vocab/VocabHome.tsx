@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { SlidingTabs } from '../../components/Segmented'
 import { useContentStore } from '../../store/useContentStore'
 import { useVocabStore } from '../../store/useVocabStore'
 
@@ -26,30 +27,20 @@ export default function VocabHome() {
         </div>
 
         {/* Level Switcher (N5 / N4) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-pill p-1 rounded-xl border border-line self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setLevel('n5')}
-            className={`px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
-              level === 'n5'
-                ? 'bg-panel text-accent shadow-sm'
-                : 'text-muted hover:text-ink'
-            }`}
-          >
-            JLPT N5
-          </button>
-          <button
-            type="button"
-            onClick={() => setLevel('n4')}
-            className={`px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
-              level === 'n4'
-                ? 'bg-panel text-accent shadow-sm'
-                : 'text-muted hover:text-ink'
-            }`}
-          >
-            JLPT N4
-          </button>
-        </div>
+        <SlidingTabs
+          ariaLabel="Pilih Level Kosakata"
+          value={level}
+          onChange={setLevel}
+          className="inline-flex items-center gap-1.5 sm:gap-2 bg-pill p-1 rounded-xl border border-line self-start sm:self-auto"
+          indicatorClassName="bg-panel rounded-lg shadow-sm"
+          buttonClassName="px-3.5 py-1.5 sm:px-5 sm:py-2 rounded-lg text-xs sm:text-sm font-bold"
+          activeButtonClassName="text-accent"
+          inactiveButtonClassName="text-muted hover:text-ink"
+          options={[
+            { value: 'n5', label: 'JLPT N5' },
+            { value: 'n4', label: 'JLPT N4' },
+          ]}
+        />
       </div>
 
       {/* Settings bar */}

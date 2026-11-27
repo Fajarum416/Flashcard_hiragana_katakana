@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { SlidingTabs } from '../../components/Segmented'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../../data/kana'
 import { fetchUserDetail, resetProgress, setDisabled, setRole, type UserDetail } from '../../lib/admin'
 import { masteryLevel, streak, type Level } from '../../lib/mastery'
@@ -184,26 +185,20 @@ export default function AdminUserDetail() {
               Status hafalan tiap huruf berdasarkan tingkat akurasi & Leitner Box.
             </p>
           </div>
-          <div className="inline-flex bg-pill border border-line rounded-full p-1" role="group">
-            <button
-              type="button"
-              className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                activeTab === 'hiragana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
-              }`}
-              onClick={() => setActiveTab('hiragana')}
-            >
-              Hiragana
-            </button>
-            <button
-              type="button"
-              className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                activeTab === 'katakana' ? 'bg-pill-on text-ink' : 'bg-transparent text-muted hover:text-ink'
-              }`}
-              onClick={() => setActiveTab('katakana')}
-            >
-              Katakana
-            </button>
-          </div>
+          <SlidingTabs
+            ariaLabel="Jenis Aksara"
+            value={activeTab}
+            onChange={setActiveTab}
+            className="inline-flex bg-pill border border-line rounded-full p-1"
+            indicatorClassName="bg-pill-on rounded-full"
+            buttonClassName="rounded-full text-sm font-medium px-4 py-1.5"
+            activeButtonClassName="text-ink"
+            inactiveButtonClassName="text-muted hover:text-ink"
+            options={[
+              { value: 'hiragana', label: 'Hiragana' },
+              { value: 'katakana', label: 'Katakana' },
+            ]}
+          />
         </div>
 
         {/* Legend */}

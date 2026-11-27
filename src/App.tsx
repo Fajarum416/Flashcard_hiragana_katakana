@@ -32,10 +32,15 @@ import { showToast } from './store/useToast'
 function AppContent() {
   const [loginModalOpen, setLoginModalOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [openHira, setOpenHira] = useState(false)
-  const [openKata, setOpenKata] = useState(false)
-  const [openVocab, setOpenVocab] = useState(false)
-  const [openKanji, setOpenKanji] = useState(false)
+  const [openSection, setOpenSection] = useState<'hira' | 'kata' | 'vocab' | 'kanji' | null>(null)
+  const openHira = openSection === 'hira'
+  const openKata = openSection === 'kata'
+  const openVocab = openSection === 'vocab'
+  const openKanji = openSection === 'kanji'
+  const setOpenHira = (v: boolean) => setOpenSection(v ? 'hira' : null)
+  const setOpenKata = (v: boolean) => setOpenSection(v ? 'kata' : null)
+  const setOpenVocab = (v: boolean) => setOpenSection(v ? 'vocab' : null)
+  const setOpenKanji = (v: boolean) => setOpenSection(v ? 'kanji' : null)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
@@ -69,9 +74,14 @@ function AppContent() {
     }
   }
 
-  const onLogout = async () => {
+  const onLogout = () => {
     closeDropdowns()
     setMobileOpen(false)
+    ;(document.getElementById('logout_confirm_modal') as HTMLDialogElement | null)?.showModal()
+  }
+
+  const confirmLogout = async () => {
+    ;(document.getElementById('logout_confirm_modal') as HTMLDialogElement | null)?.close()
     await signOut()
     resetOnLogout()
     useVocabStore.getState().resetOnLogout()
@@ -202,7 +212,7 @@ function AppContent() {
               />
               {/* hamburger icon */}
               <svg
-                className="swap-off fill-current w-5 h-5"
+                className="swap-off fill-current w-6 h-6"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
               >
@@ -210,7 +220,7 @@ function AppContent() {
               </svg>
               {/* close icon */}
               <svg
-                className="swap-on fill-current w-5 h-5"
+                className="swap-on fill-current w-6 h-6"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 512 512"
               >
@@ -558,7 +568,7 @@ function AppContent() {
             mobileOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-            <div>
+            <div className="flex-1">
               {/* Drawer Header */}
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-line">
                 <NavLink
@@ -582,6 +592,59 @@ function AppContent() {
                     <polygon points="400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" />
                   </svg>
                 </button>
+              </div>
+
+              {/* Profile / Sign In (at top of drawer, no rounded) */}
+              <div className="border-b border-line">
+                {user ? (
+                  <NavLink
+                    to="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-5 py-3.5 rounded-none bg-pill/40 hover:bg-pill-on no-underline transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-line/60">
+                      <img
+                        alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
+                        src={
+                          user.user_metadata?.avatar_url ||
+                          user.user_metadata?.picture ||
+                          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
+                        }
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-ink truncate">
+                        {user.user_metadata?.full_name ?? user.email}
+                      </div>
+                      {user.user_metadata?.full_name && user.email && (
+                        <div className="text-[11px] text-muted truncate">{user.email}</div>
+                      )}
+                    </div>
+                    <svg className="w-4 h-4 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </NavLink>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={() => {
+                      setMobileOpen(false)
+                      onLogin()
+                    }}
+                    className="w-full h-11 px-5 rounded-none bg-pill/40 hover:bg-pill-on text-ink font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors border-0"
+                  >
+                    <svg className="w-4 h-4 text-ink" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a3 3 0 110 6 3 3 0 010-6zm0 12.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span>Masuk</span>
+                  </button>
+                )}
               </div>
 
               {/* Drawer Accordion Links */}
@@ -829,61 +892,20 @@ function AppContent() {
                   </div>
                 )}
 
-                {/* Profile / Sign In (below Kanji) */}
-                <div className="pt-4 pb-6">
-                  {user ? (
-                    <div className="flex items-center gap-2">
-                      <NavLink
-                        to="/profile"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex-1 min-w-0 h-10 flex items-center gap-2 px-3 rounded-full bg-pill hover:bg-pill-on border border-line no-underline transition-colors"
-                      >
-                        <div className="w-6 h-6 rounded-full overflow-hidden shrink-0">
-                          <img
-                            alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
-                            src={
-                              user.user_metadata?.avatar_url ||
-                              user.user_metadata?.picture ||
-                              `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
-                            }
-                          />
-                        </div>
-                        <span className="text-xs font-semibold text-ink truncate flex-1">
-                          {user.user_metadata?.full_name ?? user.email}
-                        </span>
-                      </NavLink>
-                      <button
-                        type="button"
-                        onClick={() => void onLogout()}
-                        className="shrink-0 h-10 px-3.5 rounded-full bg-pill hover:bg-pill-on border border-line text-error font-semibold text-xs cursor-pointer transition-colors inline-flex items-center justify-center gap-1.5 whitespace-nowrap"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 shrink-0">
-                          <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
-                        </svg>
-                        <span>Keluar</span>
-                      </button>
-                    </div>
-                  ) : (
+                {user && (
+                  <div className="border-b border-line">
                     <button
                       type="button"
-                      disabled={loading}
-                      onClick={() => {
-                        setMobileOpen(false)
-                        onLogin()
-                      }}
-                      className="w-full h-10 rounded-full bg-pill hover:bg-pill-on border border-line text-ink font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                      onClick={() => void onLogout()}
+                      className="w-full h-11 rounded-none bg-transparent hover:bg-error/10 text-error font-semibold text-[15px] cursor-pointer transition-colors flex items-center justify-start gap-2 border-0"
                     >
-                      <svg className="w-4 h-4 text-ink" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          fillRule="evenodd"
-                          d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a3 3 0 110 6 3 3 0 010-6zm0 12.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"
-                          clipRule="evenodd"
-                        />
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 shrink-0">
+                        <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
                       </svg>
-                      <span>Masuk</span>
+                      <span>Keluar</span>
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
 
               </div>
             </div>
@@ -933,6 +955,28 @@ function AppContent() {
         onClose={() => setLoginModalOpen(false)}
         onFallbackOAuth={() => void signIn()}
       />
+
+      <dialog id="logout_confirm_modal" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Keluar dari Akun?</h3>
+          <p className="py-4">Apakah Anda yakin ingin keluar dari akun ini? Progres yang sudah tersinkronisasi tetap aman di cloud.</p>
+          <div className="modal-action">
+            <form method="dialog" className="flex gap-3">
+              <button
+                type="button"
+                className="btn btn-error text-white w-36 h-11 min-h-11"
+                onClick={() => void confirmLogout()}
+              >
+                Keluar
+              </button>
+              <button className="btn w-36 h-11 min-h-11">Batal</button>
+            </form>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
 
       <dialog id="delete_account_modal" className="modal">
         <div className="modal-box">
