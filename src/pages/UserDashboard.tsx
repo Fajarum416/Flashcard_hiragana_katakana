@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
+import { SlidingTabs } from '../components/Segmented'
 import { COL_IDS, TABLE, YOON_IDS, YOON_TABLE, type Script } from '../data/kana'
-import { fetchUserDetail, type SessionRow } from '../lib/admin'
-import { db } from '../lib/db'
-import { supabase } from '../lib/supabase'
-import { TOTAL_CARDS, masteryLevel, percent, streak, type Level, type ProgressRow } from '../lib/mastery'
+import { fetchUserDetail } from '../lib/admin'
+import { TOTAL_CARDS, masteryLevel, percent, type Level, type ProgressRow } from '../lib/mastery'
 import { getMasteryLabel } from '../lib/srs'
 import { syncNow } from '../lib/sync'
 import { useAuth } from '../store/useAuth'
@@ -47,15 +46,12 @@ export default function UserDashboard() {
   const localStats = useSelection((s) => s.stats)
 
   const [progress, setProgress] = useState<Map<string, ProgressRow>>(new Map())
-  const [sessions, setSessions] = useState<SessionRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mainTab, setMainTab] = useState<'kana' | 'vocab' | 'kanji'>('kana')
   const [activeTab, setActiveTab] = useState<Script>('hiragana')
   const [vocabLevel, setVocabLevel] = useState<'n5' | 'n4'>('n5')
-  const [vocabSessions, setVocabSessions] = useState<any[]>([])
   const [kanjiLevel, setKanjiLevel] = useState<KanjiLevel>('n5')
-  const [kanjiSessions, setKanjiSessions] = useState<any[]>([])
   const weakScrollRef = useRef<HTMLDivElement>(null)
   const weakKanjiScrollRef = useRef<HTMLDivElement>(null)
 
@@ -80,76 +76,7 @@ export default function UserDashboard() {
         }
       }
 
-      const pendingSes = await db.pending_sessions.toArray()
-      const localRows: SessionRow[] = pendingSes.map((p, idx) => ({
-        id: `local-${p.id ?? idx}`,
-        script: p.script,
-        mode: p.mode,
-        composite: p.composite,
-        total_cards: p.totalCards,
-        correct_cards: p.correctCards,
-        duration_sec: p.durationSec,
-        started_at: p.startedAt,
-      }))
-
       setProgress(merged)
-      setSessions([...localRows, ...detail.sessions])
-
-      // Load vocab sessions from Dexie and Supabase
-      const pendingVocabSes = await db.pending_vocab_sessions.toArray()
-      const localVocabRows = pendingVocabSes.map((p, idx) => ({
-        id: `local-vocab-${p.id ?? idx}`,
-        level: p.level,
-        chapter: p.chapter,
-        total_cards: p.totalCards,
-        correct_cards: p.correctCards,
-        duration_sec: p.durationSec,
-        started_at: p.startedAt,
-      }))
-
-      let remoteVocabSessions: any[] = []
-      if (supabase) {
-        try {
-          const { data: vSes } = await supabase
-            .from('vocab_sessions')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('started_at', { ascending: false })
-            .limit(20)
-          if (vSes) remoteVocabSessions = vSes
-        } catch {
-          /* Abaikan jika tabel belum ada */
-        }
-      }
-      setVocabSessions([...localVocabRows, ...remoteVocabSessions])
-
-      // Load kanji sessions from Dexie and Supabase
-      const pendingKanjiSes = await db.pending_kanji_sessions.toArray()
-      const localKanjiRows = pendingKanjiSes.map((p, idx) => ({
-        id: `local-kanji-${p.id ?? idx}`,
-        level: p.level,
-        chapter: p.chapter,
-        total_cards: p.totalCards,
-        correct_cards: p.correctCards,
-        duration_sec: p.durationSec,
-        started_at: p.startedAt,
-      }))
-
-      let remoteKanjiSessions: any[] = []
-      if (supabase) {
-        try {
-          const { data: kSes } = await supabase
-            .from('kanji_sessions')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('started_at', { ascending: false })
-            .limit(20)
-          if (kSes) remoteKanjiSessions = kSes
-        } catch {
-          /* Abaikan jika tabel belum ada */
-        }
-      }
-      setKanjiSessions([...localKanjiRows, ...remoteKanjiSessions])
     } catch (err: any) {
       // Fallback ke data lokal jika sedang offline
       const fallback = new Map<string, ProgressRow>()
@@ -187,7 +114,6 @@ export default function UserDashboard() {
   }
   const hiraPct = percent(hiraMastered, TOTAL_CARDS)
   const kataPct = percent(kataMastered, TOTAL_CARDS)
-  const userStreak = streak(sessions.map((s) => s.started_at))
 
   // Analitik Kosakata
   const n5VocabChapters = vocabChapters.filter((c) => c.level === 'n5')
@@ -296,9 +222,9 @@ export default function UserDashboard() {
 
       {/* Progress Summary Header */}
       <div className="bg-panel border border-line rounded-xl p-3.5 sm:p-4 mb-4">
-        <div className="flex justify-between items-center flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-line shrink-0">
+        <div className="flex justify-between items-center flex-wrap gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-line shrink-0">
               <img
                 alt={user.user_metadata?.full_name ?? user.email ?? 'Profil'}
                 className="w-full h-full object-cover"
@@ -309,17 +235,12 @@ export default function UserDashboard() {
                 }
               />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="m-0 text-base sm:text-lg font-bold text-ink">
-                  {user.user_metadata?.full_name || user.email || 'Pelajar'}
-                </h2>
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-pill text-ink font-medium border border-line">
-                  🔥 {userStreak} hari
-                </span>
-              </div>
+            <div className="flex flex-col min-w-0">
+              <h2 className="m-0 text-sm sm:text-base font-bold text-ink leading-tight truncate">
+                {user.user_metadata?.full_name || user.email || 'Pelajar'}
+              </h2>
               {user.email && (
-                <p className="text-[11px] text-muted m-0 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-muted m-0 truncate">
                   {user.email}
                 </p>
               )}
@@ -327,141 +248,128 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* 5 Mastery Progress Bars */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5 mt-3.5 pt-3.5 border-t border-line">
+        {/* 4 Mastery Progress Bars */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2.5 mt-2.5 sm:mt-3.5 pt-2.5 sm:pt-3.5 border-t border-line">
           {/* Hiragana */}
-          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
-            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
-              <span>Hiragana ({hiraMastered}/{TOTAL_CARDS})</span>
-              <span className="font-semibold text-ink">{hiraPct}%</span>
+          <div className="bg-bg/50 border border-line rounded-lg sm:rounded-xl px-2 py-1.5 sm:p-2.5">
+            <div className="flex justify-between items-center gap-1 text-[10px] sm:text-xs text-muted mb-1">
+              <span className="truncate">Hiragana ({hiraMastered}/{TOTAL_CARDS})</span>
+              <span className="font-semibold text-ink shrink-0">{hiraPct}%</span>
             </div>
-            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1 sm:h-1.5 bg-pill rounded-full sm:rounded overflow-hidden">
               <div className="h-full bg-ok transition-all" style={{ width: `${hiraPct}%` }} />
             </div>
           </div>
 
           {/* Katakana */}
-          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
-            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
-              <span>Katakana ({kataMastered}/{TOTAL_CARDS})</span>
-              <span className="font-semibold text-ink">{kataPct}%</span>
+          <div className="bg-bg/50 border border-line rounded-lg sm:rounded-xl px-2 py-1.5 sm:p-2.5">
+            <div className="flex justify-between items-center gap-1 text-[10px] sm:text-xs text-muted mb-1">
+              <span className="truncate">Katakana ({kataMastered}/{TOTAL_CARDS})</span>
+              <span className="font-semibold text-ink shrink-0">{kataPct}%</span>
             </div>
-            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1 sm:h-1.5 bg-pill rounded-full sm:rounded overflow-hidden">
               <div className="h-full bg-accent transition-all" style={{ width: `${kataPct}%` }} />
             </div>
           </div>
 
           {/* Kosakata */}
-          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
-            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
-              <span>Kosakata ({vocabMastered}/{totalVocabWords})</span>
-              <span className="font-semibold text-ink">{vocabPct}%</span>
+          <div className="bg-bg/50 border border-line rounded-lg sm:rounded-xl px-2 py-1.5 sm:p-2.5">
+            <div className="flex justify-between items-center gap-1 text-[10px] sm:text-xs text-muted mb-1">
+              <span className="truncate">Kosakata ({vocabMastered}/{totalVocabWords})</span>
+              <span className="font-semibold text-ink shrink-0">{vocabPct}%</span>
             </div>
-            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1 sm:h-1.5 bg-pill rounded-full sm:rounded overflow-hidden">
               <div className="h-full bg-[#e6a23c] transition-all" style={{ width: `${vocabPct}%` }} />
             </div>
           </div>
 
           {/* Kanji */}
-          <div className="bg-bg/50 border border-line rounded-xl p-2.5">
-            <div className="flex justify-between items-center text-[11px] sm:text-xs text-muted mb-1">
-              <span>Kanji ({kanjiMastered}/{totalKanjiItems})</span>
-              <span className="font-semibold text-ink">{kanjiPct}%</span>
+          <div className="bg-bg/50 border border-line rounded-lg sm:rounded-xl px-2 py-1.5 sm:p-2.5">
+            <div className="flex justify-between items-center gap-1 text-[10px] sm:text-xs text-muted mb-1">
+              <span className="truncate">Kanji ({kanjiMastered}/{totalKanjiItems})</span>
+              <span className="font-semibold text-ink shrink-0">{kanjiPct}%</span>
             </div>
-            <div className="w-full h-1.5 bg-pill rounded overflow-hidden">
+            <div className="w-full h-1 sm:h-1.5 bg-pill rounded-full sm:rounded overflow-hidden">
               <div className="h-full bg-secondary transition-all" style={{ width: `${kanjiPct}%` }} />
             </div>
-          </div>
-
-          {/* Sesi */}
-          <div className="col-span-2 sm:col-span-1 bg-bg/50 border border-line rounded-xl p-2.5 flex items-center justify-between">
-            <div>
-              <small className="text-muted block text-[11px]">Total Sesi Latihan</small>
-              <span className="text-base sm:text-lg font-bold text-ink">
-                {sessions.length + vocabSessions.length + kanjiSessions.length} Sesi
-              </span>
-            </div>
-            <span className="text-xl">📊</span>
           </div>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-muted text-[13px] text-center py-8">Memuat data analitik...</p>
+        <div className="flex flex-col items-center justify-center min-h-[260px] sm:min-h-[320px] gap-3 text-muted text-[13px]">
+          <span className="loading loading-spinner loading-xl text-accent" />
+          <span>Memuat data analitik...</span>
+        </div>
       ) : (
         <div>
           {/* Tab Navigation: 1 baris rapi di semua ukuran layar */}
-          <div className="grid grid-cols-3 gap-1 bg-pill border border-line rounded-xl p-1 mb-4">
-            <button
-              type="button"
-              onClick={() => setMainTab('kana')}
-              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
-                mainTab === 'kana'
-                  ? 'bg-panel text-accent shadow-sm'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <span className="sm:hidden">Kana</span>
-              <span className="hidden sm:inline">Hiragana & Katakana</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMainTab('vocab')}
-              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
-                mainTab === 'vocab'
-                  ? 'bg-panel text-accent shadow-sm'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <span className="sm:hidden">Kosakata</span>
-              <span className="hidden sm:inline">Kosakata (N5 & N4)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setMainTab('kanji')}
-              className={`py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center whitespace-nowrap transition-colors cursor-pointer ${
-                mainTab === 'kanji'
-                  ? 'bg-panel text-accent shadow-sm'
-                  : 'text-muted hover:text-ink'
-              }`}
-            >
-              <span className="sm:hidden">Kanji</span>
-              <span className="hidden sm:inline">Kanji (N5, N4 & JFT)</span>
-            </button>
-          </div>
+          <SlidingTabs
+            ariaLabel="Kategori Analitik"
+            value={mainTab}
+            onChange={setMainTab}
+            className="grid grid-cols-3 gap-1 bg-pill border border-line rounded-xl p-1 mb-4"
+            indicatorClassName="bg-panel rounded-lg shadow-sm"
+            buttonClassName="py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-bold text-center"
+            activeButtonClassName="text-accent"
+            inactiveButtonClassName="text-muted hover:text-ink"
+            options={[
+              {
+                value: 'kana',
+                label: (
+                  <>
+                    <span className="sm:hidden">Kana</span>
+                    <span className="hidden sm:inline">Hiragana & Katakana</span>
+                  </>
+                ),
+              },
+              {
+                value: 'vocab',
+                label: (
+                  <>
+                    <span className="sm:hidden">Kosakata</span>
+                    <span className="hidden sm:inline">Kosakata (N5 & N4)</span>
+                  </>
+                ),
+              },
+              {
+                value: 'kanji',
+                label: (
+                  <>
+                    <span className="sm:hidden">Kanji</span>
+                    <span className="hidden sm:inline">Kanji (N5, N4 & JFT)</span>
+                  </>
+                ),
+              },
+            ]}
+          />
 
           {mainTab === 'kana' && (
             <div>
               {/* KANA ANALYTICS VIEW */}
           {/* Heatmap Section */}
           <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 mb-4 shadow-sm">
-            <div className="flex justify-between items-center flex-wrap gap-2.5 mb-3">
-              <div>
+            <div className="flex justify-between items-start sm:items-center flex-nowrap gap-2 sm:gap-3 mb-3">
+              <div className="min-w-0">
                 <h3 className="m-0 text-sm sm:text-base font-semibold text-ink">Heatmap Hafalan Karakter</h3>
-                <p className="text-muted text-xs mt-0.5 mb-0">
+                <p className="text-muted text-[11px] leading-snug mt-0.5 mb-0">
                   Status hafalan tiap huruf berdasarkan tingkat akurasi & pengulangan.
                 </p>
               </div>
-              <div className="inline-flex bg-pill border border-line rounded-full p-1" role="group">
-                <button
-                  type="button"
-                  className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'hiragana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
-                  }`}
-                  onClick={() => setActiveTab('hiragana')}
-                >
-                  Hiragana
-                </button>
-                <button
-                  type="button"
-                  className={`border-0 rounded-full cursor-pointer text-sm font-medium px-4 py-1.5 transition-colors ${
-                    activeTab === 'katakana' ? 'bg-accent text-white shadow-sm' : 'bg-transparent text-muted hover:text-ink'
-                  }`}
-                  onClick={() => setActiveTab('katakana')}
-                >
-                  Katakana
-                </button>
-              </div>
+              <SlidingTabs
+                ariaLabel="Jenis Aksara Heatmap"
+                value={activeTab}
+                onChange={setActiveTab}
+                className="inline-flex bg-pill border border-line rounded-full p-0.5 shrink-0"
+                indicatorClassName="bg-accent rounded-full shadow-sm"
+                buttonClassName="rounded-full text-xs font-medium px-3 py-1"
+                activeButtonClassName="text-white"
+                inactiveButtonClassName="text-muted hover:text-ink"
+                options={[
+                  { value: 'hiragana', label: 'Hiragana' },
+                  { value: 'katakana', label: 'Katakana' },
+                ]}
+              />
             </div>
 
             {/* Legend */}
@@ -475,14 +383,14 @@ export default function UserDashboard() {
             </div>
 
             {/* Gojuon Heatmap */}
-            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
-            <div className="overflow-x-auto pb-3 mb-5">
-              <div className="grid grid-cols-[repeat(16,minmax(48px,1fr))] gap-1.5 min-w-[800px]">
+            <h4 className="m-0 mb-2 text-xs sm:text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
+            <div className="overflow-x-auto pb-2 mb-4">
+              <div className="grid grid-cols-[repeat(16,minmax(32px,1fr))] sm:grid-cols-[repeat(16,minmax(38px,1fr))] gap-1 min-w-[540px] sm:min-w-[640px]">
                 {COL_IDS.map((id) => (
-                  <div key={id} className="flex flex-col gap-1.5">
-                    <div className="text-center text-[11px] text-muted">{id}</div>
+                  <div key={id} className="flex flex-col gap-1">
+                    <div className="text-center text-[10px] text-muted">{id}</div>
                     {TABLE[activeTab][id].map((cell, idx) => {
-                      if (!cell) return <div key={idx} className="h-12 bg-transparent" />
+                      if (!cell) return <div key={idx} className="h-9 sm:h-10 bg-transparent" />
                       const key = `${activeTab}:${cell.k}`
                       const stat = progress.get(key)
                       const level = masteryLevel(stat)
@@ -494,10 +402,10 @@ export default function UserDashboard() {
                         <div
                           key={cell.k}
                           title={title}
-                          className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
+                          className={`h-9 sm:h-10 rounded border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                         >
-                          <span className={`jp text-lg font-medium ${st.textClass}`}>{cell.k}</span>
-                          <small className="text-[9px] text-muted">{cell.r}</small>
+                          <span className={`jp text-sm sm:text-base font-medium leading-none ${st.textClass}`}>{cell.k}</span>
+                          <small className="text-[8px] sm:text-[9px] leading-tight mt-0.5 text-muted">{cell.r}</small>
                         </div>
                       )
                     })}
@@ -507,12 +415,12 @@ export default function UserDashboard() {
             </div>
 
             {/* Yoon Heatmap */}
-            <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
-            <div className="overflow-x-auto pb-3">
-              <div className="grid grid-cols-[repeat(11,minmax(64px,1fr))] gap-1.5 min-w-[700px]">
+            <h4 className="m-0 mb-2 text-xs sm:text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
+            <div className="overflow-x-auto pb-2">
+              <div className="grid grid-cols-[repeat(11,minmax(42px,1fr))] sm:grid-cols-[repeat(11,minmax(50px,1fr))] gap-1 min-w-[490px] sm:min-w-[580px]">
                 {YOON_IDS.map((id) => (
-                  <div key={id} className="flex flex-col gap-1.5">
-                    <div className="text-center text-[11px] text-muted">{id}</div>
+                  <div key={id} className="flex flex-col gap-1">
+                    <div className="text-center text-[10px] text-muted">{id}</div>
                     {YOON_TABLE[activeTab][id].map((cell) => {
                       const key = `${activeTab}:${cell.k}`
                       const stat = progress.get(key)
@@ -525,10 +433,10 @@ export default function UserDashboard() {
                         <div
                           key={cell.k}
                           title={title}
-                          className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
+                          className={`h-9 sm:h-10 rounded border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                         >
-                          <span className={`jp text-base font-medium ${st.textClass}`}>{cell.k}</span>
-                          <small className="text-[9px] text-muted">{cell.r}</small>
+                          <span className={`jp text-xs sm:text-sm font-medium leading-none ${st.textClass}`}>{cell.k}</span>
+                          <small className="text-[8px] sm:text-[9px] leading-tight mt-0.5 text-muted">{cell.r}</small>
                         </div>
                       )
                     })}
@@ -546,33 +454,45 @@ export default function UserDashboard() {
           {/* SRS Distribution Overview */}
           <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
             <h3 className="text-sm sm:text-base font-semibold text-ink mb-0.5">Distribusi Tingkat Hafalan Kosakata</h3>
-            <p className="text-xs text-muted mb-3">
+            <p className="text-[11px] leading-snug text-muted mb-2.5">
               Pengelompokan kosakata berdasarkan seberapa kuat ingatan Anda.
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
-              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                <div className="text-[11px] font-medium text-muted">Belum Dipelajari</div>
-                <div className="text-xl sm:text-2xl font-black text-ink tabular-nums mt-0.5">{vocabNone}</div>
-                <div className="text-[11px] text-muted">Belum dibuka</div>
+            <div className="stats stats-horizontal shadow w-full grid grid-cols-4 bg-pill/40 border border-line rounded-xl overflow-hidden">
+              <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                <div className="stat-title text-muted text-[10px] sm:text-[11px] truncate">
+                  <span className="sm:hidden">Belum</span>
+                  <span className="hidden sm:inline">Belum Dipelajari</span>
+                </div>
+                <div className="stat-value text-ink text-lg sm:text-2xl font-black tabular-nums">{vocabNone}</div>
+                <div className="stat-desc text-muted text-[11px] hidden sm:block">Belum dibuka</div>
               </div>
 
-              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                <div className="text-[11px] font-medium text-bad">Lemah / Ulangi</div>
-                <div className="text-xl sm:text-2xl font-black text-bad tabular-nums mt-0.5">{vocabWeak}</div>
-                <div className="text-[11px] text-muted">Perlu diulang segera</div>
+              <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                <div className="stat-title text-bad text-[10px] sm:text-[11px] truncate">
+                  <span className="sm:hidden">Ulangi</span>
+                  <span className="hidden sm:inline">Lemah / Ulangi</span>
+                </div>
+                <div className="stat-value text-bad text-lg sm:text-2xl font-black tabular-nums">{vocabWeak}</div>
+                <div className="stat-desc text-muted text-[11px] hidden sm:block">Perlu diulang segera</div>
               </div>
 
-              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                <div className="text-[11px] font-medium text-[#e6a23c]">Belajar / Berkembang</div>
-                <div className="text-xl sm:text-2xl font-black text-[#e6a23c] tabular-nums mt-0.5">{vocabLearning + vocabAlmost}</div>
-                <div className="text-[11px] text-muted">Sedang berproses</div>
+              <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                <div className="stat-title text-[#e6a23c] text-[10px] sm:text-[11px] truncate">
+                  <span className="sm:hidden">Belajar</span>
+                  <span className="hidden sm:inline">Belajar / Berkembang</span>
+                </div>
+                <div className="stat-value text-[#e6a23c] text-lg sm:text-2xl font-black tabular-nums">{vocabLearning + vocabAlmost}</div>
+                <div className="stat-desc text-muted text-[11px] hidden sm:block">Sedang berproses</div>
               </div>
 
-              <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                <div className="text-[11px] font-medium text-ok">Sudah Hafal Kuat</div>
-                <div className="text-xl sm:text-2xl font-black text-ok tabular-nums mt-0.5">{vocabMastered}</div>
-                <div className="text-[11px] text-muted">Ingatan jangka panjang</div>
+              <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                <div className="stat-title text-ok text-[10px] sm:text-[11px] truncate">
+                  <span className="sm:hidden">Hafal</span>
+                  <span className="hidden sm:inline">Sudah Hafal Kuat</span>
+                </div>
+                <div className="stat-value text-ok text-lg sm:text-2xl font-black tabular-nums">{vocabMastered}</div>
+                <div className="stat-desc text-muted text-[11px] hidden sm:block">Ingatan jangka panjang</div>
               </div>
             </div>
           </div>
@@ -584,8 +504,8 @@ export default function UserDashboard() {
                 <h3 className="text-sm sm:text-base font-semibold text-ink">
                   Kosakata yang Perlu Diperhatikan {weakWords.length > 0 ? `(${weakWords.length})` : ''}
                 </h3>
-                <p className="text-xs text-muted">
-                  Kata yang sering salah saat latihan — geser ke samping untuk melihat lebih banyak.
+                <p className="text-[11px] leading-snug text-muted">
+                  Kata yang sering salah saat latihan
                 </p>
               </div>
 
@@ -660,30 +580,24 @@ export default function UserDashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
               <div>
                 <h3 className="text-sm sm:text-base font-semibold text-ink">Progres Kosakata per Bab</h3>
-                <p className="text-xs text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab.</p>
+                <p className="text-[11px] leading-snug text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab.</p>
               </div>
 
               {/* Level Switcher */}
-              <div className="inline-flex bg-pill border border-line rounded-xl p-1 self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => setVocabLevel('n5')}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    vocabLevel === 'n5' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
-                  }`}
-                >
-                  JLPT N5
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setVocabLevel('n4')}
-                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    vocabLevel === 'n4' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
-                  }`}
-                >
-                  JLPT N4
-                </button>
-              </div>
+              <SlidingTabs
+                ariaLabel="Level Kosakata"
+                value={vocabLevel}
+                onChange={setVocabLevel}
+                className="inline-flex bg-pill border border-line rounded-xl p-1 self-start sm:self-auto"
+                indicatorClassName="bg-panel rounded-lg shadow-sm"
+                buttonClassName="px-4 py-1.5 rounded-lg text-xs font-bold"
+                activeButtonClassName="text-accent"
+                inactiveButtonClassName="text-muted hover:text-ink"
+                options={[
+                  { value: 'n5', label: 'JLPT N5' },
+                  { value: 'n4', label: 'JLPT N4' },
+                ]}
+              />
             </div>
 
             {(() => {
@@ -757,33 +671,45 @@ export default function UserDashboard() {
               {/* KANJI ANALYTICS VIEW */}
             <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-4 shadow-sm">
               <h3 className="text-sm sm:text-base font-semibold text-ink mb-0.5">Distribusi Tingkat Hafalan Kanji</h3>
-              <p className="text-xs text-muted mb-3">
+              <p className="text-[11px] leading-snug text-muted mb-2.5">
                 Pengelompokan Kanji berdasarkan seberapa kuat ingatan Anda.
               </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
-                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                  <div className="text-[11px] font-medium text-muted">Belum Dipelajari</div>
-                  <div className="text-xl sm:text-2xl font-black text-ink tabular-nums mt-0.5">{kanjiNone}</div>
-                  <div className="text-[11px] text-muted">Belum dibuka</div>
+              <div className="stats stats-horizontal shadow w-full grid grid-cols-4 bg-pill/40 border border-line rounded-xl overflow-hidden">
+                <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                  <div className="stat-title text-muted text-[10px] sm:text-[11px] truncate">
+                    <span className="sm:hidden">Belum</span>
+                    <span className="hidden sm:inline">Belum Dipelajari</span>
+                  </div>
+                  <div className="stat-value text-ink text-lg sm:text-2xl font-black tabular-nums">{kanjiNone}</div>
+                  <div className="stat-desc text-muted text-[11px] hidden sm:block">Belum dibuka</div>
                 </div>
 
-                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                  <div className="text-[11px] font-medium text-bad">Lemah / Ulangi</div>
-                  <div className="text-xl sm:text-2xl font-black text-bad tabular-nums mt-0.5">{kanjiWeak}</div>
-                  <div className="text-[11px] text-muted">Perlu diulang segera</div>
+                <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                  <div className="stat-title text-bad text-[10px] sm:text-[11px] truncate">
+                    <span className="sm:hidden">Ulangi</span>
+                    <span className="hidden sm:inline">Lemah / Ulangi</span>
+                  </div>
+                  <div className="stat-value text-bad text-lg sm:text-2xl font-black tabular-nums">{kanjiWeak}</div>
+                  <div className="stat-desc text-muted text-[11px] hidden sm:block">Perlu diulang segera</div>
                 </div>
 
-                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                  <div className="text-[11px] font-medium text-[#e6a23c]">Belajar / Berkembang</div>
-                  <div className="text-xl sm:text-2xl font-black text-[#e6a23c] tabular-nums mt-0.5">{kanjiLearning + kanjiAlmost}</div>
-                  <div className="text-[11px] text-muted">Mulai hafal & berkembang</div>
+                <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                  <div className="stat-title text-[#e6a23c] text-[10px] sm:text-[11px] truncate">
+                    <span className="sm:hidden">Belajar</span>
+                    <span className="hidden sm:inline">Belajar / Berkembang</span>
+                  </div>
+                  <div className="stat-value text-[#e6a23c] text-lg sm:text-2xl font-black tabular-nums">{kanjiLearning + kanjiAlmost}</div>
+                  <div className="stat-desc text-muted text-[11px] hidden sm:block">Mulai hafal & berkembang</div>
                 </div>
 
-                <div className="bg-pill/40 border border-line rounded-xl p-2.5 sm:p-3">
-                  <div className="text-[11px] font-medium text-ok">Sudah Hafal Kuat</div>
-                  <div className="text-xl sm:text-2xl font-black text-ok tabular-nums mt-0.5">{kanjiMastered}</div>
-                  <div className="text-[11px] text-muted">Ingatan jangka panjang</div>
+                <div className="stat px-1.5 py-2 sm:py-2.5 sm:px-4 min-w-0">
+                  <div className="stat-title text-ok text-[10px] sm:text-[11px] truncate">
+                    <span className="sm:hidden">Hafal</span>
+                    <span className="hidden sm:inline">Sudah Hafal Kuat</span>
+                  </div>
+                  <div className="stat-value text-ok text-lg sm:text-2xl font-black tabular-nums">{kanjiMastered}</div>
+                  <div className="stat-desc text-muted text-[11px] hidden sm:block">Ingatan jangka panjang</div>
                 </div>
               </div>
             </div>
@@ -795,8 +721,8 @@ export default function UserDashboard() {
                   <h3 className="text-sm sm:text-base font-semibold text-ink">
                     Kanji yang Perlu Diperhatikan {weakKanji.length > 0 ? `(${weakKanji.length})` : ''}
                   </h3>
-                  <p className="text-xs text-muted">
-                    Kanji yang sering salah saat latihan — geser ke samping untuk melihat lebih banyak.
+                  <p className="text-[11px] leading-snug text-muted">
+                    Kanji yang sering salah saat latihan
                   </p>
                 </div>
 
@@ -871,39 +797,25 @@ export default function UserDashboard() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
                 <div>
                   <h3 className="text-sm sm:text-base font-semibold text-ink">Progres Kanji per Bab</h3>
-                  <p className="text-xs text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab Kanji.</p>
+                  <p className="text-[11px] leading-snug text-muted">Pantau tingkat penyelesaian dan akurasi per materi bab Kanji.</p>
                 </div>
 
                 {/* Level Switcher */}
-                <div className="inline-flex bg-pill border border-line rounded-xl p-1 self-start sm:self-auto">
-                  <button
-                    type="button"
-                    onClick={() => setKanjiLevel('n5')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      kanjiLevel === 'n5' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    JLPT N5
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setKanjiLevel('n4')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      kanjiLevel === 'n4' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    JLPT N4
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setKanjiLevel('jft')}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      kanjiLevel === 'jft' ? 'bg-panel text-accent shadow-sm' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    JFT
-                  </button>
-                </div>
+                <SlidingTabs
+                  ariaLabel="Level Kanji"
+                  value={kanjiLevel}
+                  onChange={setKanjiLevel}
+                  className="inline-flex bg-pill border border-line rounded-xl p-1 self-start sm:self-auto"
+                  indicatorClassName="bg-panel rounded-lg shadow-sm"
+                  buttonClassName="px-3.5 py-1.5 rounded-lg text-xs font-bold"
+                  activeButtonClassName="text-accent"
+                  inactiveButtonClassName="text-muted hover:text-ink"
+                  options={[
+                    { value: 'n5', label: 'JLPT N5' },
+                    { value: 'n4', label: 'JLPT N4' },
+                    { value: 'jft', label: 'JFT' },
+                  ]}
+                />
               </div>
 
               {(() => {
