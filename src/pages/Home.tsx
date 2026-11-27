@@ -141,18 +141,18 @@ export default function Home({ script, mode, onHint }: Props) {
         )}
       </div>
       {body}
-      <div className="flex items-center justify-between gap-4 mt-7 flex-wrap">
-        <span className="inline-flex items-center gap-1">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 mt-7 flex-nowrap">
+        <span className="inline-flex items-center gap-1 sm:gap-1.5 shrink-0">
           <button
             type="button"
-            className="bg-transparent border-0 text-muted text-[13px] cursor-pointer px-1.5 py-1 underline hover:text-ink"
+            className="bg-transparent border-0 text-muted text-xs sm:text-[13px] cursor-pointer px-1 sm:px-1.5 py-1 underline hover:text-ink whitespace-nowrap"
             onClick={() => st.selectAll(sc)}
           >
             Pilih semua
           </button>
           <button
             type="button"
-            className="bg-transparent border-0 text-muted text-[13px] cursor-pointer px-1.5 py-1 underline hover:text-ink"
+            className="bg-transparent border-0 text-muted text-xs sm:text-[13px] cursor-pointer px-1 sm:px-1.5 py-1 underline hover:text-ink whitespace-nowrap"
             onClick={() => st.clearAll(sc)}
           >
             Hapus pilihan
@@ -160,7 +160,7 @@ export default function Home({ script, mode, onHint }: Props) {
         </span>
         {deck.length ? (
           <Link
-            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-bold text-sm px-[26px] py-3 no-underline cursor-pointer inline-block transition-all shadow-md"
+            className="border-0 rounded-full bg-accent hover:opacity-90 text-white font-bold text-xs sm:text-sm px-4 py-2.5 sm:px-[26px] sm:py-3 no-underline cursor-pointer inline-block transition-all shadow-md whitespace-nowrap shrink-0"
             to={`/practice/${sc}`}
           >
             Mulai Latihan -{' '}
@@ -169,7 +169,7 @@ export default function Home({ script, mode, onHint }: Props) {
         ) : (
           <button
             type="button"
-            className="border-0 rounded-full bg-pill text-ink font-semibold text-sm px-[26px] py-3 cursor-pointer inline-block transition-all"
+            className="border-0 rounded-full bg-pill text-ink font-semibold text-xs sm:text-sm px-4 py-2.5 sm:px-[26px] sm:py-3 cursor-pointer inline-block transition-all whitespace-nowrap shrink-0"
             onClick={() => onHint('Aktifkan minimal satu kolom terlebih dahulu')}
           >
             Mulai Latihan - 0 Kelompok

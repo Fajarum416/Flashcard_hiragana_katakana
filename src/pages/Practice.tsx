@@ -252,8 +252,8 @@ function Session({ script }: { script: Script }) {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 min-[481px]:grid-cols-[1fr_auto] gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 border-t border-line pt-5 md:pt-6 shrink-0 w-full">
-        <div className="flex items-center border border-line rounded-full bg-pill/40 h-[62px] md:h-[68px] px-2 w-full justify-between min-[481px]:col-span-2 md:col-span-1 md:w-auto md:justify-self-start">
+      <div className="grid grid-cols-1 min-[481px]:grid-cols-[1fr_auto] gap-2 sm:gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 border-t border-line pt-3 sm:pt-5 md:pt-6 shrink-0 w-full">
+        <div className="order-1 flex items-center border border-line rounded-full bg-pill/40 h-[56px] sm:h-[62px] md:h-[68px] px-2 w-full justify-between min-[481px]:col-span-2 md:col-span-1 md:w-auto md:justify-self-start">
           <div className="flex-1 min-w-0 px-2 py-0.5 text-center md:flex-none md:w-[120px] lg:w-[140px] shrink-0">
             <small className="block text-muted text-[11px] font-normal mb-0.5">
               Akurasi
@@ -277,7 +277,7 @@ function Session({ script }: { script: Script }) {
         </div>
         <input
           ref={inputRef}
-          className={`w-full min-w-0 h-[62px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[68px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted focus:outline-none focus-visible:outline-none focus:border-white/30 ${inpBorderClass}`}
+          className={`order-3 min-[481px]:order-none w-full min-w-0 h-[54px] sm:h-[62px] text-[19px] px-4 md:w-[300px] lg:w-[400px] xl:w-[460px] md:h-[68px] md:text-[21px] md:px-6 md:justify-self-center rounded-full border bg-pill/40 text-ink font-light text-center placeholder:text-muted focus:outline-none focus-visible:outline-none focus:border-white/30 ${inpBorderClass}`}
           value={s.value}
           placeholder="ketik romaji"
           inputMode="text"
@@ -293,7 +293,7 @@ function Session({ script }: { script: Script }) {
             check(e.target.value, false)
           }}
         />
-        <div className="flex flex-col items-center justify-center text-center md:justify-self-end">
+        <div className="order-2 min-[481px]:order-none flex flex-col items-center justify-center text-center md:justify-self-end">
           <button
             type="button"
             className="w-full min-[481px]:w-auto h-[46px] px-7 md:px-8 text-[15px] whitespace-nowrap border-0 rounded-full bg-pill hover:bg-pill-on text-ink font-medium cursor-pointer inline-flex items-center justify-center transition-all"

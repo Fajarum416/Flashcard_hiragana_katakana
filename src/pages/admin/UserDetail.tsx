@@ -217,14 +217,14 @@ export default function AdminUserDetail() {
         </div>
 
         {/* Gojuon Heatmap */}
-        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
-        <div className="overflow-x-auto pb-3 mb-5">
-          <div className="grid grid-cols-[repeat(16,minmax(48px,1fr))] gap-1.5 min-w-[800px]">
+        <h4 className="m-0 mb-2 text-xs sm:text-sm text-muted font-medium">Tunggal (Gojūon & Dakuten - 71 Huruf)</h4>
+        <div className="overflow-x-auto pb-2 mb-4">
+          <div className="grid grid-cols-[repeat(16,minmax(32px,1fr))] sm:grid-cols-[repeat(16,minmax(38px,1fr))] gap-1 min-w-[540px] sm:min-w-[640px]">
             {COL_IDS.map((id) => (
-              <div key={id} className="flex flex-col gap-1.5">
-                <div className="text-center text-[11px] text-muted">{id}</div>
+              <div key={id} className="flex flex-col gap-1">
+                <div className="text-center text-[10px] text-muted">{id}</div>
                 {TABLE[activeTab][id].map((cell, idx) => {
-                  if (!cell) return <div key={idx} className="h-12 bg-transparent" />
+                  if (!cell) return <div key={idx} className="h-9 sm:h-10 bg-transparent" />
                   const key = `${activeTab}:${cell.k}`
                   const stat = progress.get(key)
                   const level = masteryLevel(stat)
@@ -236,10 +236,10 @@ export default function AdminUserDetail() {
                     <div
                       key={cell.k}
                       title={title}
-                      className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
+                      className={`h-9 sm:h-10 rounded border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                     >
-                      <span className={`jp text-lg font-medium ${st.textClass}`}>{cell.k}</span>
-                      <small className="text-[9px] text-muted">{cell.r}</small>
+                      <span className={`jp text-sm sm:text-base font-medium leading-none ${st.textClass}`}>{cell.k}</span>
+                      <small className="text-[8px] sm:text-[9px] leading-tight mt-0.5 text-muted">{cell.r}</small>
                     </div>
                   )
                 })}
@@ -249,12 +249,12 @@ export default function AdminUserDetail() {
         </div>
 
         {/* Yoon Heatmap */}
-        <h4 className="m-0 mb-2.5 text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
-        <div className="overflow-x-auto pb-3">
-          <div className="grid grid-cols-[repeat(11,minmax(64px,1fr))] gap-1.5 min-w-[700px]">
+        <h4 className="m-0 mb-2 text-xs sm:text-sm text-muted font-medium">Gabungan (Yōon - 33 Huruf)</h4>
+        <div className="overflow-x-auto pb-2">
+          <div className="grid grid-cols-[repeat(11,minmax(42px,1fr))] sm:grid-cols-[repeat(11,minmax(50px,1fr))] gap-1 min-w-[490px] sm:min-w-[580px]">
             {YOON_IDS.map((id) => (
-              <div key={id} className="flex flex-col gap-1.5">
-                <div className="text-center text-[11px] text-muted">{id}</div>
+              <div key={id} className="flex flex-col gap-1">
+                <div className="text-center text-[10px] text-muted">{id}</div>
                 {YOON_TABLE[activeTab][id].map((cell) => {
                   const key = `${activeTab}:${cell.k}`
                   const stat = progress.get(key)
@@ -267,10 +267,10 @@ export default function AdminUserDetail() {
                     <div
                       key={cell.k}
                       title={title}
-                      className={`h-12 rounded-md border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
+                      className={`h-9 sm:h-10 rounded border flex flex-col items-center justify-center cursor-default ${st.boxClass}`}
                     >
-                      <span className={`jp text-base font-medium ${st.textClass}`}>{cell.k}</span>
-                      <small className="text-[9px] text-muted">{cell.r}</small>
+                      <span className={`jp text-xs sm:text-sm font-medium leading-none ${st.textClass}`}>{cell.k}</span>
+                      <small className="text-[8px] sm:text-[9px] leading-tight mt-0.5 text-muted">{cell.r}</small>
                     </div>
                   )
                 })}

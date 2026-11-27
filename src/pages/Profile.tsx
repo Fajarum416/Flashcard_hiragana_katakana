@@ -29,22 +29,22 @@ export default function Profile({ onDeleteAccount }: ProfileProps) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold m-0 mb-5">Profil Pengguna</h1>
+      <h1 className="text-xl sm:text-2xl font-bold m-0 mb-3 sm:mb-5">Profil Pengguna</h1>
 
       {/* Account Header Card */}
-      <div className="bg-panel border border-line rounded-xl p-6 mb-5">
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-line shrink-0">
+      <div className="bg-panel border border-line rounded-xl p-3.5 sm:p-6 mb-3.5 sm:mb-5">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-line shrink-0">
             <img alt={fullName} className="w-full h-full object-cover" src={avatarUrl} />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="m-0 mb-1 text-xl font-bold truncate">{fullName}</h2>
-            <div className="text-muted text-sm mb-2 truncate">{email}</div>
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-pill text-muted font-medium">
+            <h2 className="m-0 mb-0.5 sm:mb-1 text-base sm:text-xl font-bold truncate">{fullName}</h2>
+            <div className="text-muted text-xs sm:text-sm mb-1.5 sm:mb-2 truncate">{email}</div>
+            <div className="flex gap-1.5 sm:gap-2 flex-wrap">
+              <span className="badge badge-soft badge-info badge-sm font-medium">
                 Peran: {role === 'admin' ? 'Admin' : 'Pengguna'}
               </span>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-accent text-white font-semibold">
+              <span className="badge badge-soft badge-success badge-sm font-semibold">
                 Status: Aktif
               </span>
             </div>
@@ -53,48 +53,48 @@ export default function Profile({ onDeleteAccount }: ProfileProps) {
       </div>
 
       {/* Account Identity Details */}
-      <div className="bg-panel border border-line rounded-xl p-6 mb-5">
-        <h3 className="m-0 mb-4 text-base font-semibold">Data Identitas Akun</h3>
-        <dl className="m-0 divide-y divide-line text-sm">
-          <div className="py-3 flex justify-between gap-4 flex-wrap">
+      <div className="bg-panel border border-line rounded-xl p-3.5 sm:p-6 mb-3.5 sm:mb-5">
+        <h3 className="m-0 mb-2.5 sm:mb-4 text-sm sm:text-base font-semibold">Data Identitas Akun</h3>
+        <dl className="m-0 divide-y divide-line text-xs sm:text-sm">
+          <div className="py-2 sm:py-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">Nama Lengkap</dt>
             <dd className="m-0 font-medium text-ink text-right">{fullName}</dd>
           </div>
-          <div className="py-3 flex justify-between gap-4 flex-wrap">
+          <div className="py-2 sm:py-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">Email</dt>
             <dd className="m-0 font-medium text-ink text-right break-all">{email}</dd>
           </div>
-          <div className="py-3 flex justify-between gap-4 flex-wrap">
+          <div className="py-2 sm:py-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">Peran Akun</dt>
             <dd className="m-0 font-medium text-ink text-right">
               {role === 'admin' ? 'Admin' : 'Pengguna'}
             </dd>
           </div>
-          <div className="py-3 flex justify-between gap-4 flex-wrap">
+          <div className="py-2 sm:py-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">Metode Masuk</dt>
             <dd className="m-0 font-medium text-ink text-right">{providerLabel}</dd>
           </div>
-          <div className="py-3 flex justify-between gap-4 flex-wrap">
+          <div className="py-2 sm:py-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">Bergabung Sejak</dt>
             <dd className="m-0 font-medium text-ink text-right">{joinedAt}</dd>
           </div>
-          <div className="pt-3 flex justify-between gap-4 flex-wrap">
+          <div className="pt-2 sm:pt-3 flex justify-between gap-3 sm:gap-4 flex-wrap">
             <dt className="text-muted">ID Pengguna</dt>
-            <dd className="m-0 font-mono text-xs text-muted text-right break-all">{user.id}</dd>
+            <dd className="m-0 font-mono text-[11px] sm:text-xs text-muted text-right break-all">{user.id}</dd>
           </div>
         </dl>
       </div>
 
       {/* Delete Account Section */}
-      <div className="bg-panel border border-bad/30 rounded-xl p-6">
-        <h3 className="m-0 mb-1.5 text-base font-semibold text-bad">Hapus Akun</h3>
-        <p className="text-muted text-sm mt-0 mb-4">
+      <div className="bg-panel border border-bad/30 rounded-xl p-3.5 sm:p-6">
+        <h3 className="m-0 mb-1 sm:mb-1.5 text-sm sm:text-base font-semibold text-bad">Hapus Akun</h3>
+        <p className="text-muted text-xs sm:text-sm mt-0 mb-3 sm:mb-4">
           Menghapus akun akan menghapus seluruh data identitas dan progres belajar Anda secara permanen. Tindakan ini tidak dapat dibatalkan.
         </p>
         <button
           type="button"
           onClick={onDeleteAccount}
-          className="btn btn-error text-white rounded-full px-6 h-11 min-h-11 font-semibold"
+          className="btn btn-error btn-sm sm:btn-md text-white rounded-full px-5 sm:px-6 font-semibold"
         >
           Hapus Akun
         </button>
