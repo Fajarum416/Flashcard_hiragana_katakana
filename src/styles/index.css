@@ -68,6 +68,17 @@ body {
   font: 400 15px/1.5 "Ubuntu", system-ui, sans-serif;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .jp {

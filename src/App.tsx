@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { supabaseEnabled } from './lib/supabase'
 import { startSync } from './lib/sync'
 import { useAuth } from './store/useAuth'
@@ -125,6 +125,22 @@ function AppContent() {
   const isVocab = location.pathname.startsWith('/vocab')
   const isKanji = location.pathname.startsWith('/kanji')
   const isAdmin = location.pathname.startsWith('/admin')
+  const activeVocabLevel = !isVocab
+    ? null
+    : location.pathname.startsWith('/vocab/n4') || location.search.toLowerCase().includes('level=n4')
+      ? 'n4'
+      : 'n5'
+  const activeKanjiLevel = !isKanji
+    ? null
+    : location.pathname.startsWith('/kanji/n4') || location.search.toLowerCase().includes('level=n4')
+      ? 'n4'
+      : location.pathname.startsWith('/kanji/jft') || location.search.toLowerCase().includes('level=jft')
+        ? 'jft'
+        : 'n5'
+  const dropdownItemClass = (active: boolean) =>
+    `py-2.5 text-base rounded-lg transition-colors ${
+      active ? 'bg-accent/15 text-accent font-bold' : 'font-medium text-ink hover:bg-pill'
+    }`
 
   return (
     <>
@@ -146,7 +162,23 @@ function AppContent() {
 
           {/* Navbar End: Desktop Megamenu + Profile (sm:flex) & Mobile Hamburger Button (sm:hidden) */}
           <div className="navbar-end w-auto gap-2 sm:gap-3">
-            {/* Mobile Progres Icon Button on Navbar */}
+            {/* Mobile Admin / Progres Icon Button on Navbar */}
+            {role === 'admin' && (
+              <NavLink
+                to="/admin"
+                title="Admin"
+                aria-label="Admin"
+                className={({ isActive }) =>
+                  `sm:hidden inline-flex items-center justify-center p-1.5 no-underline transition-colors ${
+                    isActive ? 'text-accent' : 'text-amber-500 hover:text-amber-600 dark:text-amber-400'
+                  }`
+                }
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </NavLink>
+            )}
             {user && role !== 'admin' && (
               <NavLink
                 to="/dashboard"
@@ -203,6 +235,73 @@ function AppContent() {
               </svg>
             </label>
 
+            {/* Mobile Profile Dropdown / Masuk Button on Navbar */}
+            {user ? (
+              <div className="dropdown dropdown-end sm:hidden">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  title="Profil"
+                  aria-label="Profil"
+                  className="w-7 h-7 rounded-full overflow-hidden ring-2 ring-line hover:ring-accent transition-all shrink-0 cursor-pointer"
+                >
+                  <img
+                    alt={user.user_metadata?.full_name ?? user.email ?? 'Profil'}
+                    className="w-full h-full object-cover"
+                    src={
+                      user.user_metadata?.avatar_url ||
+                      user.user_metadata?.picture ||
+                      `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
+                    }
+                  />
+                </div>
+                <ul
+                  tabIndex={-1}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-2 w-56 p-2 shadow-xl border border-base-200 text-sm"
+                >
+                  <li className="menu-title px-3 py-1.5 border-b border-base-200 mb-1">
+                    <span className="font-semibold text-base-content text-sm truncate block">
+                      {user.user_metadata?.full_name || 'Pelajar'}
+                    </span>
+                    <span className="text-[11px] text-base-content/60 truncate font-normal block">
+                      {user.email}
+                    </span>
+                  </li>
+                  <li>
+                    <NavLink to="/profile" onClick={closeDropdowns} className="justify-between py-2 font-medium">
+                      Profil
+                      <span className="badge badge-soft badge-success badge-xs font-semibold">Aktif</span>
+                    </NavLink>
+                  </li>
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => void onLogout()}
+                      className="text-error py-2 font-medium flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 shrink-0">
+                        <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
+                      </svg>
+                      <span>Keluar</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={onLogin}
+                title="Masuk"
+                aria-label="Masuk"
+                className="sm:hidden inline-flex items-center justify-center p-1.5 text-ink hover:text-accent transition-colors bg-transparent border-0 cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+            )}
+
             {/* Mobile Hamburger Button on Right using swap swap-rotate */}
             <label
               className="sm:hidden swap swap-rotate cursor-pointer p-1.5 text-ink hover:text-accent transition-colors"
@@ -247,22 +346,22 @@ function AppContent() {
               <div id="k1" popover="auto">
                 <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-60 text-base">
                   <li>
-                    <NavLink
+                    <Link
                       to="/hiragana/flashcard"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(location.pathname === '/hiragana/flashcard')}
                     >
                       Flashcard Hiragana
-                    </NavLink>
+                    </Link>
                   </li>
                   <li>
-                    <NavLink
+                    <Link
                       to="/hiragana/word"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(location.pathname === '/hiragana/word')}
                     >
                       Kata Hiragana
-                    </NavLink>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -277,22 +376,22 @@ function AppContent() {
               <div id="k2" popover="auto">
                 <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-60 text-base">
                   <li>
-                    <NavLink
+                    <Link
                       to="/katakana/flashcard"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(location.pathname === '/katakana/flashcard')}
                     >
                       Flashcard Katakana
-                    </NavLink>
+                    </Link>
                   </li>
                   <li>
-                    <NavLink
+                    <Link
                       to="/katakana/word"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(location.pathname === '/katakana/word')}
                     >
                       Kata Katakana
-                    </NavLink>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -307,22 +406,22 @@ function AppContent() {
               <div id="k3" popover="auto">
                 <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-44 text-base">
                   <li>
-                    <NavLink
+                    <Link
                       to="/vocab?level=n5"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search !== '?level=n4' ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(activeVocabLevel === 'n5')}
                     >
                       N5
-                    </NavLink>
+                    </Link>
                   </li>
                   <li>
-                    <NavLink
+                    <Link
                       to="/vocab?level=n4"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=n4' ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(activeVocabLevel === 'n4')}
                     >
                       N4
-                    </NavLink>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -338,31 +437,31 @@ function AppContent() {
               <div id="k4" popover="auto">
                 <ul className="menu menu-md bg-base-100 rounded-box shadow-xl p-2.5 border border-base-200 min-w-44 text-base">
                   <li>
-                    <NavLink
+                    <Link
                       to="/kanji?level=n5"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search !== '?level=n4' && location.search !== '?level=jft' ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(activeKanjiLevel === 'n5')}
                     >
                       JLPT N5
-                    </NavLink>
+                    </Link>
                   </li>
                   <li>
-                    <NavLink
+                    <Link
                       to="/kanji?level=n4"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=n4' ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(activeKanjiLevel === 'n4')}
                     >
                       JLPT N4
-                    </NavLink>
+                    </Link>
                   </li>
                   <li>
-                    <NavLink
+                    <Link
                       to="/kanji?level=jft"
                       onClick={closeDropdowns}
-                      className={({ isActive }) => `py-2.5 text-base font-medium ${isActive && location.search === '?level=jft' ? '!text-accent font-bold' : ''}`}
+                      className={dropdownItemClass(activeKanjiLevel === 'jft')}
                     >
                       JFT
-                    </NavLink>
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -597,59 +696,6 @@ function AppContent() {
                 </button>
               </div>
 
-              {/* Profile / Sign In (at top of drawer, no rounded) */}
-              <div className="border-b border-line">
-                {user ? (
-                  <NavLink
-                    to="/profile"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-3.5 rounded-none bg-pill/40 hover:bg-pill-on no-underline transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 border border-line/60">
-                      <img
-                        alt={user.user_metadata?.full_name ?? user.email ?? 'Profile'}
-                        src={
-                          user.user_metadata?.avatar_url ||
-                          user.user_metadata?.picture ||
-                          `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email ?? 'User')}`
-                        }
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-ink truncate">
-                        {user.user_metadata?.full_name ?? user.email}
-                      </div>
-                      {user.user_metadata?.full_name && user.email && (
-                        <div className="text-[11px] text-muted truncate">{user.email}</div>
-                      )}
-                    </div>
-                    <svg className="w-4 h-4 text-muted shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </NavLink>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => {
-                      setMobileOpen(false)
-                      onLogin()
-                    }}
-                    className="w-full h-11 px-5 rounded-none bg-pill/40 hover:bg-pill-on text-ink font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors border-0"
-                  >
-                    <svg className="w-4 h-4 text-ink" viewBox="0 0 24 24" fill="currentColor">
-                      <path
-                        fillRule="evenodd"
-                        d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5a3 3 0 110 6 3 3 0 010-6zm0 12.2a7.2 7.2 0 01-6-3.22c.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08a7.2 7.2 0 01-6 3.22z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span>Masuk</span>
-                  </button>
-                )}
-              </div>
-
               {/* Drawer Accordion Links */}
               <div className="px-5">
                 {/* Hiragana Section */}
@@ -779,28 +825,24 @@ function AppContent() {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <NavLink
+                      <Link
                         to="/vocab?level=n5"
                         onClick={() => setMobileOpen(false)}
-                        className={({ isActive }) =>
-                          `block py-2.5 text-sm no-underline border-b border-line/70 ${
-                            isActive && location.search !== '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
-                          }`
-                        }
+                        className={`block py-2.5 text-sm no-underline border-b border-line/70 ${
+                          activeVocabLevel === 'n5' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                        }`}
                       >
                         N5
-                      </NavLink>
-                      <NavLink
+                      </Link>
+                      <Link
                         to="/vocab?level=n4"
                         onClick={() => setMobileOpen(false)}
-                        className={({ isActive }) =>
-                          `block py-2.5 text-sm no-underline ${
-                            isActive && location.search === '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
-                          }`
-                        }
+                        className={`block py-2.5 text-sm no-underline ${
+                          activeVocabLevel === 'n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                        }`}
                       >
                         N4
-                      </NavLink>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -830,86 +872,36 @@ function AppContent() {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <NavLink
+                      <Link
                         to="/kanji?level=n5"
                         onClick={() => setMobileOpen(false)}
-                        className={({ isActive }) =>
-                          `block py-2.5 text-sm no-underline border-b border-line/70 ${
-                            isActive && location.search !== '?level=n4' && location.search !== '?level=jft' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
-                          }`
-                        }
+                        className={`block py-2.5 text-sm no-underline border-b border-line/70 ${
+                          activeKanjiLevel === 'n5' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                        }`}
                       >
                         JLPT N5
-                      </NavLink>
-                      <NavLink
+                      </Link>
+                      <Link
                         to="/kanji?level=n4"
                         onClick={() => setMobileOpen(false)}
-                        className={({ isActive }) =>
-                          `block py-2.5 text-sm no-underline border-b border-line/70 ${
-                            isActive && location.search === '?level=n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
-                          }`
-                        }
+                        className={`block py-2.5 text-sm no-underline border-b border-line/70 ${
+                          activeKanjiLevel === 'n4' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                        }`}
                       >
                         JLPT N4
-                      </NavLink>
-                      <NavLink
+                      </Link>
+                      <Link
                         to="/kanji?level=jft"
                         onClick={() => setMobileOpen(false)}
-                        className={({ isActive }) =>
-                          `block py-2.5 text-sm no-underline ${
-                            isActive && location.search === '?level=jft' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
-                          }`
-                        }
+                        className={`block py-2.5 text-sm no-underline ${
+                          activeKanjiLevel === 'jft' ? 'text-accent font-semibold' : 'text-muted hover:text-ink'
+                        }`}
                       >
                         JFT
-                      </NavLink>
+                      </Link>
                     </div>
                   </div>
                 </div>
-
-                {role === 'admin' && (
-                  <div className="border-b border-line py-3">
-                    <NavLink
-                      to="/admin"
-                      onClick={() => setMobileOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-2 text-[15px] font-semibold no-underline ${isActive ? 'text-accent' : 'text-amber-400'}`
-                      }
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="w-4 h-4 shrink-0"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
-                        />
-                      </svg>
-                      <span>Dasbor</span>
-                    </NavLink>
-                  </div>
-                )}
-
-                {user && (
-                  <div className="border-b border-line">
-                    <button
-                      type="button"
-                      onClick={() => void onLogout()}
-                      className="w-full h-11 rounded-none bg-transparent hover:bg-error/10 text-error font-semibold text-[15px] cursor-pointer transition-colors flex items-center justify-start gap-2 border-0"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4 shrink-0">
-                        <path fillRule="evenodd" d="M16.5 3.75a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1-1.5-1.5V15a.75.75 0 0 0-1.5 0v3.75a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5.25a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3V9A.75.75 0 1 0 9 9V5.25a1.5 1.5 0 0 1 1.5-1.5h6ZM5.78 8.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 0 0 0 1.06l3 3a.75.75 0 0 0 1.06-1.06l-1.72-1.72H15a.75.75 0 0 0 0-1.5H4.06l1.72-1.72a.75.75 0 0 0 0-1.06Z" clipRule="evenodd" />
-                      </svg>
-                      <span>Keluar</span>
-                    </button>
-                  </div>
-                )}
-
               </div>
             </div>
           </aside>
@@ -943,7 +935,7 @@ function AppContent() {
           <Route path="/kanji" element={<KanjiHome />} />
           <Route path="/kanji/:level/:chapter" element={<KanjiPractice />} />
           <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/profile" element={<Profile onDeleteAccount={onDelete} />} />
+          <Route path="/profile" element={<Profile onDeleteAccount={onDelete} onLogout={onLogout} />} />
           <Route path="/admin" element={<AdminLayout onLogout={onLogout} />}>
             <Route index element={<AdminOverview />} />
             <Route path="users" element={<AdminUsers />} />

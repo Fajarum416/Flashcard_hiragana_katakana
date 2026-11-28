@@ -437,14 +437,14 @@ export default function KanjiPractice() {
                 setIsFlipped(!isFlipped)
               }
             }}
-            className={`relative w-full bg-panel border-2 border-line rounded-3xl flex items-center justify-center text-center shadow-sm select-none transition-colors overflow-hidden ${
+            className={`relative w-full bg-panel border-2 border-line rounded-3xl flex flex-col justify-between text-center shadow-sm select-none transition-colors overflow-hidden ${
               practiceMode === 'flashcard'
-                ? 'h-[320px] sm:h-[380px] md:h-[440px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
+                ? 'h-[430px] sm:h-[470px] md:h-[520px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
                 : 'h-[260px] sm:h-[310px] md:h-[350px] p-4 sm:p-8'
             }`}
           >
             {/* Top Bar */}
-            <div className="absolute inset-x-4 top-4 sm:inset-x-8 sm:top-6 z-10 grid grid-cols-3 items-center text-xs text-muted">
+            <div className="w-full grid grid-cols-3 items-center text-xs text-muted mb-2 sm:mb-3 shrink-0">
               <div className="justify-self-start">
                 <span className="badge badge-soft badge-primary badge-sm font-semibold">
                   {validLevel.toUpperCase()}
@@ -476,7 +476,7 @@ export default function KanjiPractice() {
             </div>
 
             {/* 3D Flipping Content */}
-            <div className="[perspective:1000px] w-full flex items-center justify-center overflow-hidden">
+            <div className="[perspective:1000px] w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden">
               <div
                 className={`grid [grid-template-areas:'stack'] place-items-center w-full transition-transform duration-500 [transform-style:preserve-3d] ${
                   practiceMode === 'flashcard' && isFlipped ? '[transform:rotateY(180deg)]' : ''
@@ -490,14 +490,14 @@ export default function KanjiPractice() {
                 </div>
 
                 {/* Sisi Belakang (Ilustrasi, Arti, Onyomi, Kunyomi & Contoh Singkat) */}
-                <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-3 w-full px-2 sm:px-6 pt-5">
+                <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-3 w-full px-2 sm:px-6">
                   <div className={`flex flex-col ${currentItem?.image ? 'sm:flex-row' : ''} items-center justify-center gap-3 sm:gap-5 w-full max-w-2xl`}>
                     {currentItem?.image && (
                       <div className="shrink-0">
                         <img
                           src={currentItem.image}
                           alt={`Ilustrasi ${currentItem.kanji}`}
-                          className="w-28 h-28 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl object-cover border-2 border-line bg-bg shadow-sm"
+                          className="w-44 h-44 sm:w-52 sm:h-52 md:w-60 md:h-60 rounded-2xl object-cover border-2 border-line bg-bg shadow-sm"
                         />
                       </div>
                     )}
