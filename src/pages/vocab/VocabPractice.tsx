@@ -1,11 +1,18 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { SlidingTabs } from '../../components/Segmented'
 import { type VocabWord } from '../../data/vocab'
 import { useContentStore } from '../../store/useContentStore'
 import { useVocabStore } from '../../store/useVocabStore'
 import { recordVocabAnswer, queueVocabSession } from '../../lib/sync'
 import { getMasteryLabel, sortDeckBySRS } from '../../lib/srs'
 import { generateQuizOptions } from '../../lib/vocabQuiz'
+import {
+  getVocabBackPrimarySize,
+  getVocabMeaningSize,
+  getVocabPrimarySize,
+  getVocabSubSize,
+} from '../../lib/cardTextSize'
 
 type PracticeMode = 'flashcard' | 'quiz'
 
@@ -290,108 +297,98 @@ export default function VocabPractice() {
   return (
     <div className="w-full space-y-6">
       {/* Top Bar: Navigation & Chapter Info */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 border-b border-line pb-3 sm:pb-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <Link
             to="/vocab"
             onClick={handleBackClick}
-            className="btn btn-md btn-ghost border border-line text-ink hover:bg-pill rounded-xl px-4 font-semibold text-sm sm:text-base flex items-center gap-2"
+            className="btn btn-sm sm:btn-md bg-panel border border-line text-ink hover:bg-pill rounded-lg sm:rounded-xl px-2 sm:px-4 font-semibold text-xs sm:text-base flex items-center gap-1.5 sm:gap-2 shrink-0 shadow-xs"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             <span className="hidden sm:inline">Daftar Bab</span>
           </Link>
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-[26px] font-bold text-ink leading-tight">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-xl md:text-[26px] font-bold text-ink leading-tight truncate">
               {chapterData.title}
             </h1>
           </div>
         </div>
 
         {/* Mode Switcher: Flashcard (Review) vs Pilihan Ganda (Kuis) */}
-        <div className="join bg-pill p-1 rounded-xl border border-line">
-          <button
-            type="button"
-            onClick={() => handleModeChange('flashcard')}
-            className={`join-item btn btn-sm rounded-lg border-0 px-3 sm:px-4 font-semibold text-xs sm:text-sm cursor-pointer ${
-              practiceMode === 'flashcard'
-                ? 'bg-accent text-white shadow-xs'
-                : 'btn-ghost text-muted hover:text-ink'
-            }`}
-          >
-            Flashcard
-          </button>
-          <button
-            type="button"
-            onClick={() => handleModeChange('quiz')}
-            className={`join-item btn btn-sm rounded-lg border-0 px-3 sm:px-4 font-semibold text-xs sm:text-sm cursor-pointer ${
-              practiceMode === 'quiz'
-                ? 'bg-accent text-white shadow-xs'
-                : 'btn-ghost text-muted hover:text-ink'
-            }`}
-          >
-            Kuis
-          </button>
-        </div>
+        <SlidingTabs
+          ariaLabel="Mode Latihan Kosakata"
+          value={practiceMode}
+          onChange={handleModeChange}
+          className="inline-flex bg-pill p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-line shrink-0"
+          indicatorClassName="bg-accent rounded-md sm:rounded-lg shadow-xs"
+          buttonClassName="px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-md sm:rounded-lg font-semibold text-[11px] sm:text-sm"
+          activeButtonClassName="text-white"
+          inactiveButtonClassName="text-muted hover:text-ink"
+          options={[
+            { value: 'flashcard', label: 'Flashcard' },
+            { value: 'quiz', label: 'Kuis' },
+          ]}
+        />
       </div>
 
       {practiceMode === 'quiz' && isQuizComplete ? (
         /* Layar Selesai Kuis */
-        <div className="bg-panel border-2 border-line rounded-3xl p-4 sm:p-10 space-y-5 sm:space-y-6 shadow-sm">
-          <div className="text-center space-y-1.5 sm:space-y-2">
-            <div className="text-3xl sm:text-4xl">🎉</div>
-            <h2 className="text-xl sm:text-3xl font-black text-ink">Kuis Selesai!</h2>
-            <p className="text-xs sm:text-sm text-muted">
+        <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-5 space-y-4 shadow-sm">
+          <div className="text-center space-y-1">
+            <div className="text-2xl sm:text-3xl">🎉</div>
+            <h2 className="text-lg sm:text-xl font-bold text-ink">Kuis Selesai!</h2>
+            <p className="text-[11px] sm:text-xs text-muted">
               Anda telah menyelesaikan putaran kuis untuk {chapterData.title}.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Benar</div>
-              <div className="text-lg sm:text-3xl font-black text-success tabular-nums">{sessionCorrect}</div>
+          <div className="stats stats-horizontal shadow w-full grid grid-cols-3 bg-pill/40 border border-line rounded-xl overflow-hidden">
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Benar</div>
+              <div className="stat-value text-success text-lg sm:text-2xl font-black tabular-nums">{sessionCorrect}</div>
             </div>
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Salah</div>
-              <div className="text-lg sm:text-3xl font-black text-error tabular-nums">{sessionIncorrect}</div>
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Salah</div>
+              <div className="stat-value text-error text-lg sm:text-2xl font-black tabular-nums">{sessionIncorrect}</div>
             </div>
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Akurasi</div>
-              <div className="text-lg sm:text-3xl font-black text-accent tabular-nums">{accuracy}%</div>
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Akurasi</div>
+              <div className="stat-value text-accent text-lg sm:text-2xl font-black tabular-nums">{accuracy}%</div>
             </div>
           </div>
 
           {quizMistakes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-ink">
+            <div className="space-y-2">
+              <h3 className="text-xs sm:text-sm font-bold text-ink">
                 Kosakata yang Masih Salah ({quizMistakes.length})
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
                 {quizMistakes.map((word) => (
                   <div
                     key={word.id}
-                    className="bg-pill/40 border border-error/30 rounded-xl p-3 flex flex-col justify-between gap-1"
+                    className="bg-pill/40 border border-error/30 rounded-xl p-2.5 flex flex-col justify-between gap-0.5"
                   >
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-lg font-black text-ink font-japanese">
+                      <span className="text-base font-bold text-ink font-japanese">
                         {word.kanji || word.kana}
                       </span>
-                      <span className="text-xs text-muted font-japanese">{word.kana}</span>
+                      <span className="text-[11px] text-muted font-japanese">{word.kana}</span>
                     </div>
-                    <div className="text-sm font-semibold text-accent">{word.meaning}</div>
+                    <div className="text-xs font-semibold text-accent font-meaning">{word.meaning}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             {quizMistakes.length > 0 && (
               <button
                 type="button"
                 onClick={() => handleRestartQuiz(true)}
-                className="btn bg-accent hover:opacity-90 text-white border-0 rounded-xl px-6 font-bold cursor-pointer"
+                className="btn btn-sm bg-accent hover:opacity-90 text-white border-0 rounded-xl px-4 font-bold cursor-pointer"
               >
                 Ulangi yang Salah ({quizMistakes.length})
               </button>
@@ -399,13 +396,13 @@ export default function VocabPractice() {
             <button
               type="button"
               onClick={() => handleRestartQuiz(false)}
-              className="btn btn-outline border-line text-ink hover:bg-pill rounded-xl px-6 font-semibold cursor-pointer"
+              className="btn btn-sm btn-outline border-line text-ink hover:bg-pill rounded-xl px-4 font-semibold cursor-pointer"
             >
               Ulangi Semua Soal
             </button>
             <Link
               to="/vocab"
-              className="btn btn-ghost border border-line text-muted hover:text-ink rounded-xl px-5 font-semibold"
+              className="btn btn-sm btn-ghost border border-line text-muted hover:text-ink rounded-xl px-4 font-semibold"
             >
               Daftar Bab
             </Link>
@@ -452,21 +449,21 @@ export default function VocabPractice() {
             setIsFlipped(!isFlipped)
           }
         }}
-        className={`relative w-full bg-panel border-2 border-line rounded-3xl flex items-center justify-center text-center shadow-sm select-none transition-colors overflow-hidden ${
+        className={`relative w-full bg-panel border-2 border-line rounded-3xl flex flex-col justify-between text-center shadow-sm select-none transition-colors overflow-hidden ${
           practiceMode === 'flashcard'
             ? 'h-[320px] sm:h-[380px] md:h-[440px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
             : 'h-[260px] sm:h-[310px] md:h-[350px] p-4 sm:p-8'
         }`}
       >
         {/* Top Bar */}
-        <div className="absolute inset-x-4 top-4 sm:inset-x-8 sm:top-6 z-10 grid grid-cols-3 items-center text-xs text-muted">
-          <div className="justify-self-start">
-            <span className="badge badge-soft badge-primary badge-sm font-semibold">
+        <div className="w-full h-7 shrink-0 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs text-muted">
+          <div className="justify-self-start min-w-0 max-w-full flex items-center">
+            <span className="badge badge-soft badge-primary badge-sm font-semibold whitespace-nowrap truncate max-w-full">
               {currentWord?.type || 'Kosakata'}
             </span>
           </div>
 
-          <div className="justify-self-center">
+          <div className="justify-self-center whitespace-nowrap">
             {practiceMode === 'flashcard' && (
               <span className="text-sm font-bold text-ink tabular-nums">
                 {currentIndex + 1} <span className="font-normal text-muted">/ {totalCards}</span>
@@ -474,13 +471,13 @@ export default function VocabPractice() {
             )}
           </div>
 
-          <div className="justify-self-end">
+          <div className="justify-self-end min-w-0">
             {practiceMode === 'flashcard' ? (
               <span className="flex items-center gap-1 font-medium text-muted whitespace-nowrap">
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                 </svg>
-                <span>{isFlipped ? 'Arti Kosakata' : 'Klik untuk membalik'}</span>
+                <span className="truncate">{isFlipped ? 'Arti Kosakata' : 'Klik untuk membalik'}</span>
               </span>
             ) : (
               <span className="font-medium text-muted whitespace-nowrap">
@@ -491,47 +488,62 @@ export default function VocabPractice() {
         </div>
 
         {/* 3D Flipping Text Only (Flip stays false in quiz mode) */}
-        <div className="[perspective:1000px] w-full flex items-center justify-center overflow-hidden">
+        <div className="[perspective:1000px] w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden py-2">
           <div
-            className={`grid [grid-template-areas:'stack'] place-items-center w-full transition-transform duration-500 [transform-style:preserve-3d] ${
+            className={`grid [grid-template-areas:'stack'] place-items-center w-full max-h-full transition-transform duration-500 [transform-style:preserve-3d] ${
               practiceMode === 'flashcard' && isFlipped ? '[transform:rotateY(180deg)]' : ''
             }`}
           >
             {/* Sisi Depan (Huruf Jepang) */}
-            <div className="[grid-area:stack] [backface-visibility:hidden] flex flex-col items-center justify-center space-y-4 w-full px-2">
+            <div className="[grid-area:stack] [backface-visibility:hidden] flex flex-col items-center justify-center space-y-2.5 sm:space-y-4 w-full max-h-full overflow-y-auto px-2">
               {currentWord?.kanji ? (
                 <>
-                  <div className="text-5xl sm:text-7xl md:text-8xl font-black text-ink tracking-wide font-japanese break-words max-w-full">
+                  <div
+                    className={`${getVocabPrimarySize(currentWord.kanji)} font-black text-ink tracking-wide font-japanese leading-tight break-words max-w-full`}
+                  >
                     {currentWord.kanji}
                   </div>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-accent font-japanese break-words max-w-full">
+                  <div
+                    className={`${getVocabSubSize(currentWord.kana)} font-bold text-accent font-japanese leading-snug break-words max-w-full`}
+                  >
                     {currentWord.kana}
                   </div>
                 </>
               ) : (
-                <div className="text-5xl sm:text-7xl md:text-8xl font-black text-ink tracking-wide font-japanese break-words max-w-full">
+                <div
+                  className={`${getVocabPrimarySize(currentWord?.kana)} font-black text-ink tracking-wide font-japanese leading-tight break-words max-w-full`}
+                >
                   {currentWord?.kana}
                 </div>
               )}
 
-              {showRomajiFront && (
-                <div className="text-lg sm:text-xl md:text-2xl font-medium text-muted tracking-wide break-words max-w-full">
-                  {currentWord?.romaji}
+              {showRomajiFront && currentWord?.romaji && (
+                <div className="text-base sm:text-xl md:text-2xl font-medium text-muted tracking-wide break-words max-w-full">
+                  {currentWord.romaji}
                 </div>
               )}
             </div>
 
             {/* Sisi Belakang (Arti Kosakata) */}
-            <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-4 w-full px-2 sm:px-6">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-ink font-japanese break-words max-w-full">
+            <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-4 w-full max-h-full overflow-y-auto px-2 sm:px-6">
+              <div
+                className={`${getVocabBackPrimarySize(currentWord?.kanji || currentWord?.kana)} font-black text-ink font-japanese leading-tight break-words max-w-full`}
+              >
                 {currentWord?.kanji || currentWord?.kana}
               </div>
-              <div className="text-xl sm:text-2xl font-medium text-muted break-words max-w-full">
-                {currentWord?.kana} • <span className="italic">{currentWord?.romaji}</span>
+              <div
+                className={`${getVocabSubSize(`${currentWord?.kana ?? ''}${currentWord?.romaji ? ` • ${currentWord.romaji}` : ''}`)} font-medium text-muted leading-snug break-words max-w-full`}
+              >
+                {currentWord?.kana}
+                {currentWord?.romaji && (
+                  <> • <span className="italic">{currentWord.romaji}</span></>
+                )}
               </div>
 
-              <div className="pt-3 border-t border-line/60 w-full max-w-3xl">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent break-words leading-snug">
+              <div className="pt-2.5 sm:pt-3 border-t border-line/60 w-full max-w-3xl">
+                <div
+                  className={`${getVocabMeaningSize(currentWord?.meaning)} font-extrabold text-accent font-meaning break-words leading-snug`}
+                >
                   {currentWord?.meaning}
                 </div>
               </div>
@@ -540,8 +552,8 @@ export default function VocabPractice() {
         </div>
 
         {/* Bottom Bar */}
-        {practiceMode === 'flashcard' && (
-          <div className="absolute inset-x-4 bottom-4 sm:inset-x-8 sm:bottom-6 z-10 flex items-center justify-start">
+        <div className="w-full h-8 shrink-0 flex items-center justify-start">
+          {practiceMode === 'flashcard' && (
             <button
               type="button"
               onClick={(e) => {
@@ -558,8 +570,8 @@ export default function VocabPractice() {
               </svg>
               <span className="hidden sm:inline">Penggunaan</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Control Buttons */}
@@ -594,7 +606,7 @@ export default function VocabPractice() {
                   <span className="w-6 h-6 rounded-lg bg-pill border border-line text-xs font-bold flex items-center justify-center shrink-0 text-ink">
                     {idx + 1}
                   </span>
-                  <span className="break-words leading-snug">{opt.meaning}</span>
+                  <span className="font-meaning break-words leading-snug">{opt.meaning}</span>
                 </button>
               )
             })}
@@ -667,7 +679,10 @@ export default function VocabPractice() {
                   {currentWord?.kanji || currentWord?.kana}
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-muted break-words">
-                  {currentWord?.kana} • <span className="italic">{currentWord?.romaji}</span>
+                  {currentWord?.kana}
+                  {currentWord?.romaji && (
+                    <> • <span className="italic">{currentWord.romaji}</span></>
+                  )}
                 </div>
               </div>
               <span className="badge badge-soft badge-accent badge-xs sm:badge-sm font-semibold shrink-0">
@@ -679,7 +694,7 @@ export default function VocabPractice() {
               <div className="text-[11px] sm:text-xs font-bold text-muted uppercase tracking-wider mb-1">
                 Arti Kosakata
               </div>
-              <div className="text-base sm:text-lg font-bold text-ink break-words">
+              <div className="text-base sm:text-lg font-bold text-ink font-meaning break-words">
                 {currentWord?.meaning}
               </div>
             </div>

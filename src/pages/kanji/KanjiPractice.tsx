@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { SlidingTabs } from '../../components/Segmented'
 import { type KanjiItem, type KanjiLevel } from '../../data/kanji'
 import { useContentStore } from '../../store/useContentStore'
 import { useKanjiStore } from '../../store/useKanjiStore'
 import { recordKanjiAnswer, queueKanjiSession } from '../../lib/sync'
 import { getMasteryLabel, sortDeckBySRS } from '../../lib/srs'
 import { generateKanjiQuizOptions } from '../../lib/kanjiQuiz'
+import { getVocabMeaningSize } from '../../lib/cardTextSize'
 
 type PracticeMode = 'flashcard' | 'quiz'
 
@@ -283,96 +285,86 @@ export default function KanjiPractice() {
   return (
     <div className="w-full space-y-6">
       {/* Top Bar: Navigation & Chapter Info */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 border-b border-line pb-3 sm:pb-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <Link
             to={backUrl}
             onClick={handleBackClick}
-            className="btn btn-md btn-ghost border border-line text-ink hover:bg-pill rounded-xl px-4 font-semibold text-sm sm:text-base flex items-center gap-2"
+            className="btn btn-sm sm:btn-md bg-panel border border-line text-ink hover:bg-pill rounded-lg sm:rounded-xl px-2 sm:px-4 font-semibold text-xs sm:text-base flex items-center gap-1.5 sm:gap-2 shrink-0 shadow-xs"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>
             <span className="hidden sm:inline">Daftar Bab</span>
           </Link>
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-[26px] font-bold text-ink leading-tight">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-xl md:text-[26px] font-bold text-ink leading-tight truncate">
               {chapterData.title}
             </h1>
           </div>
         </div>
 
         {/* Mode Switcher: Flashcard (Review) vs Pilihan Ganda (Kuis) */}
-        <div className="join bg-pill p-1 rounded-xl border border-line">
-          <button
-            type="button"
-            onClick={() => handleModeChange('flashcard')}
-            className={`join-item btn btn-sm rounded-lg border-0 px-3 sm:px-4 font-semibold text-xs sm:text-sm cursor-pointer ${
-              practiceMode === 'flashcard'
-                ? 'bg-accent text-white shadow-xs'
-                : 'btn-ghost text-muted hover:text-ink'
-            }`}
-          >
-            Flashcard
-          </button>
-          <button
-            type="button"
-            onClick={() => handleModeChange('quiz')}
-            className={`join-item btn btn-sm rounded-lg border-0 px-3 sm:px-4 font-semibold text-xs sm:text-sm cursor-pointer ${
-              practiceMode === 'quiz'
-                ? 'bg-accent text-white shadow-xs'
-                : 'btn-ghost text-muted hover:text-ink'
-            }`}
-          >
-            Kuiz
-          </button>
-        </div>
+        <SlidingTabs
+          ariaLabel="Mode Latihan Kanji"
+          value={practiceMode}
+          onChange={handleModeChange}
+          className="inline-flex bg-pill p-0.5 sm:p-1 rounded-lg sm:rounded-xl border border-line shrink-0"
+          indicatorClassName="bg-accent rounded-md sm:rounded-lg shadow-xs"
+          buttonClassName="px-2.5 py-1 sm:px-4 sm:py-1.5 rounded-md sm:rounded-lg font-semibold text-[11px] sm:text-sm"
+          activeButtonClassName="text-white"
+          inactiveButtonClassName="text-muted hover:text-ink"
+          options={[
+            { value: 'flashcard', label: 'Flashcard' },
+            { value: 'quiz', label: 'Kuiz' },
+          ]}
+        />
       </div>
 
       {practiceMode === 'quiz' && isQuizComplete ? (
         /* Layar Selesai Kuis */
-        <div className="bg-panel border-2 border-line rounded-3xl p-4 sm:p-10 space-y-5 sm:space-y-6 shadow-sm">
-          <div className="text-center space-y-1.5 sm:space-y-2">
-            <div className="text-3xl sm:text-4xl">🎉</div>
-            <h2 className="text-xl sm:text-3xl font-black text-ink">Kuis Selesai!</h2>
-            <p className="text-xs sm:text-sm text-muted">
+        <div className="bg-panel border border-line rounded-2xl p-3.5 sm:p-5 space-y-4 shadow-sm">
+          <div className="text-center space-y-1">
+            <div className="text-2xl sm:text-3xl">🎉</div>
+            <h2 className="text-lg sm:text-xl font-bold text-ink">Kuis Selesai!</h2>
+            <p className="text-[11px] sm:text-xs text-muted">
               Anda telah menyelesaikan putaran kuis Kanji untuk {chapterData.title}.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Benar</div>
-              <div className="text-lg sm:text-3xl font-black text-success tabular-nums">{sessionCorrect}</div>
+          <div className="stats stats-horizontal shadow w-full grid grid-cols-3 bg-pill/40 border border-line rounded-xl overflow-hidden">
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Benar</div>
+              <div className="stat-value text-success text-lg sm:text-2xl font-black tabular-nums">{sessionCorrect}</div>
             </div>
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Salah</div>
-              <div className="text-lg sm:text-3xl font-black text-error tabular-nums">{sessionIncorrect}</div>
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Salah</div>
+              <div className="stat-value text-error text-lg sm:text-2xl font-black tabular-nums">{sessionIncorrect}</div>
             </div>
-            <div className="bg-pill/50 border border-line rounded-xl sm:rounded-2xl p-2.5 sm:p-4 text-center">
-              <div className="text-[11px] sm:text-xs font-semibold text-muted">Akurasi</div>
-              <div className="text-lg sm:text-3xl font-black text-accent tabular-nums">{accuracy}%</div>
+            <div className="stat py-2 px-2 sm:py-2.5 sm:px-4 text-center min-w-0">
+              <div className="stat-title text-muted text-[10px] sm:text-[11px]">Akurasi</div>
+              <div className="stat-value text-accent text-lg sm:text-2xl font-black tabular-nums">{accuracy}%</div>
             </div>
           </div>
 
           {quizMistakes.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-ink">
+            <div className="space-y-2">
+              <h3 className="text-xs sm:text-sm font-bold text-ink">
                 Kanji yang Masih Salah ({quizMistakes.length})
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
                 {quizMistakes.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-pill/40 border border-error/30 rounded-xl p-3 flex items-center gap-3"
+                    className="bg-pill/40 border border-error/30 rounded-xl p-2.5 flex items-center gap-2.5"
                   >
-                    <div className="text-3xl font-black text-ink font-japanese shrink-0 w-10 text-center">
+                    <div className="text-2xl font-black text-ink font-japanese shrink-0 w-9 text-center">
                       {item.kanji}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-accent truncate">{item.meaning}</div>
-                      <div className="text-xs text-muted truncate">On: {item.onyomi}</div>
-                      <div className="text-xs text-muted truncate">Kun: {item.kunyomi}</div>
+                      <div className="text-xs sm:text-sm font-bold text-accent font-meaning truncate">{item.meaning}</div>
+                      <div className="text-[11px] text-muted truncate">On: {item.onyomi}</div>
+                      <div className="text-[11px] text-muted truncate">Kun: {item.kunyomi}</div>
                     </div>
                   </div>
                 ))}
@@ -380,12 +372,12 @@ export default function KanjiPractice() {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
             {quizMistakes.length > 0 && (
               <button
                 type="button"
                 onClick={() => handleRestartQuiz(true)}
-                className="btn bg-accent hover:opacity-90 text-white border-0 rounded-xl px-6 font-bold cursor-pointer"
+                className="btn btn-sm bg-accent hover:opacity-90 text-white border-0 rounded-xl px-4 font-bold cursor-pointer"
               >
                 Ulangi yang Salah ({quizMistakes.length})
               </button>
@@ -393,13 +385,13 @@ export default function KanjiPractice() {
             <button
               type="button"
               onClick={() => handleRestartQuiz(false)}
-              className="btn btn-outline border-line text-ink hover:bg-pill rounded-xl px-6 font-semibold cursor-pointer"
+              className="btn btn-sm btn-outline border-line text-ink hover:bg-pill rounded-xl px-4 font-semibold cursor-pointer"
             >
               Ulangi Semua Soal
             </button>
             <Link
               to={backUrl}
-              className="btn btn-ghost border border-line text-muted hover:text-ink rounded-xl px-5 font-semibold"
+              className="btn btn-sm btn-ghost border border-line text-muted hover:text-ink rounded-xl px-4 font-semibold"
             >
               Daftar Bab
             </Link>
@@ -446,14 +438,14 @@ export default function KanjiPractice() {
                 setIsFlipped(!isFlipped)
               }
             }}
-            className={`relative w-full bg-panel border-2 border-line rounded-3xl flex items-center justify-center text-center shadow-sm select-none transition-colors overflow-hidden ${
+            className={`relative w-full bg-panel border-2 border-line rounded-3xl flex flex-col justify-between text-center shadow-sm select-none transition-colors overflow-hidden ${
               practiceMode === 'flashcard'
-                ? 'h-[320px] sm:h-[380px] md:h-[440px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
+                ? 'h-[430px] sm:h-[470px] md:h-[520px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
                 : 'h-[260px] sm:h-[310px] md:h-[350px] p-4 sm:p-8'
             }`}
           >
             {/* Top Bar */}
-            <div className="absolute inset-x-4 top-4 sm:inset-x-8 sm:top-6 z-10 grid grid-cols-3 items-center text-xs text-muted">
+            <div className="w-full grid grid-cols-3 items-center text-xs text-muted mb-2 sm:mb-3 shrink-0">
               <div className="justify-self-start">
                 <span className="badge badge-soft badge-primary badge-sm font-semibold">
                   {validLevel.toUpperCase()}
@@ -485,7 +477,7 @@ export default function KanjiPractice() {
             </div>
 
             {/* 3D Flipping Content */}
-            <div className="[perspective:1000px] w-full flex items-center justify-center overflow-hidden">
+            <div className="[perspective:1000px] w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden">
               <div
                 className={`grid [grid-template-areas:'stack'] place-items-center w-full transition-transform duration-500 [transform-style:preserve-3d] ${
                   practiceMode === 'flashcard' && isFlipped ? '[transform:rotateY(180deg)]' : ''
@@ -499,14 +491,14 @@ export default function KanjiPractice() {
                 </div>
 
                 {/* Sisi Belakang (Ilustrasi, Arti, Onyomi, Kunyomi & Contoh Singkat) */}
-                <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-3 w-full px-2 sm:px-6 pt-5">
+                <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-3 w-full px-2 sm:px-6">
                   <div className={`flex flex-col ${currentItem?.image ? 'sm:flex-row' : ''} items-center justify-center gap-3 sm:gap-5 w-full max-w-2xl`}>
                     {currentItem?.image && (
                       <div className="shrink-0">
                         <img
                           src={currentItem.image}
                           alt={`Ilustrasi ${currentItem.kanji}`}
-                          className="w-28 h-28 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-2xl object-cover border-2 border-line bg-bg shadow-sm"
+                          className="w-44 h-44 sm:w-52 sm:h-52 md:w-60 md:h-60 rounded-2xl object-cover border-2 border-line bg-bg shadow-sm"
                         />
                       </div>
                     )}
@@ -516,7 +508,7 @@ export default function KanjiPractice() {
                         <span className="text-3xl sm:text-5xl font-black text-ink font-japanese">
                           {currentItem?.kanji}
                         </span>
-                        <span className="text-xl sm:text-3xl font-extrabold text-accent break-words">
+                        <span className={`${getVocabMeaningSize(currentItem?.meaning)} font-extrabold text-accent font-meaning leading-snug break-words`}>
                           {currentItem?.meaning}
                         </span>
                       </div>
@@ -549,7 +541,7 @@ export default function KanjiPractice() {
                         >
                           <span className="font-bold font-japanese">{ex.word}</span>{' '}
                           <span className="text-muted font-japanese">({ex.reading})</span>{' '}
-                          <span className="text-accent font-semibold">— {ex.meaning}</span>
+                          <span className="text-accent font-semibold font-meaning">— {ex.meaning}</span>
                         </div>
                       ))}
                     </div>
@@ -591,7 +583,7 @@ export default function KanjiPractice() {
                       <span className="w-6 h-6 rounded-lg bg-pill border border-line text-xs font-bold flex items-center justify-center shrink-0 text-ink">
                         {idx + 1}
                       </span>
-                      <span className="break-words leading-snug">{opt.meaning}</span>
+                      <span className="break-words leading-snug font-meaning">{opt.meaning}</span>
                     </button>
                   )
                 })}
