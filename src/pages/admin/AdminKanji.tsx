@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SlidingTabs } from '../../components/Segmented'
 import { AdminFlipCard } from '../../components/admin/AdminFlipCard'
 import { FieldLabel, SlideOverDrawer, type DrawerStep } from '../../components/admin/SlideOverDrawer'
+import { BulkImportDrawer } from '../../components/admin/BulkImportDrawer'
 import {
   deleteKanjiChapter,
   deleteKanjiItem,
@@ -14,6 +15,7 @@ import {
 import { useContentStore } from '../../store/useContentStore'
 import { showToast } from '../../store/useToast'
 import type { KanjiExample, KanjiItem, KanjiLevel } from '../../data/kanji/types'
+import { getAdminMeaningSize } from '../../lib/cardTextSize'
 
 const KANJI_STEPS: DrawerStep[] = [
   { id: 'identity', label: 'Identitas' },
@@ -46,6 +48,7 @@ export default function AdminKanji() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const gridScrollRef = useRef<HTMLDivElement>(null)
   const [busy, setBusy] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [uploadingImg, setUploadingImg] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{
     title: string
@@ -602,6 +605,14 @@ export default function AdminKanji() {
                     <button
                       type="button"
                       disabled={busy || isBuiltInOnly}
+                      onClick={() => setImportOpen(true)}
+                      className="btn btn-xs sm:btn-sm btn-outline border-line text-ink rounded-xl cursor-pointer"
+                    >
+                      Import Data
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || isBuiltInOnly}
                       onClick={openNewKanji}
                       className="btn btn-xs sm:btn-sm bg-accent hover:opacity-90 text-white border-0 rounded-xl cursor-pointer"
                     >
@@ -659,14 +670,14 @@ export default function AdminKanji() {
                         onEdit={() => openEditKanji(item)}
                         onDelete={() => void handleDeleteKanji(item.id)}
                         front={
-                          <div className="w-full space-y-2">
-                            <div className="flex items-center justify-between text-[10px] text-muted">
+                          <div className="w-full h-full flex flex-col">
+                            <div className="flex items-center justify-between h-5 shrink-0 text-[10px] text-muted">
                               <span className="font-bold tabular-nums">#{idx + 1}</span>
                               {item.mnemonic && (
-                                <span className="badge badge-soft badge-neutral badge-xs">Mnemonic</span>
+                                <span className="badge badge-soft badge-neutral badge-xs whitespace-nowrap">Mnemonic</span>
                               )}
                             </div>
-                            <div className="flex flex-col items-center justify-center gap-2">
+                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2">
                               {item.image ? (
                                 <img
                                   src={item.image}
@@ -689,7 +700,9 @@ export default function AdminKanji() {
                             <div className="text-xs font-bold font-japanese text-muted">
                               {item.kanji} · On: {item.onyomi || '-'} · Kun: {item.kunyomi || '-'}
                             </div>
-                            <div className="pt-1 border-t border-line/60 font-meaning font-extrabold text-base sm:text-lg text-accent leading-snug break-words">
+                            <div
+                              className={`pt-1 border-t border-line/60 font-meaning font-extrabold ${getAdminMeaningSize(item.meaning)} text-accent leading-snug break-words`}
+                            >
                               {item.meaning}
                             </div>
                             {item.mnemonic && (
@@ -1241,6 +1254,22 @@ export default function AdminKanji() {
           </div>
         )}
       </SlideOverDrawer>
+
+      {activeChapter && (
+        <BulkImportDrawer
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+          kind="kanji"
+          chapterId={activeChapter.id}
+          chapterLabel={`${level === 'jft' ? 'JFT' : `JLPT ${level.toUpperCase()}`} · Bab ${activeChapter.chapter}: ${activeChapter.title}`}
+          idPrefix={`${level}-k${String(activeChapter.chapter).padStart(2, '0')}`}
+          existingItems={activeChapter.items}
+          onImported={async (msg) => {
+            await refresh(true)
+            showSuccess(msg)
+          }}
+        />
+      )}
 
       {/* Modal Konfirmasi Hapus */}
       <dialog className={`modal ${confirmDelete ? 'modal-open' : ''}`}>

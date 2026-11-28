@@ -7,6 +7,12 @@ import { useVocabStore } from '../../store/useVocabStore'
 import { recordVocabAnswer, queueVocabSession } from '../../lib/sync'
 import { getMasteryLabel, sortDeckBySRS } from '../../lib/srs'
 import { generateQuizOptions } from '../../lib/vocabQuiz'
+import {
+  getVocabBackPrimarySize,
+  getVocabMeaningSize,
+  getVocabPrimarySize,
+  getVocabSubSize,
+} from '../../lib/cardTextSize'
 
 type PracticeMode = 'flashcard' | 'quiz'
 
@@ -443,21 +449,21 @@ export default function VocabPractice() {
             setIsFlipped(!isFlipped)
           }
         }}
-        className={`relative w-full bg-panel border-2 border-line rounded-3xl flex items-center justify-center text-center shadow-sm select-none transition-colors overflow-hidden ${
+        className={`relative w-full bg-panel border-2 border-line rounded-3xl flex flex-col justify-between text-center shadow-sm select-none transition-colors overflow-hidden ${
           practiceMode === 'flashcard'
             ? 'h-[320px] sm:h-[380px] md:h-[440px] p-4 sm:p-8 hover:border-accent/40 cursor-pointer'
             : 'h-[260px] sm:h-[310px] md:h-[350px] p-4 sm:p-8'
         }`}
       >
         {/* Top Bar */}
-        <div className="absolute inset-x-4 top-4 sm:inset-x-8 sm:top-6 z-10 grid grid-cols-3 items-center text-xs text-muted">
-          <div className="justify-self-start">
-            <span className="badge badge-soft badge-primary badge-sm font-semibold">
+        <div className="w-full h-7 shrink-0 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-xs text-muted">
+          <div className="justify-self-start min-w-0 max-w-full flex items-center">
+            <span className="badge badge-soft badge-primary badge-sm font-semibold whitespace-nowrap truncate max-w-full">
               {currentWord?.type || 'Kosakata'}
             </span>
           </div>
 
-          <div className="justify-self-center">
+          <div className="justify-self-center whitespace-nowrap">
             {practiceMode === 'flashcard' && (
               <span className="text-sm font-bold text-ink tabular-nums">
                 {currentIndex + 1} <span className="font-normal text-muted">/ {totalCards}</span>
@@ -465,13 +471,13 @@ export default function VocabPractice() {
             )}
           </div>
 
-          <div className="justify-self-end">
+          <div className="justify-self-end min-w-0">
             {practiceMode === 'flashcard' ? (
               <span className="flex items-center gap-1 font-medium text-muted whitespace-nowrap">
                 <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
                 </svg>
-                <span>{isFlipped ? 'Arti Kosakata' : 'Klik untuk membalik'}</span>
+                <span className="truncate">{isFlipped ? 'Arti Kosakata' : 'Klik untuk membalik'}</span>
               </span>
             ) : (
               <span className="font-medium text-muted whitespace-nowrap">
@@ -482,47 +488,62 @@ export default function VocabPractice() {
         </div>
 
         {/* 3D Flipping Text Only (Flip stays false in quiz mode) */}
-        <div className="[perspective:1000px] w-full flex items-center justify-center overflow-hidden">
+        <div className="[perspective:1000px] w-full flex-1 min-h-0 flex items-center justify-center overflow-hidden py-2">
           <div
-            className={`grid [grid-template-areas:'stack'] place-items-center w-full transition-transform duration-500 [transform-style:preserve-3d] ${
+            className={`grid [grid-template-areas:'stack'] place-items-center w-full max-h-full transition-transform duration-500 [transform-style:preserve-3d] ${
               practiceMode === 'flashcard' && isFlipped ? '[transform:rotateY(180deg)]' : ''
             }`}
           >
             {/* Sisi Depan (Huruf Jepang) */}
-            <div className="[grid-area:stack] [backface-visibility:hidden] flex flex-col items-center justify-center space-y-4 w-full px-2">
+            <div className="[grid-area:stack] [backface-visibility:hidden] flex flex-col items-center justify-center space-y-2.5 sm:space-y-4 w-full max-h-full overflow-y-auto px-2">
               {currentWord?.kanji ? (
                 <>
-                  <div className="text-5xl sm:text-7xl md:text-8xl font-black text-ink tracking-wide font-japanese break-words max-w-full">
+                  <div
+                    className={`${getVocabPrimarySize(currentWord.kanji)} font-black text-ink tracking-wide font-japanese leading-tight break-words max-w-full`}
+                  >
                     {currentWord.kanji}
                   </div>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-accent font-japanese break-words max-w-full">
+                  <div
+                    className={`${getVocabSubSize(currentWord.kana)} font-bold text-accent font-japanese leading-snug break-words max-w-full`}
+                  >
                     {currentWord.kana}
                   </div>
                 </>
               ) : (
-                <div className="text-5xl sm:text-7xl md:text-8xl font-black text-ink tracking-wide font-japanese break-words max-w-full">
+                <div
+                  className={`${getVocabPrimarySize(currentWord?.kana)} font-black text-ink tracking-wide font-japanese leading-tight break-words max-w-full`}
+                >
                   {currentWord?.kana}
                 </div>
               )}
 
-              {showRomajiFront && (
-                <div className="text-lg sm:text-xl md:text-2xl font-medium text-muted tracking-wide break-words max-w-full">
-                  {currentWord?.romaji}
+              {showRomajiFront && currentWord?.romaji && (
+                <div className="text-base sm:text-xl md:text-2xl font-medium text-muted tracking-wide break-words max-w-full">
+                  {currentWord.romaji}
                 </div>
               )}
             </div>
 
             {/* Sisi Belakang (Arti Kosakata) */}
-            <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-4 w-full px-2 sm:px-6">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-black text-ink font-japanese break-words max-w-full">
+            <div className="[grid-area:stack] [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center space-y-2.5 sm:space-y-4 w-full max-h-full overflow-y-auto px-2 sm:px-6">
+              <div
+                className={`${getVocabBackPrimarySize(currentWord?.kanji || currentWord?.kana)} font-black text-ink font-japanese leading-tight break-words max-w-full`}
+              >
                 {currentWord?.kanji || currentWord?.kana}
               </div>
-              <div className="text-xl sm:text-2xl font-medium text-muted break-words max-w-full">
-                {currentWord?.kana} • <span className="italic">{currentWord?.romaji}</span>
+              <div
+                className={`${getVocabSubSize(`${currentWord?.kana ?? ''}${currentWord?.romaji ? ` • ${currentWord.romaji}` : ''}`)} font-medium text-muted leading-snug break-words max-w-full`}
+              >
+                {currentWord?.kana}
+                {currentWord?.romaji && (
+                  <> • <span className="italic">{currentWord.romaji}</span></>
+                )}
               </div>
 
-              <div className="pt-3 border-t border-line/60 w-full max-w-3xl">
-                <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-accent font-meaning break-words leading-snug">
+              <div className="pt-2.5 sm:pt-3 border-t border-line/60 w-full max-w-3xl">
+                <div
+                  className={`${getVocabMeaningSize(currentWord?.meaning)} font-extrabold text-accent font-meaning break-words leading-snug`}
+                >
                   {currentWord?.meaning}
                 </div>
               </div>
@@ -531,8 +552,8 @@ export default function VocabPractice() {
         </div>
 
         {/* Bottom Bar */}
-        {practiceMode === 'flashcard' && (
-          <div className="absolute inset-x-4 bottom-4 sm:inset-x-8 sm:bottom-6 z-10 flex items-center justify-start">
+        <div className="w-full h-8 shrink-0 flex items-center justify-start">
+          {practiceMode === 'flashcard' && (
             <button
               type="button"
               onClick={(e) => {
@@ -549,8 +570,8 @@ export default function VocabPractice() {
               </svg>
               <span className="hidden sm:inline">Penggunaan</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Control Buttons */}
@@ -658,7 +679,10 @@ export default function VocabPractice() {
                   {currentWord?.kanji || currentWord?.kana}
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-muted break-words">
-                  {currentWord?.kana} • <span className="italic">{currentWord?.romaji}</span>
+                  {currentWord?.kana}
+                  {currentWord?.romaji && (
+                    <> • <span className="italic">{currentWord.romaji}</span></>
+                  )}
                 </div>
               </div>
               <span className="badge badge-soft badge-accent badge-xs sm:badge-sm font-semibold shrink-0">
