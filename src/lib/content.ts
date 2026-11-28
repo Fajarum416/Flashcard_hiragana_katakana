@@ -295,7 +295,7 @@ export async function upsertVocabWord(chapterId: string, word: VocabWord, sortOr
     sort_order: sortOrder,
     kanji: word.kanji?.trim() || null,
     kana: word.kana.trim(),
-    romaji: word.romaji.trim(),
+    romaji: (word.romaji ?? '').trim(),
     meaning: word.meaning.trim(),
     type: word.type?.trim() || null,
     example_jp: word.exampleJp?.trim() || null,
@@ -308,6 +308,39 @@ export async function upsertVocabWord(chapterId: string, word: VocabWord, sortOr
 export async function deleteVocabWord(wordId: string): Promise<void> {
   const { error } = await client().from('vocab_words').delete().eq('id', wordId)
   if (error) throw new Error(error.message)
+}
+
+export async function bulkUpsertVocabWords(
+  chapterId: string,
+  words: VocabWord[],
+  startSortOrder: number = 0,
+  onProgress?: (done: number, total: number) => void,
+): Promise<number> {
+  const c = client()
+  const BATCH_SIZE = 50
+  const now = new Date().toISOString()
+  let done = 0
+
+  for (let i = 0; i < words.length; i += BATCH_SIZE) {
+    const chunk = words.slice(i, i + BATCH_SIZE).map((w, idx) => ({
+      id: w.id.trim(),
+      chapter_id: chapterId,
+      sort_order: startSortOrder + i + idx,
+      kanji: w.kanji?.trim() || null,
+      kana: w.kana.trim(),
+      romaji: (w.romaji ?? '').trim(),
+      meaning: w.meaning.trim(),
+      type: w.type?.trim() || null,
+      example_jp: w.exampleJp?.trim() || null,
+      example_id: w.exampleId?.trim() || null,
+      updated_at: now,
+    }))
+    const { error } = await c.from('vocab_words').upsert(chunk)
+    if (error) throw new Error(`Gagal pada batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`)
+    done += chunk.length
+    onProgress?.(done, words.length)
+  }
+  return done
 }
 
 export async function upsertKanjiChapter(input: {
@@ -366,6 +399,39 @@ export async function upsertKanjiItem(chapterId: string, item: KanjiItem, sortOr
 export async function deleteKanjiItem(kanjiId: string): Promise<void> {
   const { error } = await client().from('kanji_items').delete().eq('id', kanjiId)
   if (error) throw new Error(error.message)
+}
+
+export async function bulkUpsertKanjiItems(
+  chapterId: string,
+  items: KanjiItem[],
+  startSortOrder: number = 0,
+  onProgress?: (done: number, total: number) => void,
+): Promise<number> {
+  const c = client()
+  const BATCH_SIZE = 50
+  const now = new Date().toISOString()
+  let done = 0
+
+  for (let i = 0; i < items.length; i += BATCH_SIZE) {
+    const chunk = items.slice(i, i + BATCH_SIZE).map((item, idx) => ({
+      id: item.id.trim(),
+      chapter_id: chapterId,
+      sort_order: startSortOrder + i + idx,
+      kanji: item.kanji.trim(),
+      onyomi: item.onyomi.trim(),
+      kunyomi: item.kunyomi.trim(),
+      meaning: item.meaning.trim(),
+      mnemonic: item.mnemonic?.trim() || null,
+      image_url: item.image?.trim() || null,
+      examples: item.examples ?? [],
+      updated_at: now,
+    }))
+    const { error } = await c.from('kanji_items').upsert(chunk)
+    if (error) throw new Error(`Gagal pada batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`)
+    done += chunk.length
+    onProgress?.(done, items.length)
+  }
+  return done
 }
 
 /** Upload gambar ilustrasi Kanji ke Supabase Storage bucket `kanji-illustrations`. */

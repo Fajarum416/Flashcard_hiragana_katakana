@@ -7,6 +7,7 @@ import { useKanjiStore } from '../../store/useKanjiStore'
 import { recordKanjiAnswer, queueKanjiSession } from '../../lib/sync'
 import { getMasteryLabel, sortDeckBySRS } from '../../lib/srs'
 import { generateKanjiQuizOptions } from '../../lib/kanjiQuiz'
+import { getVocabMeaningSize } from '../../lib/cardTextSize'
 
 type PracticeMode = 'flashcard' | 'quiz'
 
@@ -507,7 +508,7 @@ export default function KanjiPractice() {
                         <span className="text-3xl sm:text-5xl font-black text-ink font-japanese">
                           {currentItem?.kanji}
                         </span>
-                        <span className="text-xl sm:text-3xl font-extrabold text-accent font-meaning break-words">
+                        <span className={`${getVocabMeaningSize(currentItem?.meaning)} font-extrabold text-accent font-meaning leading-snug break-words`}>
                           {currentItem?.meaning}
                         </span>
                       </div>

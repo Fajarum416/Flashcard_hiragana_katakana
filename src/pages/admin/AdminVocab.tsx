@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SlidingTabs } from '../../components/Segmented'
 import { AdminFlipCard } from '../../components/admin/AdminFlipCard'
 import { FieldLabel, SlideOverDrawer, type DrawerStep } from '../../components/admin/SlideOverDrawer'
+import { BulkImportDrawer } from '../../components/admin/BulkImportDrawer'
 import {
   deleteVocabChapter,
   deleteVocabWord,
@@ -13,6 +14,11 @@ import {
 import { useContentStore } from '../../store/useContentStore'
 import { showToast } from '../../store/useToast'
 import type { VocabWord } from '../../data/vocab/types'
+import {
+  getAdminMeaningSize,
+  getAdminVocabPrimarySize,
+  getAdminVocabSubSize,
+} from '../../lib/cardTextSize'
 
 const WORD_TYPES = [
   'Kata Benda',
@@ -39,6 +45,7 @@ export default function AdminVocab() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const gridScrollRef = useRef<HTMLDivElement>(null)
   const [busy, setBusy] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<{
     title: string
     message: string
@@ -107,7 +114,7 @@ export default function AdminVocab() {
     if (!q) return true
     return (
       w.kana.toLowerCase().includes(q) ||
-      w.romaji.toLowerCase().includes(q) ||
+      (w.romaji ?? '').toLowerCase().includes(q) ||
       w.meaning.toLowerCase().includes(q) ||
       (w.kanji?.toLowerCase().includes(q) ?? false)
     )
@@ -297,7 +304,7 @@ export default function AdminVocab() {
   }
 
   const isWordStep1Valid = Boolean(
-    wKana.trim() && wRomaji.trim() && wMeaning.trim() && wChapterId && !wChapterId.startsWith('builtin-')
+    wKana.trim() && wMeaning.trim() && wChapterId && !wChapterId.startsWith('builtin-')
   )
 
   const wordChangedFields: string[] = []
@@ -305,7 +312,7 @@ export default function AdminVocab() {
     if (wChapterId !== wOriginalChapterId) wordChangedFields.push('Bab Tujuan')
     if (wKanji !== (originalWord.kanji ?? '')) wordChangedFields.push('Kanji')
     if (wKana !== originalWord.kana) wordChangedFields.push('Kana')
-    if (wRomaji !== originalWord.romaji) wordChangedFields.push('Romaji')
+    if (wRomaji !== (originalWord.romaji ?? '')) wordChangedFields.push('Romaji')
     if (wMeaning !== originalWord.meaning) wordChangedFields.push('Arti')
     if (wType !== (originalWord.type ?? '')) wordChangedFields.push('Jenis Kata')
     if (wExJp !== (originalWord.exampleJp ?? '')) wordChangedFields.push('Contoh JP')
@@ -551,6 +558,14 @@ export default function AdminVocab() {
                     <button
                       type="button"
                       disabled={busy || isBuiltInOnly}
+                      onClick={() => setImportOpen(true)}
+                      className="btn btn-xs sm:btn-sm btn-outline border-line text-ink rounded-xl cursor-pointer"
+                    >
+                      Import Data
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy || isBuiltInOnly}
                       onClick={openNewWord}
                       className="btn btn-xs sm:btn-sm bg-accent hover:opacity-90 text-white border-0 rounded-xl cursor-pointer"
                     >
@@ -607,32 +622,42 @@ export default function AdminVocab() {
                         onEdit={() => openEditWord(w)}
                         onDelete={() => void handleDeleteWord(w.id)}
                         front={
-                          <div className="w-full space-y-1.5">
-                            <div className="flex items-center justify-between gap-1 text-[10px] text-muted">
-                              <span className="font-bold tabular-nums">#{idx + 1}</span>
+                          <div className="w-full h-full flex flex-col">
+                            <div className="flex items-center justify-between gap-1.5 h-5 shrink-0 text-[10px] text-muted">
+                              <span className="font-bold tabular-nums shrink-0">#{idx + 1}</span>
                               {w.type && (
-                                <span className="badge badge-soft badge-accent badge-xs font-semibold truncate max-w-[120px]">
+                                <span className="badge badge-soft badge-accent badge-xs font-semibold whitespace-nowrap truncate max-w-[140px]">
                                   {w.type}
                                 </span>
                               )}
                             </div>
-                            <div className="pt-1 font-black font-japanese text-2xl sm:text-3xl text-ink leading-tight break-words">
-                              {w.kanji || w.kana}
-                            </div>
-                            {w.kanji && (
-                              <div className="text-sm font-bold font-japanese text-accent break-words">
-                                {w.kana}
+                            <div className="flex-1 min-h-0 flex flex-col items-center justify-center space-y-1">
+                              <div
+                                className={`font-black font-japanese ${getAdminVocabPrimarySize(w.kanji || w.kana)} text-ink leading-tight break-words max-w-full`}
+                              >
+                                {w.kanji || w.kana}
                               </div>
-                            )}
-                            <div className="text-xs text-muted font-medium">{w.romaji}</div>
+                              {w.kanji && (
+                                <div
+                                  className={`${getAdminVocabSubSize(w.kana)} font-bold font-japanese text-accent leading-snug break-words max-w-full`}
+                                >
+                                  {w.kana}
+                                </div>
+                              )}
+                              {w.romaji && (
+                                <div className="text-xs text-muted font-medium break-words max-w-full">{w.romaji}</div>
+                              )}
+                            </div>
                           </div>
                         }
                         back={
                           <div className="w-full space-y-2">
-                            <div className="text-xs font-bold font-japanese text-muted">
-                              {w.kanji || w.kana} · {w.romaji}
+                            <div className="text-xs font-bold font-japanese text-muted break-words">
+                              {w.kanji || w.kana}{w.romaji ? ` · ${w.romaji}` : ''}
                             </div>
-                            <div className="pt-1.5 border-t border-line/60 font-meaning font-extrabold text-base sm:text-lg text-accent leading-snug break-words">
+                            <div
+                              className={`pt-1.5 border-t border-line/60 font-meaning font-extrabold ${getAdminMeaningSize(w.meaning)} text-accent leading-snug break-words`}
+                            >
                               {w.meaning}
                             </div>
                             {w.exampleJp && (
@@ -954,15 +979,14 @@ export default function AdminVocab() {
               <label className="form-control block">
                 <FieldLabel
                   label="Romaji"
-                  required
-                  changed={Boolean(originalWord && wRomaji !== originalWord.romaji)}
+                  hint="Opsional"
+                  changed={Boolean(originalWord && wRomaji !== (originalWord.romaji ?? ''))}
                 />
                 <input
                   type="text"
-                  required
                   value={wRomaji}
                   onChange={(e) => setWRomaji(e.target.value)}
-                  placeholder="contoh: sensei"
+                  placeholder="contoh: sensei (opsional)"
                   className="input input-bordered input-sm md:input-md bg-bg border-line w-full"
                 />
               </label>
@@ -1077,7 +1101,7 @@ export default function AdminVocab() {
                 {wKanji.trim() && wKana.trim() && (
                   <div className="text-sm font-japanese text-muted">{wKana}</div>
                 )}
-                <div className="text-xs text-muted">{wRomaji || 'romaji'}</div>
+                {wRomaji.trim() && <div className="text-xs text-muted">{wRomaji}</div>}
                 <div className="pt-2 border-t border-line/60 font-meaning font-bold text-sm text-ink">
                   {wMeaning || 'Arti kosakata'}
                 </div>
@@ -1092,6 +1116,22 @@ export default function AdminVocab() {
           </div>
         )}
       </SlideOverDrawer>
+
+      {activeChapter && (
+        <BulkImportDrawer
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+          kind="vocab"
+          chapterId={activeChapter.id}
+          chapterLabel={`JLPT ${level.toUpperCase()} · Bab ${activeChapter.chapter}: ${activeChapter.title}`}
+          idPrefix={`${level}-b${String(activeChapter.chapter).padStart(2, '0')}`}
+          existingWords={activeChapter.words}
+          onImported={async (msg) => {
+            await refresh(true)
+            showSuccess(msg)
+          }}
+        />
+      )}
 
       {/* Modal Konfirmasi Hapus */}
       <dialog className={`modal ${confirmDelete ? 'modal-open' : ''}`}>
